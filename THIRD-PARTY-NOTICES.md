@@ -1,6 +1,6 @@
 # Third-party notices
 
-Ray's Loader is an independent application by Rayyan.
+Ray's Loader is an independent application by Rayware Inc.
 
 ## yt-dlp
 

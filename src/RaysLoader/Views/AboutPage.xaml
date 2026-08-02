@@ -8,7 +8,7 @@
             <TextBlock x:Name="AboutNameText" FontSize="32" FontWeight="SemiBold" />
             <TextBlock Text="{x:Bind VersionText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <TextBlock x:Name="AboutDescriptionText" FontSize="16" TextWrapping="Wrap" />
-            <TextBlock Text="Publisher: Rayyan" />
+            <TextBlock Text="Publisher: Rayware Inc." />
             <TextBlock Text="Powered by yt-dlp and FFmpeg" FontWeight="SemiBold" />
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <HyperlinkButton Content="yt-dlp project" NavigateUri="https://github.com/yt-dlp/yt-dlp" />

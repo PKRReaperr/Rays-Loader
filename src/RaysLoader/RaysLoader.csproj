@@ -10,9 +10,9 @@
     <Product Condition="'$(PublicRelease)' == 'true'">Ray's Loader</Product>
     <Product Condition="'$(PublicRelease)' != 'true'">Ray's Loader DEV</Product>
     <Description>Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp.</Description>
-    <Authors>Rayyan</Authors>
-    <Company>Rayyan</Company>
-    <Copyright>Copyright © Rayyan</Copyright>
+    <Authors>Rayware Inc.</Authors>
+    <Company>Rayware Inc.</Company>
+    <Copyright>Copyright © Rayware Inc.</Copyright>
     <ApplicationIcon Condition="'$(PublicRelease)' == 'true'">Assets\RaysLoader.ico</ApplicationIcon>
     <ApplicationIcon Condition="'$(PublicRelease)' != 'true'">Assets\RaysLoader.Dev.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
