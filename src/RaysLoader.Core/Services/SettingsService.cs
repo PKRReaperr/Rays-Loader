@@ -144,10 +144,7 @@ public sealed class SettingsService : ISettingsService
         settings.WindowHeight = Math.Clamp(settings.WindowHeight, 600, 4320);
         settings.DefaultVideoQuality = videoQualities.FirstOrDefault(
             quality => quality.Equals(settings.DefaultVideoQuality, StringComparison.OrdinalIgnoreCase)) ?? "best";
-        if (string.IsNullOrWhiteSpace(settings.DefaultOutputDirectory))
-        {
-            settings.DefaultOutputDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-        }
+        settings.DefaultOutputDirectory = AppPaths.NormalizeOutputDirectory(settings.DefaultOutputDirectory);
     }
 
     private static string? ReadString(JsonElement element, string name) => element.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String ? value.GetString() : null;

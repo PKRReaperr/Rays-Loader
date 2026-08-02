@@ -22,7 +22,7 @@ public sealed class AppSettings
 {
     public AppTheme Theme { get; set; } = AppTheme.System;
     public AppAccent AccentColor { get; set; } = AppAccent.System;
-    public string DefaultOutputDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+    public string DefaultOutputDirectory { get; set; } = AppPaths.UserDownloadsDirectory;
     public int MaximumSimultaneousDownloads { get; set; } = 2;
     public bool ConfirmBeforeStoppingAll { get; set; } = true;
     public bool RememberWindowPlacement { get; set; } = true;

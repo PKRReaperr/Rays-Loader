@@ -10,7 +10,7 @@ public sealed partial class AboutPage : Page
         InitializeComponent();
     }
 
-    public string VersionText => $"Version {typeof(AboutPage).Assembly.GetName().Version?.ToString(3) ?? "1.0.0"}";
+    public string VersionText => $"Version {typeof(AboutPage).Assembly.GetName().Version?.ToString(3) ?? "1.0.1"}";
 
     private void OpenProjectFolder_Click(object sender, RoutedEventArgs e)
     {

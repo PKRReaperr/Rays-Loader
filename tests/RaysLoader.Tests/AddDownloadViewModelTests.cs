@@ -36,6 +36,23 @@ public sealed class AddDownloadViewModelTests
     }
 
     [Fact]
+    public void PortableDownloadsPathResolvesForQueuedRequest()
+    {
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            new StubSettingsService())
+        {
+            Urls = "https://example.test/video",
+        };
+
+        var request = Assert.Single(viewModel.CreateRequests());
+
+        Assert.Equal(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            request.OutputDirectory);
+    }
+
+    [Fact]
     public async Task AnalysisInitializesTimelineToFullMediaDuration()
     {
         var metadata = new MediaMetadata(

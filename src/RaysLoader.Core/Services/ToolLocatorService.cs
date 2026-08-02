@@ -1,4 +1,5 @@
 using RaysLoader.Settings;
+using RaysLoader.ProcessManagement;
 
 namespace RaysLoader.Services;
 
@@ -47,6 +48,7 @@ public sealed class ToolLocatorService : IToolLocatorService
         var pathValue = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
         foreach (var directory in pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
+            if (!YtDlpProcessEnvironment.IsTrustedDirectory(directory)) continue;
             var candidate = Path.Combine(directory, name);
             if (File.Exists(candidate))
             {
@@ -77,6 +79,7 @@ public sealed class ToolLocatorService : IToolLocatorService
         var pathValue = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
         foreach (var directory in pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
+            if (!YtDlpProcessEnvironment.IsTrustedDirectory(directory)) continue;
             var candidate = Path.Combine(directory, name);
             if (File.Exists(candidate)) return Path.GetFullPath(candidate);
         }

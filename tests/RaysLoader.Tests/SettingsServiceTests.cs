@@ -34,6 +34,20 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Single(Directory.GetFiles(_directory, "settings.corrupt-*.json"));
     }
 
+    [Fact]
+    public async Task ConventionalDownloadsPathIsStoredAsPortableUserPath()
+    {
+        var service = new SettingsService(_directory);
+        var settings = new AppSettings
+        {
+            DefaultOutputDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+        };
+
+        await service.SaveAsync(settings);
+
+        Assert.Equal(AppPaths.UserDownloadsDirectory, service.Current.DefaultOutputDirectory);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);

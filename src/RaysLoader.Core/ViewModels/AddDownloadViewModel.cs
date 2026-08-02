@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RaysLoader.Models;
 using RaysLoader.Services;
+using RaysLoader.Settings;
 
 namespace RaysLoader.ViewModels;
 
@@ -175,7 +176,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     private DownloadRequest BuildRequest(string url) => new()
     {
         Url = url,
-        OutputDirectory = OutputDirectory,
+        OutputDirectory = AppPaths.ResolveOutputDirectory(OutputDirectory),
         Mode = Mode,
         VideoQuality = VideoQuality.Equals("Best", StringComparison.OrdinalIgnoreCase) ? "best" : VideoQuality,
         Container = Container,

@@ -27,7 +27,10 @@ public sealed class YtDlpService(
         var standardOutput = new StringBuilder();
         var errors = new StringBuilder();
         var result = await processRunner.RunAsync(
-            new ProcessRequest(tools.YtDlp, argumentBuilder.BuildProbeArguments(request.Url, request, tools.JavaScriptRuntime)),
+            new ProcessRequest(
+                tools.YtDlp,
+                argumentBuilder.BuildProbeArguments(request.Url, request, tools.JavaScriptRuntime),
+                Environment: YtDlpProcessEnvironment.Create(tools)),
             line =>
             {
                 (line.IsError ? errors : standardOutput).AppendLine(line.Text);
@@ -90,7 +93,10 @@ public sealed class YtDlpService(
         try
         {
             result = await processRunner.RunAsync(
-                new ProcessRequest(tools.YtDlp, argumentBuilder.BuildDownloadArguments(task.Request, settings, tools.FfmpegDirectory, tools.JavaScriptRuntime)),
+                new ProcessRequest(
+                    tools.YtDlp,
+                    argumentBuilder.BuildDownloadArguments(task.Request, settings, tools.FfmpegDirectory, tools.JavaScriptRuntime),
+                    Environment: YtDlpProcessEnvironment.Create(tools)),
                 line =>
                 {
                     dispatcher.Enqueue(() => task.AppendLog(line.Text, line.IsError, line.Timestamp));
