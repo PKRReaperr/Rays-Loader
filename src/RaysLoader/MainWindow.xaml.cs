@@ -4,6 +4,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System.Runtime.InteropServices;
 using RaysLoader.Services;
 using RaysLoader.Settings;
@@ -27,14 +28,16 @@ public sealed partial class MainWindow : Window
         _settingsService = settingsService;
         _updateService = updateService;
         RootGrid.DataContext = viewModel;
-        Title = "Ray's Loader";
+        Title = AppIdentity.DisplayName;
+        AppNameText.Text = AppIdentity.DisplayName;
+        AppLogo.Source = new BitmapImage(new Uri(AppIdentity.LogoUri));
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarDragRegion);
         TrySetBackdrop();
         ApplyTheme(settingsService.Current.Theme);
         AccentPalette.Apply(settingsService.Current.AccentColor, settingsService.Current.Theme);
 
-        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "RaysLoader.ico"));
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", AppIdentity.IconFileName));
         AppWindow.Resize(new SizeInt32(settingsService.Current.WindowWidth, settingsService.Current.WindowHeight));
         AppWindow.Closing += AppWindow_Closing;
         Navigation.SelectedItem = AllItem;
@@ -99,7 +102,7 @@ public sealed partial class MainWindow : Window
             var dialog = new ContentDialog
             {
                 XamlRoot = RootGrid.XamlRoot,
-                Title = $"Ray's Loader {update.Version.ToString(3)} is available",
+                Title = $"{AppIdentity.DisplayName} {update.Version.ToString(3)} is available",
                 Content = "Open Settings to download, verify, and install the update.",
                 PrimaryButtonText = "Open updates",
                 CloseButtonText = "Later",

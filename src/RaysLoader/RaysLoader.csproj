@@ -5,12 +5,16 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>RaysLoader</RootNamespace>
     <AssemblyName>RaysLoader</AssemblyName>
-    <Product>Ray's Loader</Product>
+    <PublicRelease Condition="'$(PublicRelease)' == ''">false</PublicRelease>
+    <DefineConstants Condition="'$(PublicRelease)' != 'true'">$(DefineConstants);RAYSLOADER_DEV</DefineConstants>
+    <Product Condition="'$(PublicRelease)' == 'true'">Ray's Loader</Product>
+    <Product Condition="'$(PublicRelease)' != 'true'">Ray's Loader DEV</Product>
     <Description>Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp.</Description>
     <Authors>Rayyan</Authors>
     <Company>Rayyan</Company>
     <Copyright>Copyright © Rayyan</Copyright>
-    <ApplicationIcon>Assets\RaysLoader.ico</ApplicationIcon>
+    <ApplicationIcon Condition="'$(PublicRelease)' == 'true'">Assets\RaysLoader.ico</ApplicationIcon>
+    <ApplicationIcon Condition="'$(PublicRelease)' != 'true'">Assets\RaysLoader.Dev.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
@@ -29,6 +33,8 @@
   <ItemGroup>
     <Content Include="Assets\RaysLoader.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Assets\RaysLoader.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Assets\RaysLoader.Dev.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Assets\RaysLoader.Dev.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="..\..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="..\..\LICENSES\**\*" Link="LICENSES\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

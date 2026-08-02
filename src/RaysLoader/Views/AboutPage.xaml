@@ -4,10 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer>
         <StackPanel MaxWidth="760" HorizontalAlignment="Left" Padding="32,28" Spacing="14">
-            <Image Width="88" Height="88" HorizontalAlignment="Left" Source="/Assets/RaysLoader.png" />
-            <TextBlock Text="Ray's Loader" FontSize="32" FontWeight="SemiBold" />
+            <Image x:Name="AboutLogo" Width="88" Height="88" HorizontalAlignment="Left" />
+            <TextBlock x:Name="AboutNameText" FontSize="32" FontWeight="SemiBold" />
             <TextBlock Text="{x:Bind VersionText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            <TextBlock Text="Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp." FontSize="16" TextWrapping="Wrap" />
+            <TextBlock x:Name="AboutDescriptionText" FontSize="16" TextWrapping="Wrap" />
             <TextBlock Text="Publisher: Rayyan" />
             <TextBlock Text="Powered by yt-dlp and FFmpeg" FontWeight="SemiBold" />
             <StackPanel Orientation="Horizontal" Spacing="8">

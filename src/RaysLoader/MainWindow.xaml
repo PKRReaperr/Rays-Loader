@@ -16,8 +16,8 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Image Width="24" Height="24" Margin="16,0,10,0" Source="Assets/RaysLoader.png" />
-            <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" Text="Ray's Loader" />
+            <Image x:Name="AppLogo" Width="24" Height="24" Margin="16,0,10,0" />
+            <TextBlock x:Name="AppNameText" Grid.Column="1" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" />
             <Grid Grid.Column="2">
                 <MenuBar HorizontalAlignment="Left" Margin="24,0,0,0" VerticalAlignment="Center">
                     <MenuBarItem Title="File">

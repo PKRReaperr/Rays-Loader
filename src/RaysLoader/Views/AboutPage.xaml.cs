@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace RaysLoader.Views;
 
@@ -8,6 +9,9 @@ public sealed partial class AboutPage : Page
     public AboutPage()
     {
         InitializeComponent();
+        AboutLogo.Source = new BitmapImage(new Uri(AppIdentity.LogoUri));
+        AboutNameText.Text = AppIdentity.DisplayName;
+        AboutDescriptionText.Text = $"{AppIdentity.DisplayName} is a modern Windows 11 media downloader powered by yt-dlp.";
     }
 
     public string VersionText => $"Version {typeof(AboutPage).Assembly.GetName().Version?.ToString(3) ?? "1.1.0"}";

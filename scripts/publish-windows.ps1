@@ -15,7 +15,7 @@ if (Test-Path -LiteralPath $publishDirectory) {
 
 dotnet publish (Join-Path $repoRoot 'src\RaysLoader\RaysLoader.csproj') `
     -c $Configuration -p:Platform=x64 --self-contained true `
-    -p:PublishSingleFile=false -o $publishDirectory
+    -p:PublicRelease=true -p:PublishSingleFile=false -o $publishDirectory
 
 if (-not $SkipTools) {
     if ([string]::IsNullOrWhiteSpace($ToolsDirectory)) {
