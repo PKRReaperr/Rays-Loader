@@ -38,6 +38,9 @@ public partial class App : Application
             services.AddSingleton<IProgressParserService, ProgressParserService>();
             services.AddSingleton<IToolLocatorService, ToolLocatorService>();
             services.AddSingleton<IYtDlpService, YtDlpService>();
+            services.AddSingleton<IUpdateService>(new GitHubUpdateService(
+                new HttpClient(),
+                Path.Combine(settings.SettingsDirectory, "updates")));
             services.AddSingleton<IDownloadExecutor, DownloadExecutor>();
             services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
             services.AddSingleton<MainViewModel>();

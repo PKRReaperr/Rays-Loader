@@ -27,6 +27,12 @@ public sealed partial class SettingsPage : Page
         App.MainWindow.RefreshTheme();
     }
 
+    private async void DownloadUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.DownloadAndInstallCommand.ExecuteAsync(null);
+        if (ViewModel.InstallerLaunched) App.MainWindow.Close();
+    }
+
     private void AccentColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if ((sender as RadioButtons)?.SelectedItem is not AppAccent accent) return;

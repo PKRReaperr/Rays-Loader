@@ -28,6 +28,7 @@ public sealed class AppSettings
     public bool RememberWindowPlacement { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool ShowCompletionNotifications { get; set; } = true;
+    public bool AutomaticallyCheckForUpdates { get; set; } = true;
     public string DefaultVideoQuality { get; set; } = "best";
     public string DefaultContainer { get; set; } = "mp4";
     public string DefaultAudioFormat { get; set; } = "mp3";

@@ -17,12 +17,15 @@ namespace RaysLoader;
 public sealed partial class MainWindow : Window
 {
     private readonly ISettingsService _settingsService;
+    private readonly IUpdateService _updateService;
+    private bool _automaticUpdateCheckStarted;
 
-    public MainWindow(MainViewModel viewModel, ISettingsService settingsService)
+    public MainWindow(MainViewModel viewModel, ISettingsService settingsService, IUpdateService updateService)
     {
         InitializeComponent();
         ViewModel = viewModel;
         _settingsService = settingsService;
+        _updateService = updateService;
         RootGrid.DataContext = viewModel;
         Title = "Ray's Loader";
         ExtendsContentIntoTitleBar = true;
@@ -36,6 +39,7 @@ public sealed partial class MainWindow : Window
         AppWindow.Closing += AppWindow_Closing;
         Navigation.SelectedItem = AllItem;
         ShowDownloads();
+        Activated += MainWindow_Activated;
     }
 
     public MainViewModel ViewModel { get; }
@@ -75,8 +79,42 @@ public sealed partial class MainWindow : Window
     private void ShowDownloads_Click(object sender, RoutedEventArgs e) { Navigation.SelectedItem = AllItem; ShowDownloads(); }
     private void ShowSettings_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
     private void ShowAbout_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+    private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        var page = App.Services.GetRequiredService<SettingsPage>();
+        ContentFrame.Content = page;
+        await page.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
+    }
     private void RetryAll_Click(object sender, RoutedEventArgs e) => ViewModel.RetryAllFailedCommand.Execute(null);
     private void StopAll_Click(object sender, RoutedEventArgs e) => ViewModel.StopAllCommand.Execute(null);
+
+    private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (_automaticUpdateCheckStarted || !_settingsService.Current.AutomaticallyCheckForUpdates) return;
+        _automaticUpdateCheckStarted = true;
+        try
+        {
+            var update = await _updateService.CheckForUpdateAsync();
+            if (update is null || RootGrid.XamlRoot is null) return;
+            var dialog = new ContentDialog
+            {
+                XamlRoot = RootGrid.XamlRoot,
+                Title = $"Ray's Loader {update.Version.ToString(3)} is available",
+                Content = "Open Settings to download, verify, and install the update.",
+                PrimaryButtonText = "Open updates",
+                CloseButtonText = "Later",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() is ContentDialogResult.Primary)
+            {
+                ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or InvalidDataException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            System.Diagnostics.Debug.WriteLine(exception);
+        }
+    }
 
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {

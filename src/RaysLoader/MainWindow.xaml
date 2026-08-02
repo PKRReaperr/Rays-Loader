@@ -5,6 +5,7 @@
     <Grid x:Name="RootGrid" Background="{ThemeResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -36,6 +37,8 @@
                         <MenuFlyoutItem Text="Stop all" Click="StopAll_Click" />
                     </MenuBarItem>
                     <MenuBarItem Title="Help">
+                        <MenuFlyoutItem Text="Check for updates" Click="CheckForUpdates_Click" />
+                        <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="About Ray's Loader" Click="ShowAbout_Click" />
                     </MenuBarItem>
                 </MenuBar>
@@ -45,7 +48,7 @@
 
         <NavigationView
             x:Name="Navigation"
-            Grid.Row="1"
+            Grid.Row="2"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
             OpenPaneLength="236"
