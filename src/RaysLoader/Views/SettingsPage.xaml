@@ -47,7 +47,7 @@
                         </RadioButtons>
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBox Header="Default output directory" Text="{Binding Settings.DefaultOutputDirectory, Mode=TwoWay}" />
+                            <TextBox Header="Default output directory" Text="{Binding Settings.DefaultOutputDirectory, Mode=TwoWay}" PlaceholderText="Choose a folder" />
                             <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseOutput_Click">Browse</Button>
                         </Grid>
                         <NumberBox Header="Maximum simultaneous downloads" Minimum="1" Maximum="8" Value="{Binding Settings.MaximumSimultaneousDownloads, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />

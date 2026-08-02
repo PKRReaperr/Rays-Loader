@@ -32,15 +32,21 @@ public sealed class SettingsService : ISettingsService
     {
         if (!File.Exists(_settingsPath))
         {
-            Current = await TryImportLegacySettingsAsync(cancellationToken).ConfigureAwait(false) ?? new AppSettings();
+            var imported = await TryImportLegacySettingsAsync(cancellationToken).ConfigureAwait(false);
+            if (imported is not null) imported.HasCompletedOnboarding = true;
+            Current = imported ?? new AppSettings();
             await SaveAsync(Current, cancellationToken).ConfigureAwait(false);
             return Current;
         }
 
         try
         {
-            await using var stream = File.OpenRead(_settingsPath);
-            Current = await JsonSerializer.DeserializeAsync<AppSettings>(stream, JsonOptions, cancellationToken).ConfigureAwait(false) ?? new AppSettings();
+            var json = await File.ReadAllTextAsync(_settingsPath, cancellationToken).ConfigureAwait(false);
+            using var document = JsonDocument.Parse(json);
+            var hasOnboardingFlag = document.RootElement.EnumerateObject().Any(property =>
+                property.Name.Equals(nameof(AppSettings.HasCompletedOnboarding), StringComparison.OrdinalIgnoreCase));
+            Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            if (!hasOnboardingFlag) Current.HasCompletedOnboarding = true;
             Normalize(Current);
             return Current;
         }
@@ -70,7 +76,7 @@ public sealed class SettingsService : ISettingsService
 
     public Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        Current = new AppSettings();
+        Current = new AppSettings { HasCompletedOnboarding = Current.HasCompletedOnboarding };
         return SaveAsync(Current, cancellationToken);
     }
 

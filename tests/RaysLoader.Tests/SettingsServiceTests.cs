@@ -35,17 +35,43 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task ConventionalDownloadsPathIsStoredAsPortableUserPath()
+    public void NewSettingsStartWithBlankOutputAndPendingOnboarding()
+    {
+        var settings = new AppSettings();
+
+        Assert.Empty(settings.DefaultOutputDirectory);
+        Assert.False(settings.HasCompletedOnboarding);
+    }
+
+    [Fact]
+    public async Task ConventionalDownloadsPathIsStoredAsReadableAbsolutePath()
     {
         var service = new SettingsService(_directory);
+        var downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         var settings = new AppSettings
         {
-            DefaultOutputDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            DefaultOutputDirectory = downloads,
         };
 
         await service.SaveAsync(settings);
 
-        Assert.Equal(AppPaths.UserDownloadsDirectory, service.Current.DefaultOutputDirectory);
+        Assert.Equal(Path.GetFullPath(downloads), service.Current.DefaultOutputDirectory);
+    }
+
+    [Fact]
+    public async Task ExistingSettingsWithoutOnboardingFlagAreMigratedWithoutPrompt()
+    {
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(
+            Path.Combine(_directory, "settings.json"),
+            """{"DefaultOutputDirectory":"%USERPROFILE%\\Downloads"}""");
+
+        var settings = await new SettingsService(_directory).LoadAsync();
+
+        Assert.True(settings.HasCompletedOnboarding);
+        Assert.Equal(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            settings.DefaultOutputDirectory);
     }
 
     public void Dispose()

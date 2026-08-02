@@ -19,7 +19,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly ISettingsService _settingsService;
     private readonly IUpdateService _updateService;
-    private bool _automaticUpdateCheckStarted;
+    private bool _startupFlowStarted;
 
     public MainWindow(MainViewModel viewModel, ISettingsService settingsService, IUpdateService updateService)
     {
@@ -82,6 +82,7 @@ public sealed partial class MainWindow : Window
     private void ShowDownloads_Click(object sender, RoutedEventArgs e) { Navigation.SelectedItem = AllItem; ShowDownloads(); }
     private void ShowSettings_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
     private void ShowAbout_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+    private async void GettingStarted_Click(object sender, RoutedEventArgs e) => await ShowOnboardingAsync();
     private async void ReportBug_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.BugReport);
     private async void SuggestFeature_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.FeatureRequest);
     private async void ViewFeedback_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.Issues);
@@ -96,8 +97,10 @@ public sealed partial class MainWindow : Window
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
-        if (_automaticUpdateCheckStarted || !_settingsService.Current.AutomaticallyCheckForUpdates) return;
-        _automaticUpdateCheckStarted = true;
+        if (_startupFlowStarted || RootGrid.XamlRoot is null) return;
+        _startupFlowStarted = true;
+        if (!_settingsService.Current.HasCompletedOnboarding) await ShowOnboardingAsync();
+        if (!_settingsService.Current.AutomaticallyCheckForUpdates) return;
         try
         {
             var update = await _updateService.CheckForUpdateAsync();
@@ -120,6 +123,12 @@ public sealed partial class MainWindow : Window
         {
             System.Diagnostics.Debug.WriteLine(exception);
         }
+    }
+
+    public async Task ShowOnboardingAsync()
+    {
+        var dialog = new OnboardingDialog(_settingsService) { XamlRoot = RootGrid.XamlRoot };
+        await dialog.ShowAsync();
     }
 
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)

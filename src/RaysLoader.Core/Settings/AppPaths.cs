@@ -6,16 +6,12 @@ public static class AppPaths
 
     public static string NormalizeOutputDirectory(string? path)
     {
-        if (string.IsNullOrWhiteSpace(path)) return UserDownloadsDirectory;
+        if (string.IsNullOrWhiteSpace(path)) return string.Empty;
 
         var trimmed = path.Trim();
         try
         {
-            return Path.GetFullPath(ResolveOutputDirectory(trimmed)).Equals(
-                Path.GetFullPath(ResolveOutputDirectory(UserDownloadsDirectory)),
-                StringComparison.OrdinalIgnoreCase)
-                ? UserDownloadsDirectory
-                : trimmed;
+            return Path.GetFullPath(ResolveOutputDirectory(trimmed));
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         {

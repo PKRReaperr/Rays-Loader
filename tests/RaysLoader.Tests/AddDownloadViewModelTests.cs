@@ -53,6 +53,23 @@ public sealed class AddDownloadViewModelTests
     }
 
     [Fact]
+    public void BlankFirstRunFolderMustBeSelectedBeforeQueueing()
+    {
+        var settings = new StubSettingsService();
+        settings.Current.DefaultOutputDirectory = string.Empty;
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            settings)
+        {
+            Urls = "https://example.test/video",
+        };
+
+        var exception = Assert.Throws<FormatException>(() => viewModel.CreateRequests());
+
+        Assert.Equal("Choose an output folder.", exception.Message);
+    }
+
+    [Fact]
     public async Task AnalysisInitializesTimelineToFullMediaDuration()
     {
         var metadata = new MediaMetadata(
@@ -107,7 +124,7 @@ public sealed class AddDownloadViewModelTests
 
     private sealed class StubSettingsService : ISettingsService
     {
-        public AppSettings Current { get; } = new();
+        public AppSettings Current { get; } = new() { DefaultOutputDirectory = AppPaths.UserDownloadsDirectory };
         public string SettingsDirectory => Path.GetTempPath();
         public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
         public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => Task.CompletedTask;

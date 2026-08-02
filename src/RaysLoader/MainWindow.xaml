@@ -37,6 +37,8 @@
                         <MenuFlyoutItem Text="Stop all" Click="StopAll_Click" />
                     </MenuBarItem>
                     <MenuBarItem Title="Help">
+                        <MenuFlyoutItem Text="Getting started" Click="GettingStarted_Click" />
+                        <MenuFlyoutSeparator />
                         <MenuFlyoutSubItem Text="Send feedback">
                             <MenuFlyoutItem Text="Report a bug" Click="ReportBug_Click" />
                             <MenuFlyoutItem Text="Suggest a feature" Click="SuggestFeature_Click" />
