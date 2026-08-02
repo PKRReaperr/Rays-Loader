@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaysLoader", "src\RaysLoader\RaysLoader.csproj", "{68B45C37-A0FA-4EA0-BD53-53A57B5063F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaysLoader.Core", "src\RaysLoader.Core\RaysLoader.Core.csproj", "{B16CFC25-83EA-43E3-9150-5EBD45C44B91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaysLoader.Tests", "tests\RaysLoader.Tests\RaysLoader.Tests.csproj", "{D7C52BA3-A78A-4778-996A-1B013DDE133F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68B45C37-A0FA-4EA0-BD53-53A57B5063F0}.Debug|x64.ActiveCfg = Debug|x64
+		{68B45C37-A0FA-4EA0-BD53-53A57B5063F0}.Debug|x64.Build.0 = Debug|x64
+		{68B45C37-A0FA-4EA0-BD53-53A57B5063F0}.Release|x64.ActiveCfg = Release|x64
+		{68B45C37-A0FA-4EA0-BD53-53A57B5063F0}.Release|x64.Build.0 = Release|x64
+		{B16CFC25-83EA-43E3-9150-5EBD45C44B91}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B16CFC25-83EA-43E3-9150-5EBD45C44B91}.Debug|x64.Build.0 = Debug|Any CPU
+		{B16CFC25-83EA-43E3-9150-5EBD45C44B91}.Release|x64.ActiveCfg = Release|Any CPU
+		{B16CFC25-83EA-43E3-9150-5EBD45C44B91}.Release|x64.Build.0 = Release|Any CPU
+		{D7C52BA3-A78A-4778-996A-1B013DDE133F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D7C52BA3-A78A-4778-996A-1B013DDE133F}.Debug|x64.Build.0 = Debug|Any CPU
+		{D7C52BA3-A78A-4778-996A-1B013DDE133F}.Release|x64.ActiveCfg = Release|Any CPU
+		{D7C52BA3-A78A-4778-996A-1B013DDE133F}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

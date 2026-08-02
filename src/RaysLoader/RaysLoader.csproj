@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>RaysLoader</RootNamespace>
+    <AssemblyName>RaysLoader</AssemblyName>
+    <Product>Ray's Loader</Product>
+    <Description>Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp.</Description>
+    <Authors>Rayyan</Authors>
+    <Company>Rayyan</Company>
+    <Copyright>Copyright © Rayyan</Copyright>
+    <ApplicationIcon>Assets\RaysLoader.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <WindowsAppSdkUndockedRegFreeWinRTInitialize>true</WindowsAppSdkUndockedRegFreeWinRTInitialize>
+    <PublishProfile>win-x64.pubxml</PublishProfile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RaysLoader.Core\RaysLoader.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\RaysLoader.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Assets\RaysLoader.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\LICENSES\**\*" Link="LICENSES\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <!-- Unpackaged WinUI 3 publishes can omit app-generated XBF/PRI resources
+       when the CLI output directory is overridden. Stage them explicitly so
+       the self-contained published executable loads the same resources as the
+       verified Release build. -->
+  <Target Name="CopyGeneratedWinUiResourcesToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <GeneratedXbf Include="$(TargetDir)**\*.xbf" />
+      <GeneratedAppPri Include="$(TargetDir)$(AssemblyName).pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(GeneratedXbf)" DestinationFiles="@(GeneratedXbf->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(GeneratedAppPri)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

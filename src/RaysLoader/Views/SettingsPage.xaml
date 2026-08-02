@@ -1,0 +1,102 @@
+<Page
+    x:Class="RaysLoader.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="28,20,28,28">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="900" HorizontalAlignment="Left" Spacing="14">
+                <TextBlock Text="Settings" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,6" />
+                <InfoBar IsOpen="{Binding StatusMessage, Converter={StaticResource StringPresenceConverter}}" IsClosable="False" Severity="Informational" Message="{Binding StatusMessage}" />
+
+                <Expander Header="General" IsExpanded="True">
+                    <StackPanel Spacing="12" Padding="0,12,0,6">
+                        <ComboBox Header="Theme" ItemsSource="{Binding Themes}" SelectedItem="{Binding Settings.Theme, Mode=TwoWay}" />
+                        <RadioButtons
+                            Header="Accent color"
+                            MaxColumns="4"
+                            ItemsSource="{Binding AccentColors}"
+                            SelectedItem="{Binding Settings.AccentColor, Mode=TwoWay}"
+                            SelectionChanged="AccentColor_SelectionChanged"
+                            AutomationProperties.Name="Accent color">
+                            <RadioButtons.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" MinWidth="132">
+                                        <Ellipse
+                                            Width="18"
+                                            Height="18"
+                                            Fill="{Binding Converter={StaticResource AccentColorToBrushConverter}}"
+                                            Stroke="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                            StrokeThickness="1" />
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Converter={StaticResource AccentColorToLabelConverter}}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </RadioButtons.ItemTemplate>
+                        </RadioButtons>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBox Header="Default output directory" Text="{Binding Settings.DefaultOutputDirectory, Mode=TwoWay}" />
+                            <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseOutput_Click">Browse</Button>
+                        </Grid>
+                        <NumberBox Header="Maximum simultaneous downloads" Minimum="1" Maximum="8" Value="{Binding Settings.MaximumSimultaneousDownloads, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <CheckBox Content="Confirm before stopping all" IsChecked="{Binding Settings.ConfirmBeforeStoppingAll, Mode=TwoWay}" />
+                        <CheckBox Content="Remember window position and size" IsChecked="{Binding Settings.RememberWindowPlacement, Mode=TwoWay}" />
+                        <CheckBox Content="Start minimized" IsChecked="{Binding Settings.StartMinimized, Mode=TwoWay}" />
+                        <CheckBox Content="Show completion notifications" IsChecked="{Binding Settings.ShowCompletionNotifications, Mode=TwoWay}" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="Download defaults">
+                    <Grid Padding="0,12,0,6" ColumnSpacing="12" RowSpacing="10">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <TextBox Header="Video quality" Text="{Binding Settings.DefaultVideoQuality, Mode=TwoWay}" />
+                        <TextBox Grid.Column="1" Header="Container" Text="{Binding Settings.DefaultContainer, Mode=TwoWay}" />
+                        <TextBox Grid.Row="1" Header="Audio format" Text="{Binding Settings.DefaultAudioFormat, Mode=TwoWay}" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Header="Audio bitrate" Text="{Binding Settings.DefaultAudioBitrate, Mode=TwoWay}" />
+                        <TextBox Grid.Row="2" Grid.ColumnSpan="2" Header="Filename template" Text="{Binding Settings.FilenameTemplate, Mode=TwoWay}" />
+                        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="18">
+                            <CheckBox Content="Playlists" IsChecked="{Binding Settings.DownloadPlaylists, Mode=TwoWay}" />
+                            <CheckBox Content="Subtitles" IsChecked="{Binding Settings.WriteSubtitles, Mode=TwoWay}" />
+                            <CheckBox Content="Metadata" IsChecked="{Binding Settings.EmbedMetadata, Mode=TwoWay}" />
+                            <CheckBox Content="Thumbnails" IsChecked="{Binding Settings.WriteThumbnail, Mode=TwoWay}" />
+                        </StackPanel>
+                    </Grid>
+                </Expander>
+
+                <Expander Header="Tools">
+                    <StackPanel Padding="0,12,0,6" Spacing="10">
+                        <Grid ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Header="yt-dlp path" Text="{Binding Settings.YtDlpPath, Mode=TwoWay}" /><Button Grid.Column="1" VerticalAlignment="Bottom" Tag="yt-dlp" Click="BrowseTool_Click">Browse</Button></Grid>
+                        <Grid ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Header="FFmpeg path" Text="{Binding Settings.FfmpegPath, Mode=TwoWay}" /><Button Grid.Column="1" VerticalAlignment="Bottom" Tag="ffmpeg" Click="BrowseTool_Click">Browse</Button></Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Command="{Binding ValidateToolsCommand}">Validate tools</Button>
+                            <Button Click="OpenToolsFolder_Click">Open managed tools folder</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="Advanced">
+                    <StackPanel Padding="0,12,0,6" Spacing="10">
+                        <TextBox Header="Additional default yt-dlp arguments" Text="{Binding Settings.AdditionalArguments, Mode=TwoWay}" />
+                        <Grid ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Header="Cookies file" Text="{Binding Settings.CookiesFile, Mode=TwoWay}" /><Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button></Grid>
+                        <TextBox Header="Proxy" Text="{Binding Settings.Proxy, Mode=TwoWay}" PlaceholderText="Optional proxy URL" />
+                        <TextBox Header="Rate limit" Text="{Binding Settings.RateLimit, Mode=TwoWay}" PlaceholderText="For example 5M" />
+                        <NumberBox Header="Concurrent fragments" Minimum="1" Maximum="32" Value="{Binding Settings.ConcurrentFragments, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <CheckBox Content="Preserve temporary files" IsChecked="{Binding Settings.PreserveTemporaryFiles, Mode=TwoWay}" />
+                        <CheckBox Content="Verbose logging" IsChecked="{Binding Settings.VerboseLogging, Mode=TwoWay}" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="Data">
+                    <StackPanel Padding="0,12,0,6" Orientation="Horizontal" Spacing="8">
+                        <Button Click="OpenSettingsFolder_Click">Open settings folder</Button>
+                        <Button Command="{Binding ResetCommand}">Reset settings</Button>
+                    </StackPanel>
+                </Expander>
+
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                    <Button Style="{StaticResource AccentButtonStyle}" Click="Save_Click">Save settings</Button>
+                    <ProgressRing Width="20" Height="20" IsActive="{Binding IsBusy}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

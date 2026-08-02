@@ -1,0 +1,11 @@
+.vs/
+.idea/
+**/bin/
+**/obj/
+.pytest_cache/
+__pycache__/
+*.pyc
+artifacts/
+TestResults/
+*.user
+*.suo

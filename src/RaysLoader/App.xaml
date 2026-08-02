@@ -1,0 +1,31 @@
+<Application
+    x:Class="RaysLoader.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:RaysLoader.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" Invert="True" />
+            <converters:StringPresenceConverter x:Key="StringPresenceConverter" />
+            <converters:NullableImageSourceConverter x:Key="NullableImageSourceConverter" />
+            <converters:DownloadStateToGlyphConverter x:Key="DownloadStateToGlyphConverter" />
+            <converters:DownloadStateToBrushConverter x:Key="DownloadStateToBrushConverter" />
+            <converters:AccentColorToBrushConverter x:Key="AccentColorToBrushConverter" />
+            <converters:AccentColorToLabelConverter x:Key="AccentColorToLabelConverter" />
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#08090B" />
+            <SolidColorBrush x:Key="AppSurfaceBrush" Color="#101216" />
+            <SolidColorBrush x:Key="AppCardBrush" Color="#17191D" />
+            <Style x:Key="CardBorderStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource AppCardBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Padding" Value="16" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,41 @@
+using RaysLoader.Services;
+using RaysLoader.Settings;
+
+namespace RaysLoader.Tests;
+
+public sealed class SettingsServiceTests : IDisposable
+{
+    private readonly string _directory = Path.Combine(Path.GetTempPath(), "RaysLoader.Tests", Guid.NewGuid().ToString("N"));
+
+    [Fact]
+    public async Task RoundTripsAndNormalizesSettings()
+    {
+        var service = new SettingsService(_directory);
+        var settings = new AppSettings { Theme = AppTheme.Dark, AccentColor = AppAccent.Coral, MaximumSimultaneousDownloads = 99, DefaultContainer = "mkv" };
+        await service.SaveAsync(settings);
+
+        var reloaded = await new SettingsService(_directory).LoadAsync();
+
+        Assert.Equal(AppTheme.Dark, reloaded.Theme);
+        Assert.Equal(AppAccent.Coral, reloaded.AccentColor);
+        Assert.Equal(8, reloaded.MaximumSimultaneousDownloads);
+        Assert.Equal("mkv", reloaded.DefaultContainer);
+    }
+
+    [Fact]
+    public async Task CorruptSettingsFallBackWithoutCrashing()
+    {
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(Path.Combine(_directory, "settings.json"), "{ definitely not json");
+
+        var settings = await new SettingsService(_directory).LoadAsync();
+
+        Assert.Equal(2, settings.MaximumSimultaneousDownloads);
+        Assert.Single(Directory.GetFiles(_directory, "settings.corrupt-*.json"));
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
+    }
+}

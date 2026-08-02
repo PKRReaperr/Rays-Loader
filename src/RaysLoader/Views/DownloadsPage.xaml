@@ -1,0 +1,113 @@
+<Page
+    x:Class="RaysLoader.Views.DownloadsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:RaysLoader.Models"
+    NavigationCacheMode="Required">
+    <Grid x:Name="Root" Padding="24,16,24,24" AllowDrop="True" DragOver="Root_DragOver" Drop="Root_Drop">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <CommandBar Grid.Row="0" Background="Transparent" DefaultLabelPosition="Right">
+            <CommandBar.Content>
+                <TextBlock VerticalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Downloads" />
+            </CommandBar.Content>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Add" Label="Add" Command="{Binding AddDownloadCommand}" AutomationProperties.Name="Add download" />
+                <AppBarButton Icon="Play" Label="Start queue" Command="{Binding StartQueueCommand}" AutomationProperties.Name="Start all queued downloads" />
+                <AppBarToggleButton x:Name="StopAllToggle" Icon="Stop" Label="Stop all remaining" Click="StopAllToggle_Click" AutomationProperties.Name="Stop all active and queued downloads" />
+                <AppBarButton Icon="RepeatAll" Label="Retry failed" Command="{Binding RetryAllFailedCommand}" AutomationProperties.Name="Retry all failed downloads" />
+            </CommandBar.PrimaryCommands>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="Clear completed" Command="{Binding ClearCompletedCommand}" />
+                <AppBarButton Label="Clear failed" Command="{Binding ClearFailedCommand}" />
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+
+        <ListView
+            x:Name="DownloadList"
+            Grid.Row="1"
+            Margin="0,12,0,0"
+            ItemsSource="{Binding VisibleDownloads}"
+            SelectionMode="None"
+            IsItemClickEnabled="False"
+            HorizontalContentAlignment="Stretch"
+            ScrollViewer.HorizontalScrollMode="Disabled">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0,0,0,10" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:DownloadTask">
+                    <Border Style="{StaticResource CardBorderStyle}" ToolTipService.ToolTip="{x:Bind Title}">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="104" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="104" Height="72" CornerRadius="6" Background="{ThemeResource ControlFillColorSecondaryBrush}">
+                                <Grid>
+                                    <FontIcon FontSize="28" Glyph="&#xE8B1;" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <Image Source="{Binding ThumbnailUrl, Converter={StaticResource NullableImageSourceConverter}}" Stretch="UniformToFill" />
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Column="1" RowSpacing="7">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="7">
+                                    <FontIcon FontSize="13" Glyph="{x:Bind State, Converter={StaticResource DownloadStateToGlyphConverter}}" Foreground="{x:Bind State, Converter={StaticResource DownloadStateToBrushConverter}}" />
+                                    <TextBlock Text="{x:Bind StatusSummary, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <ProgressBar Grid.Row="2" Height="4" Value="{x:Bind ProgressPercent, Mode=OneWay}" Maximum="100" />
+                                <TextBlock Grid.Row="3" Text="{x:Bind CurrentOperation, Mode=OneWay}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                <Button Grid.Row="4" HorizontalAlignment="Left" Margin="0,2,0,0" Padding="10,4" Tag="{x:Bind}" Click="ViewTerminal_Click" AutomationProperties.Name="View terminal">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <FontIcon Glyph="&#xE756;" FontSize="13" />
+                                        <TextBlock Text="View terminal" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Button ToolTipService.ToolTip="Retry" AutomationProperties.Name="Retry download" Tag="{x:Bind}" Click="Retry_Click" Visibility="{x:Bind CanRetry, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <FontIcon Glyph="&#xE72C;" />
+                                </Button>
+                                <Button ToolTipService.ToolTip="Stop" AutomationProperties.Name="Stop download" Tag="{x:Bind}" Click="Stop_Click" Visibility="{x:Bind CanStop, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <FontIcon Glyph="&#xE71A;" />
+                                </Button>
+                                <Button ToolTipService.ToolTip="More actions" AutomationProperties.Name="More download actions" Tag="{x:Bind}" Click="More_Click">
+                                    <FontIcon Glyph="&#xE712;" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Grid Grid.Row="1" Visibility="{Binding HasVisibleDownloads, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="360">
+                <FontIcon Glyph="&#xE896;" FontSize="38" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                <TextBlock HorizontalAlignment="Center" FontSize="22" FontWeight="SemiBold" Text="{Binding EmptyTitle}" />
+                <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding EmptyDescription}" />
+                <Button HorizontalAlignment="Center" Margin="0,8,0,0" Style="{StaticResource AccentButtonStyle}" Command="{Binding AddDownloadCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" /><TextBlock Text="Add Download" /></StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

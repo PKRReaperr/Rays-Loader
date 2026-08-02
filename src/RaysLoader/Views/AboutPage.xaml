@@ -1,0 +1,25 @@
+<Page
+    x:Class="RaysLoader.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer>
+        <StackPanel MaxWidth="760" HorizontalAlignment="Left" Padding="32,28" Spacing="14">
+            <Image Width="88" Height="88" HorizontalAlignment="Left" Source="/Assets/RaysLoader.png" />
+            <TextBlock Text="Ray's Loader" FontSize="32" FontWeight="SemiBold" />
+            <TextBlock Text="{x:Bind VersionText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <TextBlock Text="Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp." FontSize="16" TextWrapping="Wrap" />
+            <TextBlock Text="Publisher: Rayyan" />
+            <TextBlock Text="Powered by yt-dlp and FFmpeg" FontWeight="SemiBold" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <HyperlinkButton Content="yt-dlp project" NavigateUri="https://github.com/yt-dlp/yt-dlp" />
+                <HyperlinkButton Content="FFmpeg project" NavigateUri="https://ffmpeg.org/" />
+                <Button Click="OpenProjectFolder_Click">Open project folder</Button>
+            </StackPanel>
+            <Expander Header="Licenses and third-party notices">
+                <TextBlock Padding="0,10,0,0" Text="Ray's Loader uses the MIT-licensed yt-dlp project and FFmpeg, which is distributed under LGPL/GPL terms depending on the build. See THIRD-PARTY-NOTICES.md in the application folder for details." TextWrapping="Wrap" />
+            </Expander>
+            <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="Legal notice" Message="Ray's Loader is not affiliated with YouTube or any supported media website. Users are responsible for complying with applicable laws, website terms, and content rights." />
+            <TextBlock Text="Repository and issue tracker links will be added if the project is published in the future." Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
