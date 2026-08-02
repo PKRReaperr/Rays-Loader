@@ -82,6 +82,9 @@ public sealed partial class MainWindow : Window
     private void ShowDownloads_Click(object sender, RoutedEventArgs e) { Navigation.SelectedItem = AllItem; ShowDownloads(); }
     private void ShowSettings_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
     private void ShowAbout_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+    private async void ReportBug_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.BugReport);
+    private async void SuggestFeature_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.FeatureRequest);
+    private async void ViewFeedback_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.Issues);
     private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
     {
         var page = App.Services.GetRequiredService<SettingsPage>();
@@ -148,4 +151,7 @@ public sealed partial class MainWindow : Window
             ? await content.GetTextAsync()
             : null;
     }
+
+    private static async Task OpenWebLinkAsync(string url) =>
+        await Windows.System.Launcher.LaunchUriAsync(new Uri(url));
 }

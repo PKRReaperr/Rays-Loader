@@ -11,6 +11,10 @@
             <TextBlock Text="Publisher: Rayware Inc." />
             <TextBlock Text="Powered by yt-dlp and FFmpeg" FontWeight="SemiBold" />
             <StackPanel Orientation="Horizontal" Spacing="8">
+                <HyperlinkButton Content="GitHub repository" NavigateUri="https://github.com/PKRReaperr/Rays-Loader" />
+                <HyperlinkButton Content="Send feedback" NavigateUri="https://github.com/PKRReaperr/Rays-Loader/issues/new/choose" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
                 <HyperlinkButton Content="yt-dlp project" NavigateUri="https://github.com/yt-dlp/yt-dlp" />
                 <HyperlinkButton Content="FFmpeg project" NavigateUri="https://ffmpeg.org/" />
                 <Button Click="OpenProjectFolder_Click">Open project folder</Button>
@@ -19,7 +23,7 @@
                 <TextBlock Padding="0,10,0,0" Text="Ray's Loader uses the MIT-licensed yt-dlp project and FFmpeg, which is distributed under LGPL/GPL terms depending on the build. See THIRD-PARTY-NOTICES.md in the application folder for details." TextWrapping="Wrap" />
             </Expander>
             <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="Legal notice" Message="Ray's Loader is not affiliated with YouTube or any supported media website. Users are responsible for complying with applicable laws, website terms, and content rights." />
-            <TextBlock Text="Repository and issue tracker links will be added if the project is published in the future." Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+            <TextBlock Text="Bug reports and feature suggestions are reviewed through the public GitHub issue tracker." Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
         </StackPanel>
     </ScrollViewer>
 </Page>

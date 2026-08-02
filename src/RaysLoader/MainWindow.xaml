@@ -37,6 +37,13 @@
                         <MenuFlyoutItem Text="Stop all" Click="StopAll_Click" />
                     </MenuBarItem>
                     <MenuBarItem Title="Help">
+                        <MenuFlyoutSubItem Text="Send feedback">
+                            <MenuFlyoutItem Text="Report a bug" Click="ReportBug_Click" />
+                            <MenuFlyoutItem Text="Suggest a feature" Click="SuggestFeature_Click" />
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="View feedback" Click="ViewFeedback_Click" />
+                        </MenuFlyoutSubItem>
+                        <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="Check for updates" Click="CheckForUpdates_Click" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="About Ray's Loader" Click="ShowAbout_Click" />
