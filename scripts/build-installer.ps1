@@ -26,4 +26,4 @@ if ([string]::IsNullOrWhiteSpace($IsccPath) -or -not (Test-Path -LiteralPath $Is
 
 & $IsccPath (Join-Path $repoRoot 'installer\setup.iss')
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE." }
-Write-Host "Created $(Join-Path $repoRoot 'artifacts\RaysLoaderSetup.exe')"
+Write-Host "Created $(Join-Path $repoRoot 'artifacts\RaysLoader-Setup-1.0.0.exe')"

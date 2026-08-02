@@ -2,6 +2,12 @@
 
 Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp.
 
+## Download
+
+[Download the latest Windows installer](https://github.com/PKRReaperr/Rays-Loader/releases/latest/download/RaysLoader-Setup-1.0.0.exe)
+
+Run the downloaded `.exe` and follow the installer. Windows may show a SmartScreen warning because the installer is not currently code-signed.
+
 The primary application is a native C#/.NET 8 WinUI 3 desktop app. It provides a Fluent, resizable download queue; asynchronous media analysis; video, audio, playlist, subtitle, metadata, thumbnail, and clip downloads; per-item progress and live terminal logs; cancellation and retry; persistent settings; and selectable bundled or external yt-dlp/FFmpeg tools. Ray's Loader automatically enables a bundled Deno runtime or a compatible Node installation for modern YouTube extraction.
 
 ## Quick start
