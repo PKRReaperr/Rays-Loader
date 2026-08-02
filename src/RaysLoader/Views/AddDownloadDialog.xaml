@@ -11,11 +11,20 @@
     PrimaryButtonClick="PrimaryButton_Click"
     SecondaryButtonClick="SecondaryButton_Click">
     <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMinWidth">900</x:Double>
         <x:Double x:Key="ContentDialogMaxWidth">960</x:Double>
     </ContentDialog.Resources>
-    <ScrollViewer MaxHeight="620" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Width="840" Spacing="10" Padding="0,0,8,0">
+    <ScrollViewer
+        x:Name="OptionsScrollViewer"
+        MaxHeight="620"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollBarVisibility="Disabled">
+        <StackPanel
+            x:Name="ContentPanel"
+            Width="840"
+            Spacing="10"
+            Padding="0,0,8,0"
+            Loaded="ContentPanel_Loaded"
+            Unloaded="ContentPanel_Unloaded">
             <InfoBar
                 IsOpen="{Binding ErrorMessage, Converter={StaticResource StringPresenceConverter}}"
                 IsClosable="False"

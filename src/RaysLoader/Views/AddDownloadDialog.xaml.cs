@@ -9,7 +9,12 @@ namespace RaysLoader.Views;
 
 public sealed partial class AddDownloadDialog : ContentDialog
 {
+    private const double PreferredContentWidth = 840;
+    private const double MinimumContentWidth = 520;
+    private const double PreferredScrollHeight = 620;
+    private const double MinimumScrollHeight = 220;
     private readonly IDownloadQueueService _queue;
+    private XamlRoot? _observedXamlRoot;
 
     public AddDownloadDialog(AddDownloadViewModel viewModel, IDownloadQueueService queue)
     {
@@ -20,6 +25,33 @@ public sealed partial class AddDownloadDialog : ContentDialog
     }
 
     public AddDownloadViewModel ViewModel { get; }
+
+    private void ContentPanel_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_observedXamlRoot != XamlRoot)
+        {
+            if (_observedXamlRoot is not null) _observedXamlRoot.Changed -= XamlRoot_Changed;
+            _observedXamlRoot = XamlRoot;
+            if (_observedXamlRoot is not null) _observedXamlRoot.Changed += XamlRoot_Changed;
+        }
+        UpdateResponsiveSize();
+    }
+
+    private void ContentPanel_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (_observedXamlRoot is not null) _observedXamlRoot.Changed -= XamlRoot_Changed;
+        _observedXamlRoot = null;
+    }
+
+    private void XamlRoot_Changed(XamlRoot sender, XamlRootChangedEventArgs args) => UpdateResponsiveSize();
+
+    private void UpdateResponsiveSize()
+    {
+        if (XamlRoot is null) return;
+        var viewport = XamlRoot.Size;
+        ContentPanel.Width = Math.Clamp((viewport.Width * 0.68) - 60, MinimumContentWidth, PreferredContentWidth);
+        OptionsScrollViewer.MaxHeight = Math.Clamp(viewport.Height - 180, MinimumScrollHeight, PreferredScrollHeight);
+    }
 
     private async void Analyze_Click(object sender, RoutedEventArgs e)
     {
