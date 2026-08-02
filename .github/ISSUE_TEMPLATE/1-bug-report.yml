@@ -1,0 +1,99 @@
+name: Report a bug
+description: Tell us when Ray's Loader behaves unexpectedly or fails to complete a task.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Ray's Loader. Do not include passwords, browser cookies, authentication tokens, or other private information.
+
+  - type: input
+    id: version
+    attributes:
+      label: Ray's Loader version
+      description: Find this under Help > About Ray's Loader.
+      placeholder: 1.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Edition
+      options:
+        - Public installer
+        - DEV build
+        - Portable build
+    validations:
+      required: true
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Media source
+      description: Name the website or extractor. Share a URL only when it is safe and public.
+      placeholder: YouTube
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Explain what you entered, selected, and clicked before the problem appeared.
+      placeholder: |
+        1. Open Add download
+        2. Paste a URL
+        3. Select ...
+        4. Click ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect Ray's Loader to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include the complete error message when possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste the relevant part of the download log after removing private information.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or additional context
+      description: Drag screenshots here or add anything else that may help reproduce the problem.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues before submitting this report.
+          required: true
+        - label: I removed passwords, cookies, tokens, and other private information.
+          required: true

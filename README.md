@@ -51,6 +51,14 @@ For release builds, the installer, portable archive, tool layout, and troublesho
 
 Settings are stored in `%LOCALAPPDATA%\RaysLoader`. Portable builds deliberately use the same per-user location so they also work from read-only folders.
 
+## Feedback and support
+
+- [Report a bug](https://github.com/PKRReaperr/Rays-Loader/issues/new?template=1-bug-report.yml)
+- [Suggest a feature](https://github.com/PKRReaperr/Rays-Loader/issues/new?template=2-feature-request.yml)
+- [Browse existing feedback](https://github.com/PKRReaperr/Rays-Loader/issues)
+
+Please search existing issues before submitting feedback. Remove passwords, browser cookies, authentication tokens, private URLs, and other sensitive information from reports and logs. Security vulnerabilities must be reported privately according to the [security policy](SECURITY.md).
+
 Ray's Loader is not affiliated with YouTube or any supported media website. Users are responsible for complying with applicable laws, website terms, and content rights.
 
 ## License

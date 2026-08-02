@@ -1,0 +1,62 @@
+name: Suggest a feature
+description: Propose an improvement or new capability for Ray's Loader.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for sharing an idea for Ray's Loader. Describe the problem first so we can evaluate the best solution.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Add download
+        - Format and quality selection
+        - Download queue
+        - Progress and logs
+        - Video trimming
+        - Authentication
+        - Settings and appearance
+        - Updates and installation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or limitation
+      description: What are you trying to do, and what makes it difficult today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Suggested solution
+      description: Describe how you would like the feature to work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any workarounds or different approaches you have tried.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add mockups, screenshots, examples, or links that clarify the request.
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues before submitting this suggestion.
+          required: true
