@@ -68,6 +68,25 @@ public sealed class UpdateServiceTests : IDisposable
         Assert.Empty(Directory.GetFiles(_directory, "*.exe"));
     }
 
+    [Fact]
+    public void StartupRemovesOnlyManagedUpdateArtifacts()
+    {
+        Directory.CreateDirectory(_directory);
+        var oldInstaller = Path.Combine(_directory, "RaysLoader-Setup-1.1.0.exe");
+        var partialDownload = Path.Combine(_directory, "RaysLoader-Setup-1.2.0.exe.download");
+        var unrelatedFile = Path.Combine(_directory, "keep-me.txt");
+        File.WriteAllText(oldInstaller, "old installer");
+        File.WriteAllText(partialDownload, "partial download");
+        File.WriteAllText(unrelatedFile, "unrelated");
+
+        using var client = new HttpClient(new StubHandler(_ => throw new InvalidOperationException("No request expected.")));
+        _ = new GitHubUpdateService(client, _directory, new Version(1, 3, 0));
+
+        Assert.False(File.Exists(oldInstaller));
+        Assert.False(File.Exists(partialDownload));
+        Assert.True(File.Exists(unrelatedFile));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);

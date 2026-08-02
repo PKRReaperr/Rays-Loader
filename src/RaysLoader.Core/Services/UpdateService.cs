@@ -36,6 +36,7 @@ public sealed class GitHubUpdateService : IUpdateService
         _httpClient = httpClient;
         _updatesDirectory = updatesDirectory;
         CurrentVersion = currentVersion ?? typeof(GitHubUpdateService).Assembly.GetName().Version ?? new Version(0, 0, 0);
+        CleanupManagedUpdateArtifacts();
         if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
         {
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"RaysLoader/{CurrentVersion.ToString(3)}");
@@ -100,6 +101,7 @@ public sealed class GitHubUpdateService : IUpdateService
         Directory.CreateDirectory(_updatesDirectory);
         var finalPath = Path.Combine(_updatesDirectory, update.InstallerName);
         var partialPath = finalPath + ".download";
+        CleanupManagedUpdateArtifacts(finalPath, partialPath);
 
         try
         {
@@ -181,6 +183,28 @@ public sealed class GitHubUpdateService : IUpdateService
     {
         try { if (File.Exists(path)) File.Delete(path); }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException) { Debug.WriteLine(exception); }
+    }
+
+    private void CleanupManagedUpdateArtifacts(params string[] keepPaths)
+    {
+        if (!Directory.Exists(_updatesDirectory)) return;
+        var preserved = keepPaths
+            .Select(Path.GetFullPath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            var installers = Directory.EnumerateFiles(_updatesDirectory, "RaysLoader-Setup-*.exe", SearchOption.TopDirectoryOnly);
+            var partialDownloads = Directory.EnumerateFiles(_updatesDirectory, "RaysLoader-Setup-*.exe.download", SearchOption.TopDirectoryOnly);
+            foreach (var path in installers.Concat(partialDownloads))
+            {
+                if (!preserved.Contains(Path.GetFullPath(path))) TryDelete(path);
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Debug.WriteLine(exception);
+        }
     }
 
     private sealed record GitHubRelease(
