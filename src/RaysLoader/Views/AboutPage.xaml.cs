@@ -14,7 +14,7 @@ public sealed partial class AboutPage : Page
         AboutDescriptionText.Text = $"{AppIdentity.DisplayName} is a modern Windows 11 media downloader powered by yt-dlp.";
     }
 
-    public string VersionText => $"Version {typeof(AboutPage).Assembly.GetName().Version?.ToString(3) ?? "1.1.0"}";
+    public string VersionText => $"Version {typeof(AboutPage).Assembly.GetName().Version?.ToString(3) ?? "1.2.0"}";
 
     private void OpenProjectFolder_Click(object sender, RoutedEventArgs e)
     {

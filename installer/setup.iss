@@ -1,5 +1,5 @@
 #define MyAppName "Ray's Loader"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Rayware Inc."
 #define MyAppExeName "RaysLoader.exe"
 
