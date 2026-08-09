@@ -19,6 +19,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly ISettingsService _settingsService;
     private readonly IUpdateService _updateService;
+    private readonly CancellationTokenSource _lifetimeCancellation = new();
     private bool _startupFlowStarted;
 
     public MainWindow(MainViewModel viewModel, ISettingsService settingsService, IUpdateService updateService)
@@ -103,12 +104,12 @@ public sealed partial class MainWindow : Window
         if (!_settingsService.Current.AutomaticallyCheckForUpdates) return;
         try
         {
-            var update = await _updateService.CheckForUpdateAsync();
+            var update = await _updateService.CheckForUpdateAsync(_lifetimeCancellation.Token);
             if (update is null || RootGrid.XamlRoot is null) return;
             var dialog = new ContentDialog
             {
                 XamlRoot = RootGrid.XamlRoot,
-                Title = $"{AppIdentity.DisplayName} {update.Version.ToString(3)} is available",
+                Title = $"{AppIdentity.DisplayName} {update.Version} is available",
                 Content = "Open Settings to download, verify, and install the update.",
                 PrimaryButtonText = "Open updates",
                 CloseButtonText = "Later",
@@ -118,6 +119,9 @@ public sealed partial class MainWindow : Window
             {
                 ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
             }
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
         }
         catch (Exception exception) when (exception is HttpRequestException or InvalidDataException or TaskCanceledException or System.Text.Json.JsonException)
         {
@@ -133,6 +137,9 @@ public sealed partial class MainWindow : Window
 
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        _lifetimeCancellation.Cancel();
+        _updateService.CancelActiveOperations();
+        if (ContentFrame.Content is SettingsPage settingsPage) settingsPage.ViewModel.CancelActiveUpdate();
         var size = sender.Size;
         _settingsService.Current.WindowWidth = size.Width;
         _settingsService.Current.WindowHeight = size.Height;

@@ -1,0 +1,5 @@
+<Project>
+  <Target Name="ValidateReleaseVersionMetadata" BeforeTargets="BeforeBuild" Condition="'$(MSBuildProjectName)' == 'RaysLoader'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)scripts\validate-version.ps1&quot; -ExpectedVersion &quot;$(Version)&quot;" />
+  </Target>
+</Project>

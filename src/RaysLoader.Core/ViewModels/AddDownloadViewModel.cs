@@ -160,7 +160,6 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     public IReadOnlyList<DownloadRequest> CreateRequests()
     {
         ErrorMessage = string.Empty;
-        if (string.IsNullOrWhiteSpace(OutputDirectory)) throw new FormatException("Choose an output folder.");
         var parsedUrls = UrlInputParser.Parse(Urls);
         if (TrimEnabled && parsedUrls.Count != 1) throw new FormatException("Clip trimming supports one URL at a time.");
         if (TrimEnabled && (TrimStartSeconds < 0 || TrimEndSeconds <= TrimStartSeconds)) throw new FormatException("The clip end must be later than the nonnegative start.");

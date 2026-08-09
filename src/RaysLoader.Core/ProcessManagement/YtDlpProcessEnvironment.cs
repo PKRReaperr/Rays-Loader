@@ -1,4 +1,5 @@
 using RaysLoader.Services;
+using RaysLoader.Settings;
 
 namespace RaysLoader.ProcessManagement;
 
@@ -32,23 +33,5 @@ public static class YtDlpProcessEnvironment
     }
 
     public static bool IsTrustedDirectory(string? directory)
-    {
-        if (string.IsNullOrWhiteSpace(directory)) return false;
-
-        try
-        {
-            DirectoryInfo? current = new(Path.GetFullPath(directory));
-            if (!current.Exists) return false;
-            while (current is not null)
-            {
-                if ((current.Attributes & FileAttributes.ReparsePoint) != 0) return false;
-                current = current.Parent;
-            }
-            return true;
-        }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-        {
-            return false;
-        }
-    }
+        => PathTrust.TryGetTrustedDirectory(directory, out _);
 }

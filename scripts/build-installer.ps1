@@ -26,4 +26,7 @@ if ([string]::IsNullOrWhiteSpace($IsccPath) -or -not (Test-Path -LiteralPath $Is
 
 & $IsccPath (Join-Path $repoRoot 'installer\setup.iss')
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE." }
-Write-Host "Created $(Join-Path $repoRoot 'artifacts\RaysLoader-Setup-1.3.2.exe')"
+[xml]$properties = Get-Content -LiteralPath (Join-Path $repoRoot 'Directory.Build.props') -Raw
+$version = @($properties.Project.PropertyGroup.Version | Where-Object { $_ })[0]
+& (Join-Path $PSScriptRoot 'validate-version.ps1') -ExpectedVersion $version
+Write-Host "Created $(Join-Path $repoRoot "artifacts\RaysLoader-Setup-$version.exe")"

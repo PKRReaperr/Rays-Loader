@@ -16,7 +16,8 @@
                         <ProgressBar Minimum="0" Maximum="100" Value="{Binding UpdateProgress}" Visibility="{Binding IsUpdateBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button Command="{Binding CheckForUpdatesCommand}">Check for updates</Button>
-                            <Button Style="{StaticResource AccentButtonStyle}" IsEnabled="{Binding HasAvailableUpdate}" Click="DownloadUpdate_Click">Download and install</Button>
+                            <Button Style="{StaticResource AccentButtonStyle}" IsEnabled="{Binding CanDownloadUpdate}" Click="DownloadUpdate_Click">Download and install</Button>
+                            <Button Command="{Binding CancelUpdateCommand}" IsEnabled="{Binding IsUpdateBusy}">Cancel</Button>
                         </StackPanel>
                     </StackPanel>
                 </Expander>

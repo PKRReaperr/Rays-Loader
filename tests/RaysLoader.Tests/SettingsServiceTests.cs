@@ -35,12 +35,23 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
-    public void NewSettingsStartWithBlankOutputAndPendingOnboarding()
+    public void NewSettingsStartInCurrentUsersDownloadsAndPendingOnboarding()
     {
         var settings = new AppSettings();
 
-        Assert.Empty(settings.DefaultOutputDirectory);
+        Assert.Equal(AppPaths.DefaultOutputDirectory, settings.DefaultOutputDirectory);
         Assert.False(settings.HasCompletedOnboarding);
+    }
+
+    [Fact]
+    public async Task MissingOutputSettingDefaultsToCurrentUsersDownloads()
+    {
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(Path.Combine(_directory, "settings.json"), "{}");
+
+        var settings = await new SettingsService(_directory).LoadAsync();
+
+        Assert.Equal(AppPaths.DefaultOutputDirectory, settings.DefaultOutputDirectory);
     }
 
     [Fact]
@@ -72,6 +83,20 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
             settings.DefaultOutputDirectory);
+    }
+
+    [Fact]
+    public async Task InvalidSavedOutputPathFallsBackWithoutCrashing()
+    {
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(
+            Path.Combine(_directory, "settings.json"),
+            """{"DefaultOutputDirectory":"%RAYS_LOADER_UNKNOWN%\\Downloads"}""");
+
+        var settings = await new SettingsService(_directory).LoadAsync();
+
+        Assert.Equal(AppPaths.DefaultOutputDirectory, settings.DefaultOutputDirectory);
+        Assert.Single(Directory.GetFiles(_directory, "settings.corrupt-*.json"));
     }
 
     public void Dispose()

@@ -50,7 +50,7 @@ public sealed class SettingsService : ISettingsService
             Normalize(Current);
             return Current;
         }
-        catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException or FormatException)
         {
             TryBackupCorruptSettings();
             Current = new AppSettings();

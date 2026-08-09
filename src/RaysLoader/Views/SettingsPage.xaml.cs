@@ -17,9 +17,16 @@ public sealed partial class SettingsPage : Page
         ViewModel = viewModel;
         _settingsService = settingsService;
         DataContext = viewModel;
+        Unloaded += SettingsPage_Unloaded;
     }
 
     public SettingsViewModel ViewModel { get; }
+
+    private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        Unloaded -= SettingsPage_Unloaded;
+        ViewModel.Dispose();
+    }
 
     private async void Save_Click(object sender, RoutedEventArgs e)
     {

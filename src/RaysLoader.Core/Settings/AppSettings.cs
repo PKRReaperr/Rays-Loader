@@ -23,7 +23,7 @@ public sealed class AppSettings
     public AppTheme Theme { get; set; } = AppTheme.System;
     public AppAccent AccentColor { get; set; } = AppAccent.System;
     public bool HasCompletedOnboarding { get; set; }
-    public string DefaultOutputDirectory { get; set; } = string.Empty;
+    public string DefaultOutputDirectory { get; set; } = AppPaths.DefaultOutputDirectory;
     public int MaximumSimultaneousDownloads { get; set; } = 2;
     public bool ConfirmBeforeStoppingAll { get; set; } = true;
     public bool RememberWindowPlacement { get; set; } = true;

@@ -53,7 +53,7 @@ public sealed class AddDownloadViewModelTests
     }
 
     [Fact]
-    public void BlankFirstRunFolderMustBeSelectedBeforeQueueing()
+    public void BlankFolderDefaultsToCurrentUsersDownloads()
     {
         var settings = new StubSettingsService();
         settings.Current.DefaultOutputDirectory = string.Empty;
@@ -64,9 +64,9 @@ public sealed class AddDownloadViewModelTests
             Urls = "https://example.test/video",
         };
 
-        var exception = Assert.Throws<FormatException>(() => viewModel.CreateRequests());
+        var request = Assert.Single(viewModel.CreateRequests());
 
-        Assert.Equal("Choose an output folder.", exception.Message);
+        Assert.Equal(AppPaths.DefaultOutputDirectory, request.OutputDirectory);
     }
 
     [Fact]

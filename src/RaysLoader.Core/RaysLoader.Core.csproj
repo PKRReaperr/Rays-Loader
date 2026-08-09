@@ -8,4 +8,8 @@
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="RaysLoader.Tests" />
+    <AssemblyMetadata Include="AuthenticodePublisherThumbprint" Value="$(AuthenticodePublisherThumbprint)" Condition="'$(AuthenticodePublisherThumbprint)' != ''" />
+  </ItemGroup>
 </Project>
