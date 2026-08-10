@@ -4,7 +4,7 @@
 
 - Windows 10 1809 or newer; Windows 11 is recommended.
 - .NET 8 SDK.
-- Inno Setup 6 only when creating `RaysLoader-Setup-1.3.3.exe`.
+- Inno Setup 6 only when creating `RaysLoader-Setup-1.3.4.exe`.
 - Optional distributable `yt-dlp.exe`, `ffmpeg.exe`, and `ffprobe.exe` in `%LOCALAPPDATA%\RaysLoader\tools` or supplied with `-ToolsDirectory`.
 - For complete YouTube extraction, place Deno 2.3+ as `deno.exe` beside the bundled tools or install Node 22+. Ray's Loader detects Deno first and then Node and passes its full path to yt-dlp.
 
@@ -42,7 +42,7 @@ Install Inno Setup 6, then run:
 .\scripts\build-installer.ps1
 ```
 
-Override the compiler location with `-IsccPath` if needed. Output: `artifacts\RaysLoader-Setup-1.3.3.exe`.
+Override the compiler location with `-IsccPath` if needed. Output: `artifacts\RaysLoader-Setup-1.3.4.exe`.
 
 ## Build portable ZIP
 

@@ -160,6 +160,12 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <TextBox Header="Video quality" Text="{Binding Settings.DefaultVideoQuality, Mode=TwoWay}" />
                         <TextBox Grid.Column="1" Header="Container" Text="{Binding Settings.DefaultContainer, Mode=TwoWay}" />
                         <TextBox Grid.Row="1" Header="Audio format" Text="{Binding Settings.DefaultAudioFormat, Mode=TwoWay}" />
