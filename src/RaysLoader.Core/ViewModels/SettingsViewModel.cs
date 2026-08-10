@@ -131,6 +131,14 @@ public sealed partial class SettingsViewModel(ISettingsService settingsService, 
         StatusMessage = "Settings reset to defaults.";
     }
 
+    public async Task ResetForSetupAsync()
+    {
+        settingsService.Current.HasCompletedOnboarding = false;
+        await settingsService.ResetAsync();
+        OnPropertyChanged(nameof(Settings));
+        StatusMessage = "Settings reset. The setup walkthrough will open the next time Ray's Loader starts.";
+    }
+
     public void CancelActiveUpdate() => updateCancellation?.Cancel();
 
     public void Dispose()

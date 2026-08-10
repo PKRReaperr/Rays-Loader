@@ -77,7 +77,7 @@ public sealed class DownloadQueueService : IDownloadQueueService, IAsyncDisposab
     {
         if (_active.TryGetValue(task.Id, out var cancellation))
         {
-            cancellation.Cancel();
+            TryCancel(cancellation);
             return;
         }
 
@@ -93,7 +93,7 @@ public sealed class DownloadQueueService : IDownloadQueueService, IAsyncDisposab
         StopAllRemaining = true;
         foreach (var cancellation in _active.Values)
         {
-            cancellation.Cancel();
+            TryCancel(cancellation);
         }
 
         foreach (var task in _downloads.Where(item => item.State is DownloadState.Queued))
@@ -163,7 +163,7 @@ public sealed class DownloadQueueService : IDownloadQueueService, IAsyncDisposab
         _lifetime.Cancel();
         foreach (var cancellation in _active.Values)
         {
-            cancellation.Cancel();
+            TryCancel(cancellation);
         }
 
         try
@@ -189,6 +189,19 @@ public sealed class DownloadQueueService : IDownloadQueueService, IAsyncDisposab
         {
             _scheduled.TryRemove(task.Id, out _);
             throw new InvalidOperationException("The download queue is not accepting new tasks.");
+        }
+    }
+
+    private static void TryCancel(CancellationTokenSource cancellation)
+    {
+        try
+        {
+            cancellation.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // A task can complete and dispose its linked token while shutdown
+            // is enumerating the active-operation snapshot.
         }
     }
 

@@ -19,6 +19,10 @@
             <SolidColorBrush x:Key="AppBackgroundBrush" Color="#08090B" />
             <SolidColorBrush x:Key="AppSurfaceBrush" Color="#101216" />
             <SolidColorBrush x:Key="AppCardBrush" Color="#17191D" />
+            <SolidColorBrush x:Key="SettingsPageHeaderBrush" Color="#1D2026" />
+            <SolidColorBrush x:Key="SettingsSectionLabelBrush" Color="#22262D" />
+            <SolidColorBrush x:Key="SettingsSectionBodyBrush" Color="#0D0F13" />
+            <SolidColorBrush x:Key="SettingsSectionDividerBrush" Color="#08090B" />
             <Style x:Key="CardBorderStyle" TargetType="Border">
                 <Setter Property="Background" Value="{ThemeResource AppCardBrush}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />

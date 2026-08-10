@@ -40,16 +40,38 @@ public sealed class SettingsViewModelTests
         Assert.Equal("Update cancelled. The current installation was not changed.", viewModel.UpdateStatus);
     }
 
+    [Fact]
+    public async Task ResetForSetupRestoresFirstRunWalkthrough()
+    {
+        var settings = new StubSettingsService();
+        settings.Current.HasCompletedOnboarding = true;
+        using var viewModel = new SettingsViewModel(
+            settings,
+            new ToolLocatorService([], () => string.Empty),
+            new BlockingUpdateService(blockCheck: false, blockDownload: false));
+
+        await viewModel.ResetForSetupAsync();
+
+        Assert.False(settings.Current.HasCompletedOnboarding);
+        Assert.Equal(1, settings.ResetCount);
+        Assert.Contains("setup walkthrough", viewModel.StatusMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static SettingsViewModel CreateViewModel(IUpdateService updates) =>
         new(new StubSettingsService(), new ToolLocatorService([], () => string.Empty), updates);
 
     private sealed class StubSettingsService : ISettingsService
     {
         public AppSettings Current { get; } = new();
+        public int ResetCount { get; private set; }
         public string SettingsDirectory => Path.GetTempPath();
         public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
         public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task ResetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task ResetAsync(CancellationToken cancellationToken = default)
+        {
+            ResetCount++;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class BlockingUpdateService(bool blockCheck, bool blockDownload) : IUpdateService

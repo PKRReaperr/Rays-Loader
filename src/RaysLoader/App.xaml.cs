@@ -41,6 +41,7 @@ public partial class App : Application
             services.AddSingleton<IUpdateService>(new GitHubUpdateService(
                 new HttpClient(),
                 Path.Combine(settings.SettingsDirectory, "updates")));
+            services.AddSingleton<IAppDataCleanupService, AppDataCleanupService>();
             services.AddSingleton<IDownloadExecutor, DownloadExecutor>();
             services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
             services.AddSingleton<MainViewModel>();

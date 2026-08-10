@@ -51,6 +51,12 @@ For release builds, the installer, portable archive, tool layout, and troublesho
 
 Settings are stored in `%LOCALAPPDATA%\RaysLoader`. Portable builds deliberately use the same per-user location so they also work from read-only folders.
 
+## Reset or uninstall
+
+Open **Settings > Troubleshooting** to reset settings, managed yt-dlp/FFmpeg tools, updater files, diagnostics, or legacy app data. Ray's Loader never removes downloaded media, user-selected external tools, or cookie files.
+
+To uninstall, use **Uninstall Ray's Loader** in the Troubleshooting section or Windows Installed apps. The uninstaller asks whether to keep app data for a normal reinstall or remove settings, managed tools, updater files, and logs for a clean reinstall. Silent uninstalls preserve per-user app data by default.
+
 ## Feedback and support
 
 - [Report a bug](https://github.com/PKRReaperr/Rays-Loader/issues/new?template=1-bug-report.yml)

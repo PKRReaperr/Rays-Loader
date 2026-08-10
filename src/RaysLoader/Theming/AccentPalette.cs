@@ -47,10 +47,26 @@ public static class AccentPalette
         var card = isLight
             ? Blend(Colors.White, color, 0.06)
             : Blend(FromHex(0x17, 0x19, 0x1D), color, 0.12);
+        var settingsHeader = isLight
+            ? Blend(FromHex(0xEC, 0xEE, 0xF2), color, 0.06)
+            : Blend(FromHex(0x1D, 0x20, 0x26), color, 0.08);
+        var settingsLabel = isLight
+            ? Blend(FromHex(0xE4, 0xE7, 0xEC), color, 0.07)
+            : Blend(FromHex(0x22, 0x26, 0x2D), color, 0.09);
+        var settingsBody = isLight
+            ? Blend(FromHex(0xFA, 0xFA, 0xFB), color, 0.04)
+            : Blend(FromHex(0x0D, 0x0F, 0x13), color, 0.06);
+        var settingsDivider = isLight
+            ? Blend(FromHex(0xD3, 0xD6, 0xDC), color, 0.04)
+            : Blend(FromHex(0x08, 0x09, 0x0B), color, 0.04);
 
         SetBrush("AppBackgroundBrush", background, 1);
         SetBrush("AppSurfaceBrush", surface, 1);
         SetBrush("AppCardBrush", card, 1);
+        SetBrush("SettingsPageHeaderBrush", settingsHeader, 1);
+        SetBrush("SettingsSectionLabelBrush", settingsLabel, 1);
+        SetBrush("SettingsSectionBodyBrush", settingsBody, 1);
+        SetBrush("SettingsSectionDividerBrush", settingsDivider, 1);
         SetBrush("SolidBackgroundFillColorBaseBrush", background, 1);
         SetBrush("SolidBackgroundFillColorSecondaryBrush", surface, 1);
         SetBrush("LayerFillColorDefaultBrush", surface, 1);
