@@ -38,6 +38,7 @@ public partial class App : Application
             services.AddSingleton<IProgressParserService, ProgressParserService>();
             services.AddSingleton<IToolLocatorService, ToolLocatorService>();
             services.AddSingleton<IYtDlpService, YtDlpService>();
+            services.AddSingleton<ISupportedSitesService, SupportedSitesService>();
             services.AddSingleton<IUpdateService>(new GitHubUpdateService(
                 new HttpClient(),
                 Path.Combine(settings.SettingsDirectory, "updates")));
@@ -47,9 +48,11 @@ public partial class App : Application
             services.AddSingleton<MainViewModel>();
             services.AddTransient<AddDownloadViewModel>();
             services.AddTransient<SettingsViewModel>();
+            services.AddTransient<SupportedSitesViewModel>();
             services.AddTransient<DownloadsPage>();
             services.AddTransient<SettingsPage>();
             services.AddTransient<AboutPage>();
+            services.AddTransient<SupportedSitesPage>();
             services.AddSingleton<MainWindow>();
 
             Services = services.BuildServiceProvider();

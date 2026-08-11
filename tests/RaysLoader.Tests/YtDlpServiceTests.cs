@@ -17,6 +17,7 @@ public sealed class YtDlpServiceTests : IDisposable
               "title": "Test media",
               "duration": 12.5,
               "thumbnail": "https://example.test/thumb.jpg",
+              "extractor_key": "ExampleSite",
               "is_live": false,
               "formats": [
                 { "format_id": "storyboard", "ext": "mhtml", "vcodec": "none", "acodec": "none", "tbr": null, "filesize": null },
@@ -44,6 +45,7 @@ public sealed class YtDlpServiceTests : IDisposable
         Assert.Equal(2, metadata.Formats.Count);
         Assert.Null(metadata.Formats[0].Bitrate);
         Assert.Equal(1234, metadata.Formats[1].FileSize);
+        Assert.Equal("ExampleSite", metadata.ExtractorName);
     }
 
     public void Dispose() => File.Delete(_tool);

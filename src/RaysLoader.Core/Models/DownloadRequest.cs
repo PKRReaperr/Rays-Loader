@@ -60,4 +60,5 @@ public sealed record MediaMetadata(
     double? DurationSeconds,
     bool IsPlaylist,
     bool IsLive,
-    IReadOnlyList<MediaFormat> Formats);
+    IReadOnlyList<MediaFormat> Formats,
+    string ExtractorName = "");

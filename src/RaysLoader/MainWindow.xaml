@@ -37,6 +37,7 @@
                         <MenuFlyoutItem Text="Stop all" Click="StopAll_Click" />
                     </MenuBarItem>
                     <MenuBarItem Title="Help">
+                        <MenuFlyoutItem Text="Supported sites" Click="ShowSupportedSites_Click" />
                         <MenuFlyoutItem Text="Getting started" Click="GettingStarted_Click" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutSubItem Text="Send feedback">
@@ -87,6 +88,9 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="SupportedSitesItem" Content="Supported sites" Tag="SupportedSites" AutomationProperties.Name="Supported sites">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE909;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Settings" Tag="Settings" AutomationProperties.Name="Settings">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></NavigationViewItem.Icon>
                 </NavigationViewItem>

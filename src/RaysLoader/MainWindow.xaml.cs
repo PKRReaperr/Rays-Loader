@@ -65,6 +65,13 @@ public sealed partial class MainWindow : Window
         AccentPalette.Apply(_settingsService.Current.AccentColor, _settingsService.Current.Theme);
     }
 
+    public void ShowSupportedSites()
+    {
+        Navigation.SelectedItem = SupportedSitesItem;
+        if (ContentFrame.Content is not SupportedSitesPage)
+            ContentFrame.Content = App.Services.GetRequiredService<SupportedSitesPage>();
+    }
+
     private void Navigation_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItemContainer?.Tag is not string tag) return;
@@ -75,6 +82,7 @@ public sealed partial class MainWindow : Window
         }
         else if (tag == "Settings") ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
         else if (tag == "About") ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+        else if (tag == "SupportedSites") ShowSupportedSites();
     }
 
     private async void AddDownload_Click(object sender, RoutedEventArgs e) => await ShowAddDownloadAsync();
@@ -83,6 +91,7 @@ public sealed partial class MainWindow : Window
     private void ShowDownloads_Click(object sender, RoutedEventArgs e) { Navigation.SelectedItem = AllItem; ShowDownloads(); }
     private void ShowSettings_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
     private void ShowAbout_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+    private void ShowSupportedSites_Click(object sender, RoutedEventArgs e) => ShowSupportedSites();
     private async void GettingStarted_Click(object sender, RoutedEventArgs e) => await ShowOnboardingAsync();
     private async void ReportBug_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.BugReport);
     private async void SuggestFeature_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.FeatureRequest);

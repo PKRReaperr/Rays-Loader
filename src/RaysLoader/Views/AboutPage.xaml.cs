@@ -23,4 +23,6 @@ public sealed partial class AboutPage : Page
         if (!Directory.Exists(projectFolder)) projectFolder = AppContext.BaseDirectory;
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(projectFolder) { UseShellExecute = true });
     }
+
+    private void SupportedSites_Click(object sender, RoutedEventArgs e) => App.MainWindow.ShowSupportedSites();
 }

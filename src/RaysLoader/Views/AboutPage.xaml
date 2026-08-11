@@ -17,6 +17,9 @@
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <HyperlinkButton Content="yt-dlp project" NavigateUri="https://github.com/yt-dlp/yt-dlp" />
                 <HyperlinkButton Content="FFmpeg project" NavigateUri="https://ffmpeg.org/" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Click="SupportedSites_Click">Supported sites</Button>
                 <Button Click="OpenProjectFolder_Click">Open project folder</Button>
             </StackPanel>
             <Expander Header="Licenses and third-party notices">

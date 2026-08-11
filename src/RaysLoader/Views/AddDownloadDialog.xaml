@@ -49,6 +49,23 @@
                 <ProgressRing Width="20" Height="20" IsActive="{Binding IsBusy}" />
                 <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding AnalysisTitle}" TextTrimming="CharacterEllipsis" MaxWidth="360" />
             </StackPanel>
+            <Grid Margin="2,-6,0,0" ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding AnalysisSource}"
+                    TextTrimming="CharacterEllipsis" />
+                <HyperlinkButton
+                    Grid.Column="1"
+                    Padding="0"
+                    Content="Browse supported sites"
+                    NavigateUri="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" />
+            </Grid>
 
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>

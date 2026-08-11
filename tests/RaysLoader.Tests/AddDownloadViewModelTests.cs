@@ -79,7 +79,8 @@ public sealed class AddDownloadViewModelTests
             3723.5,
             false,
             false,
-            []);
+            [],
+            "ExampleSite");
         var viewModel = new AddDownloadViewModel(new StubYtDlpService(metadata), new StubSettingsService())
         {
             Urls = metadata.Url,
@@ -94,6 +95,7 @@ public sealed class AddDownloadViewModelTests
         Assert.Equal("1:02:03", viewModel.TrimEndDisplay);
         Assert.Equal("1:02:03", viewModel.TrimLengthDisplay);
         Assert.Equal("1:02:03", viewModel.MediaDurationDisplay);
+        Assert.Equal("Detected source: ExampleSite", viewModel.AnalysisSource);
     }
 
     [Fact]

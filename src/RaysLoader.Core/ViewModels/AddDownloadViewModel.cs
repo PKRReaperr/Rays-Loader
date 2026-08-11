@@ -31,6 +31,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     [ObservableProperty] private bool exactBoundaries;
     [ObservableProperty] private ClipDownloadMethodOption selectedClipMethod = new("Full quality, then trim (reliable)", ClipDownloadMethod.DownloadThenTrim);
     [ObservableProperty] private string analysisTitle = "Not analyzed";
+    [ObservableProperty] private string analysisSource = "Analyze a URL to detect its source";
     [ObservableProperty] private string analysisThumbnailUrl = string.Empty;
     [ObservableProperty] private string errorMessage = string.Empty;
     [ObservableProperty] private bool isBusy;
@@ -126,6 +127,9 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
             var metadata = await ytDlpService.AnalyzeAsync(BuildRequest(uri.AbsoluteUri));
             analyzedMetadata = metadata;
             AnalysisTitle = metadata.Title;
+            AnalysisSource = metadata.ExtractorName.Length > 0
+                ? $"Detected source: {metadata.ExtractorName}"
+                : "Source detected by yt-dlp";
             AnalysisThumbnailUrl = metadata.ThumbnailUrl;
             MediaDurationSeconds = Math.Max(0, metadata.DurationSeconds ?? 0);
             TrimStartSeconds = 0;
@@ -139,6 +143,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
         {
             ErrorMessage = "Analysis was cancelled.";
             AnalysisTitle = "Analysis cancelled";
+            AnalysisSource = "Source detection cancelled";
             AnalysisThumbnailUrl = string.Empty;
             ResetTimeline();
         }
@@ -148,6 +153,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
                 ? "Ray's Loader could not analyze this URL."
                 : exception.Message;
             AnalysisTitle = "Analysis failed";
+            AnalysisSource = "Source could not be detected";
             AnalysisThumbnailUrl = string.Empty;
             ResetTimeline();
         }

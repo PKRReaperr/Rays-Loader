@@ -318,7 +318,10 @@ public sealed class YtDlpService(
             ReadDouble(media, "duration"),
             isPlaylist,
             isLive,
-            formats);
+            formats,
+            ReadString(media, "extractor_key").Length > 0
+                ? ReadString(media, "extractor_key")
+                : ReadString(root, "extractor_key"));
     }
 
     private static string ClassifyError(string error)
