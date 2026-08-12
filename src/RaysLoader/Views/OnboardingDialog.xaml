@@ -31,8 +31,8 @@
                 <TextBlock Text="This short setup covers the choices that affect every download. You can change them later in Settings." FontSize="15" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <StackPanel Spacing="10">
                     <TextBlock Text="1. Paste one or more media URLs" />
-                    <TextBlock Text="2. Select Analyze URL before adding the download" />
-                    <TextBlock Text="3. Add items to the queue and start when ready" />
+                    <TextBlock Text="2. Wait for the title and thumbnail preview" />
+                    <TextBlock Text="3. Choose your options, then add items to the queue" />
                 </StackPanel>
             </StackPanel>
 
@@ -75,7 +75,7 @@
             <StackPanel x:Name="ReadyStep" Spacing="16" Visibility="Collapsed">
                 <FontIcon Glyph="&#xE73E;" FontSize="52" HorizontalAlignment="Left" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                 <TextBlock Text="Ready to download" FontSize="26" FontWeight="SemiBold" />
-                <TextBlock Text="Use Add download, paste your URL, and select Analyze URL. After analysis finishes, choose your options and add the download to the queue." TextWrapping="Wrap" FontSize="15" />
+                <TextBlock Text="Use Add download and paste one or more URLs. Ray's Loader previews every item automatically; once the titles and thumbnails are ready, choose your options and add them to the queue." TextWrapping="Wrap" FontSize="15" />
                 <TextBlock x:Name="FolderSummary" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <TextBlock Text="You can reopen this walkthrough from Help > Getting started." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>

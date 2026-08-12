@@ -75,6 +75,60 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Padding="16,22" Background="{ThemeResource SettingsSectionLabelBrush}" Spacing="4">
+                        <TextBlock FontSize="16" FontWeight="SemiBold" Text="Authentication" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Preferences used only when a website requires a sign-in." TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="24,22" Spacing="12">
+                        <ComboBox
+                            Width="300"
+                            HorizontalAlignment="Left"
+                            Header="Preferred authentication method"
+                            ItemsSource="{Binding AuthenticationMethods}"
+                            SelectedItem="{Binding SelectedAuthenticationMethod, Mode=TwoWay}" />
+                        <StackPanel Spacing="8" Visibility="{Binding UsesBrowserAuthentication, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ComboBox
+                                Width="310"
+                                HorizontalAlignment="Left"
+                                Header="Signed-in browser"
+                                ItemsSource="{Binding Browsers}"
+                                SelectedItem="{Binding SelectedBrowser, Mode=TwoWay}" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Sign in on the website using this browser. Ray's Loader only enables these cookies after a site reports that authentication is required. Firefox is recommended on Windows."
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="8" Visibility="{Binding UsesCookiesFile, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Header="Default cookies file" Text="{Binding Settings.CookiesFile, Mode=TwoWay}" PlaceholderText="Choose cookies.txt" />
+                            <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button>
+                        </Grid>
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Ray's Loader does not store account passwords. Browser cookies and cookie files are sensitive and should never be shared in logs or bug reports."
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Authentication only unlocks media types supported by yt-dlp. It does not enable still Flickr photo downloads."
+                            TextWrapping="Wrap" />
+                        <HyperlinkButton
+                            Padding="0"
+                            HorizontalAlignment="Left"
+                            Content="Open yt-dlp's official authentication guide"
+                            NavigateUri="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="3" Background="{ThemeResource SettingsSectionDividerBrush}" />
+
+                <Grid Background="{ThemeResource SettingsSectionBodyBrush}" ColumnSpacing="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Padding="16,22" Background="{ThemeResource SettingsSectionLabelBrush}" Spacing="4">
                         <TextBlock FontSize="16" FontWeight="SemiBold" Text="Appearance" />
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Theme and interface colors." TextWrapping="Wrap" />
                     </StackPanel>
@@ -188,10 +242,43 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Padding="16,22" Background="{ThemeResource SettingsSectionLabelBrush}" Spacing="4">
-                        <TextBlock FontSize="16" FontWeight="SemiBold" Text="Tools" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="yt-dlp and FFmpeg locations." TextWrapping="Wrap" />
+                        <TextBlock FontSize="16" FontWeight="SemiBold" Text="Download engine" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="yt-dlp health, updates, and supporting tools." TextWrapping="Wrap" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Margin="24,22" Spacing="10">
+                    <StackPanel Grid.Column="1" Margin="24,22" Spacing="12">
+                        <TextBlock FontSize="15" FontWeight="SemiBold" Text="Backend status" />
+                        <TextBlock FontWeight="SemiBold" Text="{Binding YtDlpVersionText}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding YtDlpSourceText}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding FfmpegVersionText}" />
+                        <TextBlock Text="{Binding JavaScriptRuntimeText}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding ToolStatus}" TextWrapping="Wrap" />
+                        <ProgressRing
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left"
+                            IsActive="{Binding IsToolBusy}"
+                            Visibility="{Binding IsToolBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <CheckBox
+                            Content="Keep yt-dlp updated when Ray's Loader starts"
+                            IsChecked="{Binding Settings.AutomaticallyUpdateYtDlp, Mode=TwoWay}" />
+                        <ComboBox
+                            Width="180"
+                            HorizontalAlignment="Left"
+                            Header="yt-dlp update channel"
+                            ItemsSource="{Binding YtDlpUpdateChannels}"
+                            SelectedItem="{Binding Settings.YtDlpUpdateChannel, Mode=TwoWay}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Command="{Binding CheckToolStatusCommand}">Check status</Button>
+                            <Button Style="{StaticResource AccentButtonStyle}" Command="{Binding UpdateYtDlpCommand}">Update yt-dlp now</Button>
+                            <Button Command="{Binding CancelToolOperationCommand}">Cancel</Button>
+                        </StackPanel>
+
+                        <Border Height="1" Margin="0,4" Background="{ThemeResource SettingsSectionDividerBrush}" />
+                        <TextBlock FontSize="15" FontWeight="SemiBold" Text="Custom tool paths" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Optional. A custom yt-dlp selection is checked but remains externally managed."
+                            TextWrapping="Wrap" />
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -209,7 +296,6 @@
                             <Button Grid.Column="1" VerticalAlignment="Bottom" Tag="ffmpeg" Click="BrowseTool_Click">Browse</Button>
                         </Grid>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Command="{Binding ValidateToolsCommand}">Validate tools</Button>
                             <Button Click="OpenToolsFolder_Click">Open managed tools folder</Button>
                         </StackPanel>
                     </StackPanel>
@@ -224,18 +310,10 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Padding="16,22" Background="{ThemeResource SettingsSectionLabelBrush}" Spacing="4">
                         <TextBlock FontSize="16" FontWeight="SemiBold" Text="Advanced" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Network, authentication, and processing." TextWrapping="Wrap" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Network and processing controls." TextWrapping="Wrap" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="24,22" Spacing="10">
                         <TextBox Header="Additional default yt-dlp arguments" Text="{Binding Settings.AdditionalArguments, Mode=TwoWay}" />
-                        <Grid ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBox Header="Cookies file" Text="{Binding Settings.CookiesFile, Mode=TwoWay}" />
-                            <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button>
-                        </Grid>
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />

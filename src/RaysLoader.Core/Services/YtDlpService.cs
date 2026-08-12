@@ -17,11 +17,13 @@ public sealed class YtDlpService(
     IYtDlpArgumentBuilder argumentBuilder,
     IProgressParserService progressParser,
     IToolLocatorService toolLocator,
+    IToolMaintenanceService toolMaintenanceService,
     ISettingsService settingsService,
     IUiDispatcher dispatcher) : IYtDlpService
 {
     public async Task<MediaMetadata> AnalyzeAsync(DownloadRequest request, CancellationToken cancellationToken = default)
     {
+        await toolMaintenanceService.WaitForIdleAsync(cancellationToken).ConfigureAwait(false);
         var tools = toolLocator.Locate(settingsService.Current);
         EnsureToolExists(tools.YtDlp, "yt-dlp");
         var standardOutput = new StringBuilder();
@@ -44,7 +46,7 @@ public sealed class YtDlpService(
 
         if (result.ExitCode != 0)
         {
-            throw new YtDlpException(ClassifyError(errors.ToString()));
+            throw new YtDlpException(ClassifyError(errors.ToString(), request));
         }
 
         try
@@ -60,6 +62,7 @@ public sealed class YtDlpService(
 
     public async Task ExecuteDownloadAsync(DownloadTask task, CancellationToken cancellationToken = default)
     {
+        await toolMaintenanceService.WaitForIdleAsync(cancellationToken).ConfigureAwait(false);
         var settings = settingsService.Current;
         var tools = toolLocator.Locate(settings);
         EnsureToolExists(tools.YtDlp, "yt-dlp");
@@ -324,16 +327,35 @@ public sealed class YtDlpService(
                 : ReadString(root, "extractor_key"));
     }
 
-    private static string ClassifyError(string error)
+    internal static string ClassifyError(string error, DownloadRequest? request = null)
     {
         var normalized = error.ToLowerInvariant();
+        if (IsFlickrUrl(request?.Url) && normalized.Contains("not a video"))
+            return "This Flickr URL is a still photo. yt-dlp's Flickr extractor only downloads videos, so browser authentication cannot download this item.";
         if (normalized.Contains("unsupported url")) return "This website or URL is not supported by the installed yt-dlp version.";
-        if (normalized.Contains("sign in") || normalized.Contains("cookies")) return "This media requires authentication. Configure browser cookies or a cookies file.";
+        if (normalized.Contains("http error 401") || normalized.Contains("unauthorized"))
+            return HasAuthentication(request)
+                ? "The website rejected the supplied sign-in cookies (HTTP 401). Refresh the media page in the selected browser, confirm you can view it, and analyze again."
+                : "The website requires authentication (HTTP 401). Open Authentication, sign in through your browser, and analyze again.";
+        if (normalized.Contains("http error 403") || normalized.Contains("forbidden"))
+            return HasAuthentication(request)
+                ? "The website refused the authenticated request (HTTP 403). The browser cookies were supplied but were not accepted; refresh the media page and retry, or use a cookies.txt file."
+                : "The website refused access (HTTP 403). Authentication, region restrictions, or anti-bot protection may be required.";
+        if (normalized.Contains("sign in") || normalized.Contains("log in") || normalized.Contains("login") || normalized.Contains("cookies"))
+            return "This media requires authentication. Open Authentication, sign in through your browser, and analyze again.";
         if (normalized.Contains("age")) return "This media appears to be age restricted. Authentication cookies may be required.";
         if (normalized.Contains("geo") || normalized.Contains("country")) return "This media is not available in the current region.";
         if (normalized.Contains("unable to download") || normalized.Contains("network")) return "The media website could not be reached. Check the network connection and try again.";
         return string.IsNullOrWhiteSpace(error) ? "yt-dlp could not analyze this URL." : error.Trim();
     }
+
+    private static bool HasAuthentication(DownloadRequest? request) =>
+        !string.IsNullOrWhiteSpace(request?.BrowserCookies) || !string.IsNullOrWhiteSpace(request?.CookiesFile);
+
+    private static bool IsFlickrUrl(string? value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
+        (uri.Host.Equals("flickr.com", StringComparison.OrdinalIgnoreCase) ||
+         uri.Host.EndsWith(".flickr.com", StringComparison.OrdinalIgnoreCase));
 
     private static void EnsureToolExists(string path, string displayName)
     {

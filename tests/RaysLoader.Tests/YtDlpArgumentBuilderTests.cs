@@ -149,6 +149,41 @@ public sealed class YtDlpArgumentBuilderTests
         Assert.Equal(runtime, probe[probe.IndexOf("--js-runtimes") + 1]);
         Assert.Equal(runtime, download[download.IndexOf("--js-runtimes") + 1]);
     }
+
+    [Fact]
+    public void AddsBrowserCookiesToProbeAndDownload()
+    {
+        var request = new DownloadRequest
+        {
+            Url = "https://www.flickr.com/photos/example/123",
+            OutputDirectory = "C:\\Media",
+            BrowserCookies = "firefox",
+        };
+
+        var probe = _builder.BuildProbeArguments(request.Url, request);
+        var download = _builder.BuildDownloadArguments(request, new AppSettings(), null);
+
+        Assert.Equal("firefox", probe[probe.IndexOf("--cookies-from-browser") + 1]);
+        Assert.Equal("firefox", download[download.IndexOf("--cookies-from-browser") + 1]);
+        Assert.DoesNotContain("--cookies", probe);
+    }
+
+    [Fact]
+    public void CookiesFileTakesPrecedenceWhenBothSourcesArePresent()
+    {
+        var request = new DownloadRequest
+        {
+            Url = "https://example.test/private",
+            OutputDirectory = "C:\\Media",
+            CookiesFile = "C:\\Secrets\\cookies.txt",
+            BrowserCookies = "firefox",
+        };
+
+        var arguments = _builder.BuildProbeArguments(request.Url, request);
+
+        Assert.Equal(request.CookiesFile, arguments[arguments.IndexOf("--cookies") + 1]);
+        Assert.DoesNotContain("--cookies-from-browser", arguments);
+    }
 }
 
 internal static class ListExtensions

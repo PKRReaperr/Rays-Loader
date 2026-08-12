@@ -1,4 +1,5 @@
 using System.Text.Json;
+using RaysLoader.Models;
 using RaysLoader.Settings;
 
 namespace RaysLoader.Services;
@@ -144,6 +145,14 @@ public sealed class SettingsService : ISettingsService
     {
         string[] videoQualities = ["best", "2160p", "1440p", "1080p", "720p", "480p", "360p"];
         if (!Enum.IsDefined(settings.AccentColor)) settings.AccentColor = AppAccent.System;
+        if (!Enum.IsDefined(settings.AuthenticationMode)) settings.AuthenticationMode = AuthenticationMode.None;
+        if (!Enum.IsDefined(settings.YtDlpUpdateChannel)) settings.YtDlpUpdateChannel = YtDlpUpdateChannel.Nightly;
+        settings.BrowserCookies = AuthenticationOptions.Browsers.Any(option =>
+            option.Value.Equals(settings.BrowserCookies, StringComparison.OrdinalIgnoreCase))
+            ? settings.BrowserCookies.ToLowerInvariant()
+            : string.Empty;
+        if (settings.AuthenticationMode is AuthenticationMode.Browser && settings.BrowserCookies.Length == 0)
+            settings.BrowserCookies = AuthenticationOptions.Browsers[0].Value;
         settings.MaximumSimultaneousDownloads = Math.Clamp(settings.MaximumSimultaneousDownloads, 1, 8);
         settings.ConcurrentFragments = Math.Clamp(settings.ConcurrentFragments, 1, 32);
         settings.WindowWidth = Math.Clamp(settings.WindowWidth, 800, 7680);

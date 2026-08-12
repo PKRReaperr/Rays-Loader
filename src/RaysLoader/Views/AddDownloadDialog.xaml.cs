@@ -41,6 +41,7 @@ public sealed partial class AddDownloadDialog : ContentDialog
     {
         if (_observedXamlRoot is not null) _observedXamlRoot.Changed -= XamlRoot_Changed;
         _observedXamlRoot = null;
+        ViewModel.Dispose();
     }
 
     private void XamlRoot_Changed(XamlRoot sender, XamlRootChangedEventArgs args) => UpdateResponsiveSize();
@@ -53,17 +54,9 @@ public sealed partial class AddDownloadDialog : ContentDialog
         OptionsScrollViewer.MaxHeight = Math.Clamp(viewport.Height - 180, MinimumScrollHeight, PreferredScrollHeight);
     }
 
-    private async void Analyze_Click(object sender, RoutedEventArgs e)
+    private async void RetryPreview_Click(object sender, RoutedEventArgs e)
     {
-        AnalyzeButton.IsEnabled = false;
-        try
-        {
-            await ViewModel.AnalyzeCommand.ExecuteAsync(null);
-        }
-        finally
-        {
-            AnalyzeButton.IsEnabled = true;
-        }
+        await ViewModel.AnalyzeCommand.ExecuteAsync(null);
     }
 
     private void PrimaryButton_Click(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -79,11 +72,9 @@ public sealed partial class AddDownloadDialog : ContentDialog
             var requests = ViewModel.CreateRequests();
             foreach (var request in requests)
             {
-                var title = requests.Count == 1 && ViewModel.AnalysisTitle is not "Not analyzed"
-                    ? ViewModel.AnalysisTitle
-                    : null;
-                var task = _queue.Enqueue(request, title, startImmediately: false);
-                if (requests.Count == 1) task.ThumbnailUrl = ViewModel.AnalysisThumbnailUrl;
+                var preview = ViewModel.FindPreview(request.Url);
+                var task = _queue.Enqueue(request, preview?.Title, startImmediately: false);
+                if (preview is not null) task.ThumbnailUrl = preview.ThumbnailUrl;
             }
             if (startQueue) _queue.StartQueued();
         }
@@ -114,6 +105,18 @@ public sealed partial class AddDownloadDialog : ContentDialog
         picker.FileTypeFilter.Add(".txt");
         InitializePicker(picker);
         if (await picker.PickSingleFileAsync() is { } file) ViewModel.CookiesFile = file.Path;
+    }
+
+    private async void OpenSourceWebsite_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await Windows.System.Launcher.LaunchUriAsync(ViewModel.GetSourceWebsiteUri());
+        }
+        catch (FormatException exception)
+        {
+            ViewModel.ErrorMessage = exception.Message;
+        }
     }
 
     private static void InitializePicker(object picker)

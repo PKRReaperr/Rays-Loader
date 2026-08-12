@@ -8,7 +8,7 @@ Ray's Loader is a modern Windows 11 media downloader powered by yt-dlp.
 
 ## Download
 
-[Download the latest Windows installer](https://github.com/PKRReaperr/Rays-Loader/releases/latest/download/RaysLoader-Setup-1.3.5.exe)
+[Download the latest Windows installer](https://github.com/PKRReaperr/Rays-Loader/releases/latest/download/RaysLoader-Setup-1.3.6.exe)
 
 Run the downloaded `.exe` and follow the installer. Windows may show a SmartScreen warning because the installer is not currently code-signed.
 

@@ -3,11 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:RaysLoader.Controls"
+    xmlns:models="using:RaysLoader.Models"
     Title="Add download"
     PrimaryButtonText="Add to queue"
     SecondaryButtonText="Add &amp; start queue"
     CloseButtonText="Cancel"
     DefaultButton="Primary"
+    IsPrimaryButtonEnabled="{Binding CanQueue}"
+    IsSecondaryButtonEnabled="{Binding CanQueue}"
     PrimaryButtonClick="PrimaryButton_Click"
     SecondaryButtonClick="SecondaryButton_Click">
     <ContentDialog.Resources>
@@ -43,29 +46,105 @@
                 Text="{Binding UrlInputSummary}"
                 FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button Click="Paste_Click" AutomationProperties.Name="Paste from clipboard"><StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE77F;" /><TextBlock Text="Paste" /></StackPanel></Button>
-                <Button x:Name="AnalyzeButton" Click="Analyze_Click" AutomationProperties.Name="Analyze URL"><StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE721;" /><TextBlock Text="Analyze URL" /></StackPanel></Button>
-                <ProgressRing Width="20" Height="20" IsActive="{Binding IsBusy}" />
-                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding AnalysisTitle}" TextTrimming="CharacterEllipsis" MaxWidth="360" />
-            </StackPanel>
-            <Grid Margin="2,-6,0,0" ColumnSpacing="10">
+            <Grid ColumnSpacing="10">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <Button Click="Paste_Click" AutomationProperties.Name="Paste from clipboard"><StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE77F;" /><TextBlock Text="Paste" /></StackPanel></Button>
+                <ProgressRing Grid.Column="1" Width="20" Height="20" IsActive="{Binding IsBusy}" />
                 <TextBlock
+                    Grid.Column="2"
                     VerticalAlignment="Center"
-                    FontSize="12"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding AnalysisSource}"
+                    Text="{Binding PreviewStatus}"
                     TextTrimming="CharacterEllipsis" />
                 <HyperlinkButton
-                    Grid.Column="1"
+                    Grid.Column="3"
                     Padding="0"
                     Content="Browse supported sites"
                     NavigateUri="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" />
             </Grid>
+
+            <ListView
+                MaxHeight="210"
+                ItemsSource="{Binding Previews}"
+                SelectionMode="None"
+                IsItemClickEnabled="False">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0,0,0,6" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:MediaPreviewItem">
+                        <Border
+                            Padding="10"
+                            Background="{ThemeResource AppCardBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                            <Grid MinHeight="76" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="124" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{ThemeResource SettingsSectionBodyBrush}" CornerRadius="6">
+                                    <Grid>
+                                        <FontIcon
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="22"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Glyph="&#xE8B9;" />
+                                        <Image
+                                            Source="{x:Bind ThumbnailUrl, Mode=OneWay, Converter={StaticResource NullableImageSourceConverter}}"
+                                            Stretch="UniformToFill" />
+                                    </Grid>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        MaxLines="2"
+                                        Text="{x:Bind Title, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind Source, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        MaxLines="2"
+                                        Text="{x:Bind Message, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ProgressRing
+                                    Grid.Column="2"
+                                    Width="20"
+                                    Height="20"
+                                    VerticalAlignment="Center"
+                                    IsActive="{x:Bind IsLoading, Mode=OneWay}"
+                                    Visibility="{x:Bind IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <FontIcon
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                    Glyph="&#xEA39;"
+                                    Visibility="{x:Bind HasFailed, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -159,13 +238,116 @@
                 </StackPanel>
             </Expander>
 
-            <Expander Header="Authentication and advanced options">
+            <Expander Header="Authentication (optional)" IsExpanded="{Binding IsAuthenticationExpanded, Mode=TwoWay}">
+                <StackPanel Spacing="12" Padding="0,10,0,4">
+                    <InfoBar
+                        IsOpen="{Binding AuthenticationMessage, Converter={StaticResource StringPresenceConverter}}"
+                        IsClosable="False"
+                        Message="{Binding AuthenticationMessage}"
+                        Severity="Warning" />
+                    <ComboBox
+                        Width="300"
+                        HorizontalAlignment="Left"
+                        Header="Authentication method"
+                        ItemsSource="{Binding AuthenticationMethods}"
+                        SelectedItem="{Binding SelectedAuthenticationMethod, Mode=TwoWay}" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Authentication unlocks supported account-restricted media; it cannot add media types that yt-dlp does not support. For example, yt-dlp downloads Flickr videos but not still Flickr photos."
+                        TextWrapping="Wrap" />
+
+                    <Border
+                        Padding="14"
+                        CornerRadius="8"
+                        Background="{ThemeResource AppCardBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        Visibility="{Binding UsesBrowserAuthentication, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Spacing="10">
+                            <TextBlock FontSize="15" FontWeight="SemiBold" Text="Use an existing browser sign-in" />
+                            <ComboBox
+                                Width="310"
+                                HorizontalAlignment="Left"
+                                Header="Browser where you are signed in"
+                                ItemsSource="{Binding Browsers}"
+                                SelectedItem="{Binding SelectedBrowser, Mode=TwoWay}" />
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="1" />
+                                <TextBlock Grid.Column="1" Text="Open the source website in the selected browser." TextWrapping="Wrap" />
+                            </Grid>
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="2" />
+                                <TextBlock Grid.Column="1" Text="Sign in normally and confirm that you can view the media. Ray's Loader never asks for your password." TextWrapping="Wrap" />
+                            </Grid>
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="3" />
+                                <TextBlock Grid.Column="1" Text="Return here and select Retry preview with sign-in. yt-dlp will read the selected browser's local cookies for this operation." TextWrapping="Wrap" />
+                            </Grid>
+                            <InfoBar
+                                IsOpen="True"
+                                IsClosable="False"
+                                Severity="Informational"
+                                Message="Firefox is the most reliable option on Windows. If a Chromium browser fails, close it completely before retrying; recent Chrome versions may block cookie decryption." />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Click="OpenSourceWebsite_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <FontIcon Glyph="&#xE774;" />
+                                        <TextBlock Text="Open source website" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource AccentButtonStyle}" Click="RetryPreview_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <FontIcon Glyph="&#xE721;" />
+                                        <TextBlock Text="Retry preview with sign-in" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                            <HyperlinkButton
+                                Padding="0"
+                                HorizontalAlignment="Left"
+                                Content="Read yt-dlp's official cookie guide"
+                                NavigateUri="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border
+                        Padding="14"
+                        CornerRadius="8"
+                        Background="{ThemeResource AppCardBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        Visibility="{Binding UsesCookiesFile, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Spacing="10">
+                            <TextBlock FontWeight="SemiBold" Text="Use a manually exported cookies.txt file" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="The file must use Netscape/Mozilla cookie format. Cookie files can grant account access, so keep them private and never attach them to bug reports."
+                                TextWrapping="Wrap" />
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBox Header="Cookies file" Text="{Binding CookiesFile, Mode=TwoWay}" PlaceholderText="Choose cookies.txt" />
+                                <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button>
+                            </Grid>
+                            <Button HorizontalAlignment="Left" Style="{StaticResource AccentButtonStyle}" Click="RetryPreview_Click">Retry preview with cookies file</Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Expander>
+
+            <Expander Header="Advanced options">
                 <StackPanel Spacing="10" Padding="0,10,0,4">
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <TextBox Header="Cookies file" Text="{Binding CookiesFile, Mode=TwoWay}" PlaceholderText="Optional cookies.txt" />
-                        <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button>
-                    </Grid>
                     <TextBox Header="Additional yt-dlp arguments" Text="{Binding AdditionalArguments, Mode=TwoWay}" PlaceholderText="Optional advanced arguments" />
                 </StackPanel>
             </Expander>

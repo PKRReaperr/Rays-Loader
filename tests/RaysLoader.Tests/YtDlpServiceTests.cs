@@ -31,6 +31,7 @@ public sealed class YtDlpServiceTests : IDisposable
             new YtDlpArgumentBuilder(),
             new ProgressParserService(),
             new StubToolLocator(_tool),
+            new StubToolMaintenanceService(),
             settings,
             new ImmediateUiDispatcher());
 
@@ -46,6 +47,55 @@ public sealed class YtDlpServiceTests : IDisposable
         Assert.Null(metadata.Formats[0].Bitrate);
         Assert.Equal(1234, metadata.Formats[1].FileSize);
         Assert.Equal("ExampleSite", metadata.ExtractorName);
+    }
+
+    [Fact]
+    public void FlickrStillPhotoErrorExplainsExtractorLimitation()
+    {
+        var request = new DownloadRequest
+        {
+            Url = "https://www.flickr.com/photos/example/123456789",
+            OutputDirectory = Path.GetTempPath(),
+            BrowserCookies = "firefox",
+        };
+
+        var message = YtDlpService.ClassifyError("ERROR: [Flickr] 123456789: not a video", request);
+
+        Assert.Contains("still photo", message);
+        Assert.Contains("only downloads videos", message);
+        Assert.Contains("authentication cannot", message);
+    }
+
+    [Fact]
+    public void AuthenticatedForbiddenErrorIsNotReportedAsNetworkFailure()
+    {
+        var request = new DownloadRequest
+        {
+            Url = "https://example.test/private",
+            OutputDirectory = Path.GetTempPath(),
+            BrowserCookies = "firefox",
+        };
+
+        var message = YtDlpService.ClassifyError("Unable to download webpage: HTTP Error 403: Forbidden", request);
+
+        Assert.Contains("cookies were supplied", message);
+        Assert.Contains("HTTP 403", message);
+        Assert.DoesNotContain("network connection", message);
+    }
+
+    [Fact]
+    public void UnauthorizedErrorDirectsUnauthenticatedUserToAuthentication()
+    {
+        var request = new DownloadRequest
+        {
+            Url = "https://example.test/private",
+            OutputDirectory = Path.GetTempPath(),
+        };
+
+        var message = YtDlpService.ClassifyError("HTTP Error 401: Unauthorized", request);
+
+        Assert.Contains("requires authentication", message);
+        Assert.Contains("HTTP 401", message);
     }
 
     public void Dispose() => File.Delete(_tool);
@@ -71,5 +121,14 @@ public sealed class YtDlpServiceTests : IDisposable
         public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
         public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task ResetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    }
+
+    private sealed class StubToolMaintenanceService : IToolMaintenanceService
+    {
+        public ToolHealthSnapshot? LastSnapshot => null;
+        public string LastMessage => string.Empty;
+        public Task<ToolHealthSnapshot> CheckStatusAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<YtDlpMaintenanceResult> CheckAndUpdateYtDlpAsync(YtDlpUpdateChannel channel, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task WaitForIdleAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

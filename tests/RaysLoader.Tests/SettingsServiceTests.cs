@@ -11,7 +11,16 @@ public sealed class SettingsServiceTests : IDisposable
     public async Task RoundTripsAndNormalizesSettings()
     {
         var service = new SettingsService(_directory);
-        var settings = new AppSettings { Theme = AppTheme.Dark, AccentColor = AppAccent.Coral, MaximumSimultaneousDownloads = 99, DefaultContainer = "mkv" };
+        var settings = new AppSettings
+        {
+            Theme = AppTheme.Dark,
+            AccentColor = AppAccent.Coral,
+            MaximumSimultaneousDownloads = 99,
+            DefaultContainer = "mkv",
+            AuthenticationMode = AuthenticationMode.Browser,
+            BrowserCookies = "FIREFOX",
+            YtDlpUpdateChannel = YtDlpUpdateChannel.Stable,
+        };
         await service.SaveAsync(settings);
 
         var reloaded = await new SettingsService(_directory).LoadAsync();
@@ -20,6 +29,19 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(AppAccent.Coral, reloaded.AccentColor);
         Assert.Equal(8, reloaded.MaximumSimultaneousDownloads);
         Assert.Equal("mkv", reloaded.DefaultContainer);
+        Assert.Equal(AuthenticationMode.Browser, reloaded.AuthenticationMode);
+        Assert.Equal("firefox", reloaded.BrowserCookies);
+        Assert.Equal(YtDlpUpdateChannel.Stable, reloaded.YtDlpUpdateChannel);
+    }
+
+    [Fact]
+    public async Task BrowserAuthenticationWithoutSavedBrowserDefaultsToFirefox()
+    {
+        var service = new SettingsService(_directory);
+
+        await service.SaveAsync(new AppSettings { AuthenticationMode = AuthenticationMode.Browser });
+
+        Assert.Equal("firefox", service.Current.BrowserCookies);
     }
 
     [Fact]
@@ -41,6 +63,8 @@ public sealed class SettingsServiceTests : IDisposable
 
         Assert.Equal(AppPaths.DefaultOutputDirectory, settings.DefaultOutputDirectory);
         Assert.False(settings.HasCompletedOnboarding);
+        Assert.True(settings.AutomaticallyUpdateYtDlp);
+        Assert.Equal(YtDlpUpdateChannel.Nightly, settings.YtDlpUpdateChannel);
     }
 
     [Fact]

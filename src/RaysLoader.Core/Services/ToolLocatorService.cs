@@ -33,7 +33,9 @@ public sealed class ToolLocatorService : IToolLocatorService
         var managedTools = Path.Combine(localRoot, "RaysLoader", "tools");
         var legacyTools = Path.Combine(localRoot, "YtDlpGui", "tools");
 
-        var directories = searchDirectories ?? [applicationTools, managedTools, legacyTools];
+        // Managed updates intentionally override the installer-bundled fallback.
+        // Explicit user-selected paths still take precedence in FindTool.
+        var directories = searchDirectories ?? [managedTools, applicationTools, legacyTools];
         var trustWarnings = new List<string>();
         return new ToolPaths(
             FindTool(settings.YtDlpPath, "yt-dlp.exe", trustWarnings, directories),
@@ -79,16 +81,27 @@ public sealed class ToolLocatorService : IToolLocatorService
             }
         }
 
-        return directories.Length > 1 && PathTrust.TryGetSafeChildPath(directories[1], name, out var fallback) ? fallback : string.Empty;
+        return directories.Length > 0 && PathTrust.TryGetSafeChildPath(directories[0], name, out var fallback) ? fallback : string.Empty;
     }
 
     private string FindJavaScriptRuntime(params string[] directories)
     {
         var deno = FindOptionalTool("deno.exe", directories);
+        if (deno.Length == 0)
+            deno = FindConventionalRuntime("deno.exe", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".deno", "bin"));
         if (deno.Length > 0) return $"deno:{deno}";
 
         var node = FindOptionalTool("node.exe", directories);
+        if (node.Length == 0)
+            node = FindConventionalRuntime("node.exe", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "nodejs"));
         return node.Length > 0 ? $"node:{node}" : string.Empty;
+    }
+
+    private static string FindConventionalRuntime(string name, string directory)
+    {
+        if (!PathTrust.TryGetTrustedDirectory(directory, out var trustedDirectory) ||
+            !PathTrust.TryGetSafeChildPath(trustedDirectory, name, out var candidate)) return string.Empty;
+        return PathTrust.TryGetTrustedExecutable(candidate, out var executable) ? executable : string.Empty;
     }
 
     private string FindOptionalTool(string name, params string[] directories)

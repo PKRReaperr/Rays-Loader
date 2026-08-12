@@ -37,6 +37,7 @@ public partial class App : Application
             services.AddSingleton<IYtDlpArgumentBuilder, YtDlpArgumentBuilder>();
             services.AddSingleton<IProgressParserService, ProgressParserService>();
             services.AddSingleton<IToolLocatorService, ToolLocatorService>();
+            services.AddSingleton<IToolMaintenanceService, ToolMaintenanceService>();
             services.AddSingleton<IYtDlpService, YtDlpService>();
             services.AddSingleton<ISupportedSitesService, SupportedSitesService>();
             services.AddSingleton<IUpdateService>(new GitHubUpdateService(

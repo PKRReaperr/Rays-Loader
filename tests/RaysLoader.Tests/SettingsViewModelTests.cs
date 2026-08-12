@@ -47,8 +47,8 @@ public sealed class SettingsViewModelTests
         settings.Current.HasCompletedOnboarding = true;
         using var viewModel = new SettingsViewModel(
             settings,
-            new ToolLocatorService([], () => string.Empty),
-            new BlockingUpdateService(blockCheck: false, blockDownload: false));
+            new BlockingUpdateService(blockCheck: false, blockDownload: false),
+            new StubToolMaintenanceService());
 
         await viewModel.ResetForSetupAsync();
 
@@ -57,8 +57,42 @@ public sealed class SettingsViewModelTests
         Assert.Contains("setup walkthrough", viewModel.StatusMessage, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static SettingsViewModel CreateViewModel(IUpdateService updates) =>
-        new(new StubSettingsService(), new ToolLocatorService([], () => string.Empty), updates);
+    [Fact]
+    public async Task ToolStatusCheckDisplaysBackendVersions()
+    {
+        var tools = new StubToolMaintenanceService();
+        using var viewModel = CreateViewModel(
+            new BlockingUpdateService(blockCheck: false, blockDownload: false),
+            tools);
+
+        await viewModel.CheckToolStatusCommand.ExecuteAsync(null);
+
+        Assert.Equal("yt-dlp: 2026.08.11.232958", viewModel.YtDlpVersionText);
+        Assert.Contains("FFmpeg: 8.0", viewModel.FfmpegVersionText);
+        Assert.Contains("node 22.14.0", viewModel.JavaScriptRuntimeText);
+        Assert.Equal("The download engine is ready.", viewModel.ToolStatus);
+    }
+
+    [Fact]
+    public async Task CancelToolCommandCancelsActiveBackendCheck()
+    {
+        var tools = new StubToolMaintenanceService(block: true);
+        using var viewModel = CreateViewModel(
+            new BlockingUpdateService(blockCheck: false, blockDownload: false),
+            tools);
+
+        var operation = viewModel.CheckToolStatusCommand.ExecuteAsync(null);
+        await tools.OperationStarted.Task;
+        Assert.True(viewModel.IsToolBusy);
+        viewModel.CancelToolOperationCommand.Execute(null);
+        await operation;
+
+        Assert.False(viewModel.IsToolBusy);
+        Assert.Equal("Backend status check cancelled.", viewModel.ToolStatus);
+    }
+
+    private static SettingsViewModel CreateViewModel(IUpdateService updates, IToolMaintenanceService? tools = null) =>
+        new(new StubSettingsService(), updates, tools ?? new StubToolMaintenanceService());
 
     private sealed class StubSettingsService : ISettingsService
     {
@@ -110,5 +144,43 @@ public sealed class SettingsViewModelTests
             1,
             new string('A', 64),
             string.Empty);
+    }
+
+    private sealed class StubToolMaintenanceService(bool block = false) : IToolMaintenanceService
+    {
+        public TaskCompletionSource OperationStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public ToolHealthSnapshot? LastSnapshot { get; private set; }
+        public string LastMessage { get; private set; } = "Backend status has not been checked yet.";
+
+        public async Task<ToolHealthSnapshot> CheckStatusAsync(CancellationToken cancellationToken = default)
+        {
+            OperationStarted.TrySetResult();
+            if (block) await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            LastSnapshot = CreateSnapshot();
+            LastMessage = "The download engine is ready.";
+            return LastSnapshot;
+        }
+
+        public async Task<YtDlpMaintenanceResult> CheckAndUpdateYtDlpAsync(
+            YtDlpUpdateChannel channel,
+            CancellationToken cancellationToken = default)
+        {
+            var snapshot = await CheckStatusAsync(cancellationToken);
+            return new YtDlpMaintenanceResult(snapshot, false, $"yt-dlp {snapshot.YtDlpVersion} is current.");
+        }
+
+        public Task WaitForIdleAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        private static ToolHealthSnapshot CreateSnapshot() => new(
+            "2026.08.11.232958",
+            "C:\\tools\\yt-dlp.exe",
+            "Managed by Ray's Loader",
+            "8.0",
+            "8.0",
+            "node 22.14.0",
+            true,
+            true,
+            true,
+            true);
     }
 }

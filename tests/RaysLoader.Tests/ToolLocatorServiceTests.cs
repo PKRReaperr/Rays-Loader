@@ -25,7 +25,7 @@ public sealed class ToolLocatorServiceTests : IDisposable
     {
         var managed = Path.Combine(root, "managed");
         var expected = CreateExecutable(managed, "yt-dlp.exe");
-        var service = CreateLocator(string.Empty, Path.Combine(root, "bundled"), managed, Path.Combine(root, "legacy"));
+        var service = CreateLocator(string.Empty, managed, Path.Combine(root, "bundled"), Path.Combine(root, "legacy"));
 
         var tools = service.Locate(new AppSettings { YtDlpPath = Path.Combine(root, "missing.exe") });
 
@@ -45,6 +45,19 @@ public sealed class ToolLocatorServiceTests : IDisposable
     }
 
     [Fact]
+    public void FindsJavaScriptRuntimeInTrustedPathEntry()
+    {
+        var pathDirectory = Path.Combine(root, "node runtime");
+        var expected = CreateExecutable(pathDirectory, "node.exe");
+        var managed = Path.Combine(root, "managed");
+        var service = CreateLocator(pathDirectory, managed, Path.Combine(root, "bundled"), Path.Combine(root, "legacy"));
+
+        var tools = service.Locate(new AppSettings());
+
+        Assert.Equal($"node:{expected}", tools.JavaScriptRuntime, ignoreCase: true);
+    }
+
+    [Fact]
     public void RejectsConfiguredExecutableInsideReparsePointDirectory()
     {
         var target = Path.Combine(root, "target");
@@ -52,7 +65,7 @@ public sealed class ToolLocatorServiceTests : IDisposable
         var link = Path.Combine(root, "linked");
         CreateJunction(link, target);
         var trustedFallback = CreateExecutable(Path.Combine(root, "managed"), "yt-dlp.exe");
-        var service = CreateLocator(string.Empty, Path.Combine(root, "bundled"), Path.GetDirectoryName(trustedFallback)!, Path.Combine(root, "legacy"));
+        var service = CreateLocator(string.Empty, Path.GetDirectoryName(trustedFallback)!, Path.Combine(root, "bundled"), Path.Combine(root, "legacy"));
 
         var tools = service.Locate(new AppSettings { YtDlpPath = Path.Combine(link, Path.GetFileName(executable)) });
 
@@ -69,7 +82,7 @@ public sealed class ToolLocatorServiceTests : IDisposable
         var link = Path.Combine(root, "path-link");
         CreateJunction(link, target);
         var managed = Path.Combine(root, "managed");
-        var service = CreateLocator(link, Path.Combine(root, "bundled"), managed, Path.Combine(root, "legacy"));
+        var service = CreateLocator(link, managed, Path.Combine(root, "bundled"), Path.Combine(root, "legacy"));
 
         var tools = service.Locate(new AppSettings());
 
@@ -85,7 +98,7 @@ public sealed class ToolLocatorServiceTests : IDisposable
     private ToolLocatorService CreateLocator(string pathValue, params string[] directories)
     {
         if (directories.Length == 0)
-            directories = [Path.Combine(root, "bundled"), Path.Combine(root, "managed"), Path.Combine(root, "legacy")];
+            directories = [Path.Combine(root, "managed"), Path.Combine(root, "bundled"), Path.Combine(root, "legacy")];
         return new ToolLocatorService(directories, () => pathValue);
     }
 

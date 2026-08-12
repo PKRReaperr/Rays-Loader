@@ -18,6 +18,19 @@ public enum AppAccent
     Violet,
 }
 
+public enum AuthenticationMode
+{
+    None,
+    Browser,
+    CookiesFile,
+}
+
+public enum YtDlpUpdateChannel
+{
+    Stable,
+    Nightly,
+}
+
 public sealed class AppSettings
 {
     public AppTheme Theme { get; set; } = AppTheme.System;
@@ -30,6 +43,8 @@ public sealed class AppSettings
     public bool StartMinimized { get; set; }
     public bool ShowCompletionNotifications { get; set; } = true;
     public bool AutomaticallyCheckForUpdates { get; set; } = true;
+    public bool AutomaticallyUpdateYtDlp { get; set; } = true;
+    public YtDlpUpdateChannel YtDlpUpdateChannel { get; set; } = YtDlpUpdateChannel.Nightly;
     public string DefaultVideoQuality { get; set; } = "best";
     public string DefaultContainer { get; set; } = "mp4";
     public string DefaultAudioFormat { get; set; } = "mp3";
@@ -41,6 +56,8 @@ public sealed class AppSettings
     public bool WriteThumbnail { get; set; }
     public string YtDlpPath { get; set; } = string.Empty;
     public string FfmpegPath { get; set; } = string.Empty;
+    public AuthenticationMode AuthenticationMode { get; set; }
+    public string BrowserCookies { get; set; } = string.Empty;
     public string CookiesFile { get; set; } = string.Empty;
     public string AdditionalArguments { get; set; } = string.Empty;
     public string Proxy { get; set; } = string.Empty;

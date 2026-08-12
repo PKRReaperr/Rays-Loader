@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System.Runtime.InteropServices;
+using RaysLoader.ProcessManagement;
 using RaysLoader.Services;
 using RaysLoader.Settings;
 using RaysLoader.Theming;
@@ -19,15 +20,21 @@ public sealed partial class MainWindow : Window
 {
     private readonly ISettingsService _settingsService;
     private readonly IUpdateService _updateService;
+    private readonly IToolMaintenanceService _toolMaintenanceService;
     private readonly CancellationTokenSource _lifetimeCancellation = new();
     private bool _startupFlowStarted;
 
-    public MainWindow(MainViewModel viewModel, ISettingsService settingsService, IUpdateService updateService)
+    public MainWindow(
+        MainViewModel viewModel,
+        ISettingsService settingsService,
+        IUpdateService updateService,
+        IToolMaintenanceService toolMaintenanceService)
     {
         InitializeComponent();
         ViewModel = viewModel;
         _settingsService = settingsService;
         _updateService = updateService;
+        _toolMaintenanceService = toolMaintenanceService;
         RootGrid.DataContext = viewModel;
         Title = AppIdentity.DisplayName;
         AppNameText.Text = AppIdentity.DisplayName;
@@ -43,7 +50,7 @@ public sealed partial class MainWindow : Window
         AppWindow.Closing += AppWindow_Closing;
         Navigation.SelectedItem = AllItem;
         ShowDownloads();
-        Activated += MainWindow_Activated;
+        RootGrid.Loaded += RootGrid_Loaded;
     }
 
     public MainViewModel ViewModel { get; }
@@ -98,42 +105,64 @@ public sealed partial class MainWindow : Window
     private async void ViewFeedback_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.Issues);
     private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
     {
-        var page = App.Services.GetRequiredService<SettingsPage>();
-        ContentFrame.Content = page;
+        var page = ShowSettings();
         await page.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
+    }
+    private void OpenUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateInfoBar.IsOpen = false;
+        ShowSettings();
     }
     private void RetryAll_Click(object sender, RoutedEventArgs e) => ViewModel.RetryAllFailedCommand.Execute(null);
     private void StopAll_Click(object sender, RoutedEventArgs e) => ViewModel.StopAllCommand.Execute(null);
 
-    private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    private async void RootGrid_Loaded(object sender, RoutedEventArgs args)
     {
-        if (_startupFlowStarted || RootGrid.XamlRoot is null) return;
+        if (_startupFlowStarted) return;
         _startupFlowStarted = true;
+        RootGrid.Loaded -= RootGrid_Loaded;
         if (!_settingsService.Current.HasCompletedOnboarding) await ShowOnboardingAsync();
+        if (_settingsService.Current.AutomaticallyUpdateYtDlp)
+        {
+            try
+            {
+                await _toolMaintenanceService.CheckAndUpdateYtDlpAsync(
+                    _settingsService.Current.YtDlpUpdateChannel,
+                    _lifetimeCancellation.Token);
+            }
+            catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or YtDlpException or MissingToolException or ProcessLaunchException)
+            {
+                System.Diagnostics.Debug.WriteLine(exception);
+                UpdateInfoBar.Title = "The yt-dlp backend needs attention";
+                UpdateInfoBar.Message = _toolMaintenanceService.LastMessage;
+                UpdateInfoBar.Severity = InfoBarSeverity.Warning;
+                UpdateInfoBar.IsOpen = true;
+            }
+        }
         if (!_settingsService.Current.AutomaticallyCheckForUpdates) return;
         try
         {
             var update = await _updateService.CheckForUpdateAsync(_lifetimeCancellation.Token);
             if (update is null || RootGrid.XamlRoot is null) return;
-            var dialog = new ContentDialog
-            {
-                XamlRoot = RootGrid.XamlRoot,
-                Title = $"{AppIdentity.DisplayName} {update.Version} is available",
-                Content = "Open Settings to download, verify, and install the update.",
-                PrimaryButtonText = "Open updates",
-                CloseButtonText = "Later",
-                DefaultButton = ContentDialogButton.Primary,
-            };
-            if (await dialog.ShowAsync() is ContentDialogResult.Primary)
-            {
-                ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
-            }
+            UpdateInfoBar.Title = $"{AppIdentity.DisplayName} {update.Version} is available";
+            UpdateInfoBar.Message = "Open Settings to download, verify, and install the update.";
+            UpdateInfoBar.Severity = InfoBarSeverity.Informational;
+            UpdateInfoBar.IsOpen = true;
         }
         catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
         {
         }
         catch (Exception exception) when (exception is HttpRequestException or InvalidDataException or TaskCanceledException or System.Text.Json.JsonException)
         {
+            System.Diagnostics.Debug.WriteLine(exception);
+        }
+        catch (Exception exception)
+        {
+            // A background update check must never take down the main window.
             System.Diagnostics.Debug.WriteLine(exception);
         }
     }
@@ -148,7 +177,11 @@ public sealed partial class MainWindow : Window
     {
         _lifetimeCancellation.Cancel();
         _updateService.CancelActiveOperations();
-        if (ContentFrame.Content is SettingsPage settingsPage) settingsPage.ViewModel.CancelActiveUpdate();
+        if (ContentFrame.Content is SettingsPage settingsPage)
+        {
+            settingsPage.ViewModel.CancelActiveUpdate();
+            settingsPage.ViewModel.CancelActiveToolOperation();
+        }
         var size = sender.Size;
         _settingsService.Current.WindowWidth = size.Width;
         _settingsService.Current.WindowHeight = size.Height;
@@ -162,6 +195,13 @@ public sealed partial class MainWindow : Window
         AppTheme.Dark => ElementTheme.Dark,
         _ => ElementTheme.Default,
     };
+
+    private SettingsPage ShowSettings()
+    {
+        var page = App.Services.GetRequiredService<SettingsPage>();
+        ContentFrame.Content = page;
+        return page;
+    }
 
     private void TrySetBackdrop()
     {
