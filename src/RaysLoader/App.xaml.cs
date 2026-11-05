@@ -68,6 +68,7 @@ public partial class App : Application
             Services = services.BuildServiceProvider();
             MainWindow = Services.GetRequiredService<MainWindow>();
             MainWindow.Activate();
+            MainWindow.ApplyStartupWindowState();
         }
         catch (Exception exception)
         {

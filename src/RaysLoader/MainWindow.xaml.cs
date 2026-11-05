@@ -63,7 +63,7 @@ public sealed partial class MainWindow : Window
         }
 
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", AppIdentity.IconFileName));
-        AppWindow.Resize(new SizeInt32(settingsService.Current.WindowWidth, settingsService.Current.WindowHeight));
+        RestoreWindowPlacement(settingsService.Current);
         AppWindow.Closing += AppWindow_Closing;
         Navigation.SelectedItem = AllItem;
         ShowDownloads();
@@ -212,8 +212,7 @@ public sealed partial class MainWindow : Window
             Navigation.IsEnabled = false;
             RootGrid.IsHitTestVisible = false;
             var autoSave = App.Services.GetRequiredService<SettingsAutoSaveService>();
-            _settingsService.Current.WindowWidth = sender.Size.Width;
-            _settingsService.Current.WindowHeight = sender.Size.Height;
+            CaptureWindowPlacement(sender, _settingsService.Current);
             var saved = await autoSave.FlushAsync();
             if (!saved)
             {
@@ -268,11 +267,51 @@ public sealed partial class MainWindow : Window
             settingsPage.ViewModel.CancelActiveUpdate();
             settingsPage.ViewModel.CancelActiveToolOperation();
         }
-        var size = sender.Size;
-        _settingsService.Current.WindowWidth = size.Width;
-        _settingsService.Current.WindowHeight = size.Height;
+        CaptureWindowPlacement(sender, _settingsService.Current);
         try { await _settingsService.SaveAsync(_settingsService.Current); }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException) { System.Diagnostics.Debug.WriteLine(exception); }
+    }
+
+    /// <summary>Minimizes the window when the user enabled Start minimized and setup is complete.</summary>
+    public void ApplyStartupWindowState()
+    {
+        var settings = _settingsService.Current;
+        if (settings.StartMinimized && settings.HasCompletedOnboarding && AppWindow.Presenter is OverlappedPresenter presenter)
+            presenter.Minimize();
+    }
+
+    private void RestoreWindowPlacement(AppSettings settings)
+    {
+        if (!settings.RememberWindowPlacement)
+        {
+            var defaults = new AppSettings();
+            AppWindow.Resize(new SizeInt32(defaults.WindowWidth, defaults.WindowHeight));
+            return;
+        }
+
+        var size = new SizeInt32(settings.WindowWidth, settings.WindowHeight);
+        if (settings.WindowX is { } x && settings.WindowY is { } y &&
+            DisplayArea.GetFromRect(new RectInt32(x, y, size.Width, size.Height), DisplayAreaFallback.None) is not null)
+        {
+            // Only restore a position that is still on a connected display.
+            AppWindow.MoveAndResize(new RectInt32(x, y, size.Width, size.Height));
+        }
+        else
+        {
+            AppWindow.Resize(size);
+        }
+    }
+
+    private static void CaptureWindowPlacement(AppWindow window, AppSettings settings)
+    {
+        if (!settings.RememberWindowPlacement) return;
+        // A minimized or maximized window reports bounds that make a poor restore
+        // size, so keep the last placement recorded in the normal state.
+        if (window.Presenter is OverlappedPresenter { State: not OverlappedPresenterState.Restored }) return;
+        settings.WindowWidth = window.Size.Width;
+        settings.WindowHeight = window.Size.Height;
+        settings.WindowX = window.Position.X;
+        settings.WindowY = window.Position.Y;
     }
 
     private void ApplyTheme(AppTheme theme) => RootGrid.RequestedTheme = theme switch

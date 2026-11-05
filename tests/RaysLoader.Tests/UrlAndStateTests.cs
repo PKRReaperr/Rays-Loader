@@ -12,6 +12,20 @@ public sealed class UrlAndStateTests
         Assert.Equal(2, result.Count);
     }
 
+    [Fact]
+    public void KeepsUrlsWhoseCaseSensitiveIdsDiffer()
+    {
+        var result = UrlInputParser.Parse("https://youtu.be/abcDEF\nhttps://youtu.be/ABCdef");
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public void TreatsSchemeAndHostCaseAsDuplicates()
+    {
+        var result = UrlInputParser.Parse("https://Example.TEST/Video\nHTTPS://example.test/Video");
+        Assert.Single(result);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("not a url")]

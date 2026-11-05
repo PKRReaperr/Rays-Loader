@@ -76,7 +76,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
         {
             var lines = Urls.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (lines.Length == 0) return "Enter one URL per line.";
-            var valid = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var valid = new HashSet<string>(StringComparer.Ordinal);
             var invalid = 0;
             foreach (var line in lines)
             {
@@ -280,7 +280,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     }
 
     public MediaPreviewItem? FindPreview(string url) =>
-        Previews.FirstOrDefault(preview => preview.Url.Equals(url, StringComparison.OrdinalIgnoreCase));
+        Previews.FirstOrDefault(preview => preview.Url.Equals(url, StringComparison.Ordinal));
 
     public void Dispose()
     {

@@ -49,6 +49,8 @@ public sealed class ProcessRunnerService : IProcessRunnerService
             throw new ProcessLaunchException($"Ray's Loader could not start '{request.FileName}'.", exception);
         }
 
+        // yt-dlp starts FFmpeg after this point, so its children inherit the job.
+        ChildProcessJob.TryAssign(process);
         onStarted?.Invoke(process.Id);
         // Keep draining redirected pipes while cancellation tears down the process.
         // Cancelling these readers first can lose the final diagnostic lines or

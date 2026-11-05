@@ -59,6 +59,92 @@ public sealed class DownloadQueueServiceTests
         executor.ReleaseAll();
     }
 
+    [Fact]
+    public async Task StoppingTaskThatIsWaitingForSlotDoesNotStartIt()
+    {
+        var executor = new BlockingExecutor();
+        await using var queue = new DownloadQueueService(executor, new StubSettingsService(1), new ImmediateUiDispatcher());
+        var request = new DownloadRequest { Url = "https://example.test/video", OutputDirectory = "C:\\Media" };
+        var first = queue.Enqueue(request with { Url = "https://example.test/1" });
+        var second = queue.Enqueue(request with { Url = "https://example.test/2" });
+        await executor.WaitForStartsAsync(1);
+        await Task.Delay(150); // Let the dispatcher take the second task and wait for the slot.
+
+        queue.Stop(second);
+        executor.ReleaseAll();
+        await WaitUntilAsync(() => first.State is DownloadState.Completed);
+        await Task.Delay(150);
+
+        Assert.Equal(DownloadState.Cancelled, second.State);
+        Assert.False(executor.StartCounts.ContainsKey(second.Id));
+    }
+
+    [Fact]
+    public async Task StopAllDoesNotStartTaskThatWasWaitingForSlot()
+    {
+        var executor = new BlockingExecutor();
+        await using var queue = new DownloadQueueService(executor, new StubSettingsService(1), new ImmediateUiDispatcher());
+        var request = new DownloadRequest { Url = "https://example.test/video", OutputDirectory = "C:\\Media" };
+        var first = queue.Enqueue(request with { Url = "https://example.test/1" });
+        var second = queue.Enqueue(request with { Url = "https://example.test/2" });
+        var third = queue.Enqueue(request with { Url = "https://example.test/3" });
+        await executor.WaitForStartsAsync(1);
+        await Task.Delay(150);
+
+        queue.StopAll();
+        await WaitUntilAsync(() => first.State is DownloadState.Cancelled);
+        await Task.Delay(200);
+
+        Assert.Single(executor.StartCounts);
+        Assert.Equal(DownloadState.Cancelled, second.State);
+        Assert.Equal(DownloadState.Cancelled, third.State);
+    }
+
+    [Fact]
+    public async Task RaisingConcurrencySettingStartsWaitingDownloadsWithoutRestart()
+    {
+        var executor = new BlockingExecutor();
+        var settings = new StubSettingsService(1);
+        await using var queue = new DownloadQueueService(executor, settings, new ImmediateUiDispatcher());
+        var request = new DownloadRequest { Url = "https://example.test/video", OutputDirectory = "C:\\Media" };
+        queue.Enqueue(request with { Url = "https://example.test/1" });
+        queue.Enqueue(request with { Url = "https://example.test/2" });
+        queue.Enqueue(request with { Url = "https://example.test/3" });
+        await executor.WaitForStartsAsync(1);
+
+        settings.Current.MaximumSimultaneousDownloads = 3;
+        await executor.WaitForStartsAsync(3);
+
+        Assert.Equal(3, queue.ConcurrencyLimit);
+        Assert.Equal(3, executor.MaximumConcurrent);
+        executor.ReleaseAll();
+    }
+
+    [Fact]
+    public async Task ConcurrencyFollowsReplacedSettingsAfterReset()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "RaysLoaderTests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var settings = new SettingsService(directory, importLegacySettings: false);
+            await settings.LoadAsync();
+            await using var queue = new DownloadQueueService(new BlockingExecutor(), settings, new ImmediateUiDispatcher());
+
+            settings.Current.MaximumSimultaneousDownloads = 5;
+            Assert.Equal(5, queue.ConcurrencyLimit);
+
+            await settings.ResetAsync();
+            Assert.Equal(2, queue.ConcurrencyLimit);
+
+            settings.Current.MaximumSimultaneousDownloads = 4;
+            Assert.Equal(4, queue.ConcurrencyLimit);
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+        }
+    }
+
     private static async Task WaitUntilAsync(Func<bool> condition)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));

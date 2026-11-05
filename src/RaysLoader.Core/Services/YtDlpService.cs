@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using RaysLoader.Models;
 using RaysLoader.ProcessManagement;
 using RaysLoader.Settings;
@@ -12,7 +13,7 @@ public interface IYtDlpService
     Task ExecuteDownloadAsync(DownloadTask task, CancellationToken cancellationToken = default);
 }
 
-public sealed class YtDlpService(
+public sealed partial class YtDlpService(
     IProcessRunnerService processRunner,
     IYtDlpArgumentBuilder argumentBuilder,
     IProgressParserService progressParser,
@@ -343,8 +344,9 @@ public sealed class YtDlpService(
                 : "The website refused access (HTTP 403). Authentication, region restrictions, or anti-bot protection may be required.";
         if (normalized.Contains("sign in") || normalized.Contains("log in") || normalized.Contains("login") || normalized.Contains("cookies"))
             return "This media requires authentication. Open Authentication, sign in through your browser, and analyze again.";
-        if (normalized.Contains("age")) return "This media appears to be age restricted. Authentication cookies may be required.";
-        if (normalized.Contains("geo") || normalized.Contains("country")) return "This media is not available in the current region.";
+        // Match whole phrases: a bare "age" also matches "webpage", "page", "image", and "message".
+        if (AgeRestrictionRegex().IsMatch(normalized)) return "This media appears to be age restricted. Authentication cookies may be required.";
+        if (GeoRestrictionRegex().IsMatch(normalized)) return "This media is not available in the current region.";
         if (normalized.Contains("unable to download") || normalized.Contains("network")) return "The media website could not be reached. Check the network connection and try again.";
         return string.IsNullOrWhiteSpace(error) ? "yt-dlp could not analyze this URL." : error.Trim();
     }
@@ -369,6 +371,12 @@ public sealed class YtDlpService(
     private static bool ReadBoolean(JsonElement element, string name) => element.ValueKind is JsonValueKind.Object && element.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True;
     private static double? ReadDouble(JsonElement element, string name) => element.ValueKind is JsonValueKind.Object && element.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.Number && value.TryGetDouble(out var result) ? result : null;
     private static long? ReadLong(JsonElement element, string name) => element.ValueKind is JsonValueKind.Object && element.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.Number && value.TryGetInt64(out var result) ? result : null;
+
+    [GeneratedRegex(@"\bage[- ]?(restrict|gate|verif|limit)|\bconfirm (your|you are of) age\b|inappropriate for some users")]
+    private static partial Regex AgeRestrictionRegex();
+
+    [GeneratedRegex(@"\bgeo[- ]?(restrict|block|fenc)|\bnot (made )?available in your (country|region)\b|\bin your country\b")]
+    private static partial Regex GeoRestrictionRegex();
 }
 
 public sealed class YtDlpException(string message, Exception? innerException = null) : Exception(message, innerException);
