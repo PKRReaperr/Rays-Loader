@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using RaysLoader.Theming;
 using RaysLoader.Models;
 using RaysLoader.ViewModels;
 
@@ -65,7 +66,7 @@ public sealed partial class SupportedSitesPage : Page
             DefaultButton = ContentDialogButton.Primary,
         };
 
-        var result = await dialog.ShowAsync();
+        var result = await dialog.ShowThemedAsync();
         var destination = result switch
         {
             ContentDialogResult.Primary => SupportedSiteLinks.CreateIssueSearch(site),

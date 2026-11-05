@@ -2,24 +2,31 @@
     x:Class="RaysLoader.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid x:Name="RootGrid" Background="{ThemeResource AppBackgroundBrush}">
+    <Grid x:Name="RootGrid" Background="{ThemeResource RlBackgroundBrush}" ActualThemeChanged="RootGrid_ActualThemeChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="{ThemeResource AppSurfaceBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Image x:Name="AppLogo" Width="24" Height="24" Margin="16,0,10,0" />
-            <TextBlock x:Name="AppNameText" Grid.Column="1" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" />
-            <Grid Grid.Column="2">
-                <MenuBar HorizontalAlignment="Left" Margin="24,0,0,0" VerticalAlignment="Center">
+        <Border Grid.Row="0" Background="{ThemeResource RlSurfaceBrush}" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,0,1">
+            <Grid x:Name="AppTitleBar">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image x:Name="AppLogo" Width="22" Height="22" Margin="16,0,10,0" />
+                <TextBlock
+                    x:Name="AppNameText"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    FontWeight="ExtraBold"
+                    FontStretch="SemiExpanded"
+                    CharacterSpacing="40" />
+                <MenuBar Grid.Column="2" Margin="18,0,0,0" VerticalAlignment="Center">
                     <MenuBarItem Title="File">
                         <MenuFlyoutItem Text="Add download" KeyboardAcceleratorTextOverride="Ctrl+N" Click="AddDownload_Click" />
                         <MenuFlyoutSeparator />
@@ -52,13 +59,35 @@
                         <MenuFlyoutItem Text="About Ray's Loader" Click="ShowAbout_Click" />
                     </MenuBarItem>
                 </MenuBar>
+                <Grid x:Name="TitleBarDragRegion" Grid.Column="3" Background="Transparent">
+                    <StackPanel Margin="20,0,150,0" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center">
+                        <Border
+                            x:Name="DevelopmentBadge"
+                            Padding="7,3"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource RlAccentFillBrush}"
+                            Visibility="Collapsed">
+                            <TextBlock
+                                FontFamily="{StaticResource RlMonoStrongFont}"
+                                FontSize="10"
+                                FontWeight="SemiBold"
+                                CharacterSpacing="120"
+                                Foreground="{ThemeResource RlAccentInkBrush}"
+                                Text="DEV PREVIEW" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock
+                        Margin="0,0,150,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource RlLabelTextStyle}"
+                        FontSize="10"
+                        AutomationProperties.AccessibilityView="Raw">
+                        <Run Text="{Binding RunningCount, Converter={StaticResource TwoDigitConverter}}" /><Run Text=" RUNNING / " /><Run Text="{Binding QueuedCount, Converter={StaticResource TwoDigitConverter}}" /><Run Text=" QUEUED" />
+                    </TextBlock>
+                </Grid>
             </Grid>
-            <Grid x:Name="TitleBarDragRegion" Grid.Column="3" Background="Transparent">
-                <Border x:Name="DevelopmentBadge" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0" Padding="8,3" CornerRadius="6" Background="{ThemeResource ControlFillColorSecondaryBrush}">
-                    <TextBlock Text="DEV PREVIEW" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                </Border>
-            </Grid>
-        </Grid>
+        </Border>
 
         <InfoBar
             x:Name="UpdateInfoBar"
@@ -72,49 +101,37 @@
             </InfoBar.ActionButton>
         </InfoBar>
 
-        <NavigationView
-            x:Name="Navigation"
-            Grid.Row="2"
-            IsBackButtonVisible="Collapsed"
-            IsSettingsVisible="False"
-            OpenPaneLength="236"
-            PaneDisplayMode="Left"
-            Background="{ThemeResource AppBackgroundBrush}"
-            SelectionChanged="Navigation_SelectionChanged">
-            <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="AllItem" Content="All" Tag="All" AutomationProperties.Name="All downloads">
-                    <NavigationViewItem.Icon><SymbolIcon Symbol="AllApps" /></NavigationViewItem.Icon>
-                    <NavigationViewItem.InfoBadge><InfoBadge Value="{Binding AllCount}" /></NavigationViewItem.InfoBadge>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Running" Tag="Running" AutomationProperties.Name="Running downloads">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE896;" /></NavigationViewItem.Icon>
-                    <NavigationViewItem.InfoBadge><InfoBadge Value="{Binding RunningCount}" /></NavigationViewItem.InfoBadge>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Queued" Tag="Queued" AutomationProperties.Name="Queued downloads">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE823;" /></NavigationViewItem.Icon>
-                    <NavigationViewItem.InfoBadge><InfoBadge Value="{Binding QueuedCount}" /></NavigationViewItem.InfoBadge>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Completed" Tag="Completed" AutomationProperties.Name="Completed downloads">
-                    <NavigationViewItem.Icon><SymbolIcon Symbol="Accept" /></NavigationViewItem.Icon>
-                    <NavigationViewItem.InfoBadge><InfoBadge Value="{Binding CompletedCount}" /></NavigationViewItem.InfoBadge>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Failed" Tag="Failed" AutomationProperties.Name="Failed downloads">
-                    <NavigationViewItem.Icon><SymbolIcon Symbol="ReportHacked" /></NavigationViewItem.Icon>
-                    <NavigationViewItem.InfoBadge><InfoBadge Value="{Binding FailedCount}" /></NavigationViewItem.InfoBadge>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
-            <NavigationView.FooterMenuItems>
-                <NavigationViewItem x:Name="SupportedSitesItem" Content="Supported sites" Tag="SupportedSites" AutomationProperties.Name="Supported sites">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE909;" /></NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Name="SettingsNavigationItem" Content="Settings" Tag="Settings" AutomationProperties.Name="Settings">
-                    <NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="About" Tag="About" AutomationProperties.Name="About Ray's Loader">
-                    <NavigationViewItem.Icon><SymbolIcon Symbol="Help" /></NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.FooterMenuItems>
-            <Frame x:Name="ContentFrame" />
-        </NavigationView>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Background="{ThemeResource RlSurfaceBrush}" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,1,0">
+                <Grid x:Name="Rail" Padding="0,20,0,14" RowSpacing="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel AutomationProperties.Name="Download filters">
+                        <TextBlock Margin="20,0,20,10" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="FILTER" />
+                        <RadioButton x:Name="AllItem" Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="All" Content="All" Tag="{Binding AllCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="All downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Running" Content="Running" Tag="{Binding RunningCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Running downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Queued" Content="Queued" Tag="{Binding QueuedCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Queued downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Completed" Content="Completed" Tag="{Binding CompletedCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Completed downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Failed" Content="Failed" Tag="{Binding FailedCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Failed downloads" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2">
+                        <RadioButton x:Name="SupportedSitesItem" Style="{StaticResource RlRailItemStyle}" MinHeight="40" FontSize="13" GroupName="Navigation" CommandParameter="SupportedSites" Content="Supported sites" Checked="Rail_Checked" />
+                        <RadioButton x:Name="SettingsNavigationItem" Style="{StaticResource RlRailItemStyle}" MinHeight="40" FontSize="13" GroupName="Navigation" CommandParameter="Settings" Content="Settings" Checked="Rail_Checked" />
+                        <RadioButton x:Name="AboutItem" Style="{StaticResource RlRailItemStyle}" MinHeight="40" FontSize="13" GroupName="Navigation" CommandParameter="About" Content="About" Checked="Rail_Checked" AutomationProperties.Name="About Ray's Loader" />
+                        <TextBlock x:Name="VersionText" Margin="20,14,20,0" Style="{StaticResource RlLabelTextStyle}" FontSize="10" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Frame x:Name="ContentFrame" Grid.Column="1" />
+        </Grid>
     </Grid>
 </Window>

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
+using RaysLoader.Theming;
 using RaysLoader.Models;
 using RaysLoader.Services;
 using RaysLoader.ViewModels;
@@ -20,12 +21,6 @@ public sealed partial class DownloadsPage : Page
         _queue = queue;
         _settings = settings;
         DataContext = viewModel;
-        if (AppIdentity.IsDevelopment)
-        {
-            DevLibraryHeader.Visibility = Visibility.Visible;
-            DownloadsHeading.Visibility = Visibility.Collapsed;
-            Root.Padding = new Thickness(28, 20, 28, 28);
-        }
         viewModel.AddDownloadRequested += AddDownloadRequested;
         viewModel.LogRequested += LogRequested;
         Unloaded += DownloadsPage_Unloaded;
@@ -38,11 +33,11 @@ public sealed partial class DownloadsPage : Page
         var dialogViewModel = App.Services.GetRequiredService<AddDownloadViewModel>();
         if (!string.IsNullOrWhiteSpace(initialUrl)) dialogViewModel.Urls = initialUrl;
         var dialog = new AddDownloadDialog(dialogViewModel, _queue) { XamlRoot = XamlRoot };
-        await dialog.ShowAsync();
+        await dialog.ShowThemedAsync();
     }
 
     private async void AddDownloadRequested(object? sender, EventArgs e) => await ShowAddDialogAsync();
-    private async void LogRequested(object? sender, DownloadTask task) => await new LogDialog(task) { XamlRoot = XamlRoot }.ShowAsync();
+    private async void LogRequested(object? sender, DownloadTask task) => await new LogDialog(task) { XamlRoot = XamlRoot }.ShowThemedAsync();
     private void Stop_Click(object sender, RoutedEventArgs e) { if ((sender as FrameworkElement)?.Tag is DownloadTask task) ViewModel.StopCommand.Execute(task); }
     private void Retry_Click(object sender, RoutedEventArgs e) { if ((sender as FrameworkElement)?.Tag is DownloadTask task) ViewModel.RetryCommand.Execute(task); }
     private void ViewTerminal_Click(object sender, RoutedEventArgs e) { if ((sender as FrameworkElement)?.Tag is DownloadTask task) ViewModel.ShowLogCommand.Execute(task); }
@@ -66,7 +61,7 @@ public sealed partial class DownloadsPage : Page
                 CloseButtonText = "Keep downloading",
                 DefaultButton = ContentDialogButton.Close,
             };
-            if (await confirmation.ShowAsync() != ContentDialogResult.Primary)
+            if (await confirmation.ShowThemedAsync() != ContentDialogResult.Primary)
             {
                 StopAllToggle.IsChecked = false;
                 return;

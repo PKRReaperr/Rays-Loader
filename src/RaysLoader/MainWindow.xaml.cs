@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -44,28 +43,24 @@ public sealed partial class MainWindow : Window
         _toolMaintenanceService = toolMaintenanceService;
         RootGrid.DataContext = viewModel;
         Title = AppIdentity.DisplayName;
-        AppNameText.Text = AppIdentity.DisplayName;
         AppLogo.Source = new BitmapImage(new Uri(AppIdentity.LogoUri));
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarDragRegion);
-        TrySetBackdrop();
+        AppNameText.Text = AppIdentity.DisplayName.ToUpperInvariant();
+        VersionText.Text = VersionLabel();
         ApplyTheme(settingsService.Current.Theme);
-        AccentPalette.Apply(settingsService.Current.AccentColor, settingsService.Current.Theme);
+        AccentPalette.Apply(settingsService.Current.AccentColor);
+        ApplyCaptionButtonColors();
         if (AppIdentity.IsDevelopment)
         {
             DevelopmentBadge.Visibility = Visibility.Visible;
             AppUpdatesMenuItem.Text = "Download engine updates";
-            Navigation.PaneDisplayMode = NavigationViewPaneDisplayMode.Auto;
-            Navigation.OpenPaneLength = 212;
-            Navigation.ExpandedModeThresholdWidth = 1100;
-            Navigation.CompactModeThresholdWidth = 700;
-            AllItem.Content = "All downloads";
         }
 
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", AppIdentity.IconFileName));
         RestoreWindowPlacement(settingsService.Current);
         AppWindow.Closing += AppWindow_Closing;
-        Navigation.SelectedItem = AllItem;
+        AllItem.IsChecked = true;
         ShowDownloads();
         RootGrid.Loaded += RootGrid_Loaded;
     }
@@ -86,35 +81,41 @@ public sealed partial class MainWindow : Window
     public void RefreshTheme()
     {
         ApplyTheme(_settingsService.Current.Theme);
-        AccentPalette.Apply(_settingsService.Current.AccentColor, _settingsService.Current.Theme);
+        AccentPalette.Apply(_settingsService.Current.AccentColor);
     }
 
     public void ShowSupportedSites()
     {
-        Navigation.SelectedItem = SupportedSitesItem;
         if (ContentFrame.Content is not SupportedSitesPage)
             ContentFrame.Content = App.Services.GetRequiredService<SupportedSitesPage>();
+        SupportedSitesItem.IsChecked = true;
     }
 
-    private void Navigation_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private void Rail_Checked(object sender, RoutedEventArgs e)
     {
-        if (args.SelectedItemContainer?.Tag is not string tag) return;
-        if (Enum.TryParse<DownloadFilter>(tag, out var filter))
+        if ((sender as RadioButton)?.CommandParameter is not string route) return;
+        if (Enum.TryParse<DownloadFilter>(route, out var filter))
         {
             ViewModel.SelectedFilter = filter;
             ShowDownloads();
         }
-        else if (tag == "Settings") ShowSettings();
-        else if (tag == "About") ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
-        else if (tag == "SupportedSites") ShowSupportedSites();
+        else if (route == "Settings") ShowSettings();
+        else if (route == "About") ShowAbout();
+        else if (route == "SupportedSites") ShowSupportedSites();
+    }
+
+    private void ShowAbout()
+    {
+        if (ContentFrame.Content is not AboutPage) ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+        AboutItem.IsChecked = true;
     }
 
     private async void AddDownload_Click(object sender, RoutedEventArgs e) => await ShowAddDownloadAsync();
     private async void PasteAndAdd_Click(object sender, RoutedEventArgs e) => await ShowAddDownloadAsync(await ClipboardTextAsync());
     private void Exit_Click(object sender, RoutedEventArgs e) => Close();
-    private void ShowDownloads_Click(object sender, RoutedEventArgs e) { Navigation.SelectedItem = AllItem; ShowDownloads(); }
+    private void ShowDownloads_Click(object sender, RoutedEventArgs e) { AllItem.IsChecked = true; ShowDownloads(); }
     private void ShowSettings_Click(object sender, RoutedEventArgs e) => ShowSettings();
-    private void ShowAbout_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
+    private void ShowAbout_Click(object sender, RoutedEventArgs e) => ShowAbout();
     private void ShowSupportedSites_Click(object sender, RoutedEventArgs e) => ShowSupportedSites();
     private async void GettingStarted_Click(object sender, RoutedEventArgs e) => await ShowOnboardingAsync();
     private async void ReportBug_Click(object sender, RoutedEventArgs e) => await OpenWebLinkAsync(AppLinks.BugReport);
@@ -193,7 +194,7 @@ public sealed partial class MainWindow : Window
     public async Task ShowOnboardingAsync()
     {
         var dialog = new OnboardingDialog(_settingsService) { XamlRoot = RootGrid.XamlRoot };
-        await dialog.ShowAsync();
+        await dialog.ShowThemedAsync();
     }
 
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
@@ -209,14 +210,14 @@ public sealed partial class MainWindow : Window
             // Commit NumberBox text before disabling the editor. Keep settings
             // stable while cancelled tool processes finish restoring their files.
             SettingsNavigationItem.Focus(FocusState.Programmatic);
-            Navigation.IsEnabled = false;
+            Rail.IsHitTestVisible = false;
             RootGrid.IsHitTestVisible = false;
             var autoSave = App.Services.GetRequiredService<SettingsAutoSaveService>();
             CaptureWindowPlacement(sender, _settingsService.Current);
             var saved = await autoSave.FlushAsync();
             if (!saved)
             {
-                Navigation.IsEnabled = true;
+                Rail.IsHitTestVisible = true;
                 RootGrid.IsHitTestVisible = true;
                 var dialog = new ContentDialog
                 {
@@ -228,7 +229,7 @@ public sealed partial class MainWindow : Window
                     XamlRoot = RootGrid.XamlRoot,
                 };
                 ContentDialogResult choice;
-                try { choice = await dialog.ShowAsync(); }
+                try { choice = await dialog.ShowThemedAsync(); }
                 catch (Exception exception) when (exception is InvalidOperationException or COMException)
                 {
                     // Another dialog can already be open when the title-bar X
@@ -245,7 +246,7 @@ public sealed partial class MainWindow : Window
                     _closeInProgress = false;
                     return;
                 }
-                Navigation.IsEnabled = false;
+                Rail.IsHitTestVisible = false;
                 RootGrid.IsHitTestVisible = false;
             }
             _lifetimeCancellation.Cancel();
@@ -326,14 +327,34 @@ public sealed partial class MainWindow : Window
         if (ContentFrame.Content is SettingsView existing) return existing;
         var page = App.Services.GetRequiredService<SettingsView>();
         ContentFrame.Content = page;
-        Navigation.SelectedItem = SettingsNavigationItem;
+        SettingsNavigationItem.IsChecked = true;
         return page;
     }
 
-    private void TrySetBackdrop()
+    private static string VersionLabel()
     {
-        try { SystemBackdrop = new MicaBackdrop { Kind = MicaKind.Base }; }
-        catch (Exception exception) when (exception is COMException or InvalidOperationException) { System.Diagnostics.Debug.WriteLine(exception); }
+        var version = typeof(MainWindow).Assembly.GetName().Version;
+        return version is null ? string.Empty : $"V{version.Major}.{version.Minor}.{version.Build}";
+    }
+
+    private void RootGrid_ActualThemeChanged(FrameworkElement sender, object args) => ApplyCaptionButtonColors();
+
+    /// <summary>Keeps the system caption buttons readable on the flat title bar in both themes.</summary>
+    private void ApplyCaptionButtonColors()
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported()) return;
+        var titleBar = AppWindow.TitleBar;
+        var light = RootGrid.ActualTheme == ElementTheme.Light;
+        var foreground = light ? Windows.UI.Color.FromArgb(255, 11, 11, 11) : Windows.UI.Color.FromArgb(255, 237, 237, 237);
+        var hover = light ? Windows.UI.Color.FromArgb(255, 223, 222, 215) : Windows.UI.Color.FromArgb(255, 27, 27, 27);
+        titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+        titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+        titleBar.ButtonForegroundColor = foreground;
+        titleBar.ButtonHoverForegroundColor = foreground;
+        titleBar.ButtonHoverBackgroundColor = hover;
+        titleBar.ButtonPressedForegroundColor = foreground;
+        titleBar.ButtonPressedBackgroundColor = hover;
+        titleBar.ButtonInactiveForegroundColor = light ? Windows.UI.Color.FromArgb(255, 92, 92, 92) : Windows.UI.Color.FromArgb(255, 140, 140, 140);
     }
 
     private static async Task<string?> ClipboardTextAsync()

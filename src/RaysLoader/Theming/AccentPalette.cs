@@ -3,128 +3,109 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using RaysLoader.Settings;
 using Windows.UI;
-using Windows.UI.ViewManagement;
 
 namespace RaysLoader.Theming;
 
+/// <summary>
+/// The four accent colours and their per-theme variants. On the light theme the
+/// thin lines and text use darker shades so they stay readable on off-white.
+/// </summary>
 public static class AccentPalette
 {
+    private readonly record struct Variant(Color Fill, Color Ink, Color Line, Color Text, Color Soft);
+
     public static string Label(AppAccent accent) => accent switch
     {
-        AppAccent.System => "Windows accent",
-        AppAccent.Ocean => "Ocean",
-        AppAccent.Mint => "Mint",
-        AppAccent.Coral => "Coral",
-        AppAccent.Gold => "Gold",
-        AppAccent.Rose => "Rose",
-        AppAccent.Violet => "Violet",
-        _ => "Windows accent",
+        AppAccent.Red => "Red",
+        AppAccent.Yellow => "Yellow",
+        AppAccent.Navy => "Navy",
+        _ => "Neon green",
     };
 
-    public static Color Color(AppAccent accent) => accent switch
+    /// <summary>The swatch colour shown in settings.</summary>
+    public static Color Color(AppAccent accent) => Dark(accent).Fill;
+
+    public static void Apply(AppAccent accent)
     {
-        AppAccent.Ocean => FromHex(0x4C, 0xC2, 0xFF),
-        AppAccent.Mint => FromHex(0x45, 0xD4, 0x83),
-        AppAccent.Coral => FromHex(0xFF, 0x7A, 0x66),
-        AppAccent.Gold => FromHex(0xF5, 0xC5, 0x42),
-        AppAccent.Rose => FromHex(0xFF, 0x70, 0xAE),
-        AppAccent.Violet => FromHex(0xB4, 0x98, 0xFF),
-        _ => new UISettings().GetColorValue(UIColorType.AccentLight2),
-    };
+        var resources = Application.Current.Resources;
+        var dark = Dark(accent);
+        var light = Light(accent);
 
-    public static void Apply(AppAccent accent, AppTheme theme)
-    {
-        var color = Color(accent);
-        var foreground = RelativeLuminance(color) > 0.48 ? Colors.Black : Colors.White;
-        var isLight = theme is AppTheme.Light ||
-            (theme is AppTheme.System && RelativeLuminance(new UISettings().GetColorValue(UIColorType.Background)) > 0.5);
-        var background = isLight
-            ? Blend(FromHex(0xF7, 0xF8, 0xFA), color, 0.07)
-            : Blend(FromHex(0x08, 0x09, 0x0B), color, 0.08);
-        var surface = isLight
-            ? Blend(FromHex(0xF0, 0xF2, 0xF5), color, 0.09)
-            : Blend(FromHex(0x10, 0x12, 0x16), color, 0.10);
-        var card = isLight
-            ? Blend(Colors.White, color, 0.06)
-            : Blend(FromHex(0x17, 0x19, 0x1D), color, 0.12);
-        var settingsHeader = isLight
-            ? Blend(FromHex(0xEC, 0xEE, 0xF2), color, 0.06)
-            : Blend(FromHex(0x1D, 0x20, 0x26), color, 0.08);
-        var settingsLabel = isLight
-            ? Blend(FromHex(0xE4, 0xE7, 0xEC), color, 0.07)
-            : Blend(FromHex(0x22, 0x26, 0x2D), color, 0.09);
-        var settingsBody = isLight
-            ? Blend(FromHex(0xFA, 0xFA, 0xFB), color, 0.04)
-            : Blend(FromHex(0x0D, 0x0F, 0x13), color, 0.06);
-        var settingsDivider = isLight
-            ? Blend(FromHex(0xD3, 0xD6, 0xDC), color, 0.04)
-            : Blend(FromHex(0x08, 0x09, 0x0B), color, 0.04);
+        // The app's own theme dictionaries (Rl* tokens and Fluent overrides).
+        if (Theme(resources, "Default") is { } appDark) Write(appDark, dark);
+        if (Theme(resources, "Light") is { } appLight) Write(appLight, light);
 
-#if RAYSLOADER_DEV
-        // Quiet neutral surfaces give the accent and content more room in DEV.
-        background = isLight ? FromHex(0xF4, 0xF5, 0xF8) : FromHex(0x14, 0x16, 0x1C);
-        surface = isLight ? FromHex(0xEA, 0xED, 0xF3) : FromHex(0x1B, 0x1E, 0x26);
-        card = isLight ? Colors.White : FromHex(0x23, 0x27, 0x31);
-#endif
-
-        SetBrush("AppBackgroundBrush", background, 1);
-        SetBrush("AppSurfaceBrush", surface, 1);
-        SetBrush("AppCardBrush", card, 1);
-        SetBrush("SettingsPageHeaderBrush", settingsHeader, 1);
-        SetBrush("SettingsSectionLabelBrush", settingsLabel, 1);
-        SetBrush("SettingsSectionBodyBrush", settingsBody, 1);
-        SetBrush("SettingsSectionDividerBrush", settingsDivider, 1);
-        SetBrush("SolidBackgroundFillColorBaseBrush", background, 1);
-        SetBrush("SolidBackgroundFillColorSecondaryBrush", surface, 1);
-        SetBrush("LayerFillColorDefaultBrush", surface, 1);
-        SetBrush("LayerFillColorAltBrush", background, 1);
-        SetBrush("LayerOnMicaBaseAltFillColorDefaultBrush", surface, 1);
-        SetBrush("CardBackgroundFillColorDefaultBrush", card, 1);
-        SetBrush("CardBackgroundFillColorSecondaryBrush", surface, 1);
-        SetBrush("AccentFillColorSelectedTextBackgroundBrush", color, 1);
-        SetBrush("AccentFillColorDefaultBrush", color, 1);
-        SetBrush("AccentFillColorSecondaryBrush", color, 0.9);
-        SetBrush("AccentFillColorTertiaryBrush", color, 0.8);
-        SetBrush("AccentTextFillColorPrimaryBrush", color, 1);
-        SetBrush("AccentTextFillColorSecondaryBrush", color, 0.9);
-        SetBrush("AccentTextFillColorTertiaryBrush", color, 0.8);
-        SetBrush("SystemFillColorAttentionBrush", color, 1);
-        SetBrush("AccentAAFillColorDefaultBrush", color, 1);
-        SetBrush("AccentAAFillColorSecondaryBrush", color, 0.9);
-        SetBrush("AccentAAFillColorTertiaryBrush", color, 0.8);
-        SetBrush("TextOnAccentFillColorPrimaryBrush", foreground, 1);
-        SetBrush("TextOnAccentFillColorSecondaryBrush", foreground, 0.8);
-    }
-
-    private static void SetBrush(string key, Color color, double opacity)
-    {
-        if (Application.Current.Resources[key] is not SolidColorBrush brush) return;
-        brush.Color = color;
-        brush.Opacity = opacity;
-    }
-
-    private static Color FromHex(byte red, byte green, byte blue) => ColorHelper.FromArgb(255, red, green, blue);
-
-    private static Color Blend(Color baseColor, Color tint, double tintAmount)
-    {
-        static byte Mix(byte left, byte right, double amount) =>
-            (byte)Math.Clamp(Math.Round(left + ((right - left) * amount)), byte.MinValue, byte.MaxValue);
-
-        return ColorHelper.FromArgb(
-            255,
-            Mix(baseColor.R, tint.R, tintAmount),
-            Mix(baseColor.G, tint.G, tintAmount),
-            Mix(baseColor.B, tint.B, tintAmount));
-    }
-
-    private static double RelativeLuminance(Color color)
-    {
-        static double Channel(byte value)
+        // Stock controls alias the framework's own accent brushes (for example
+        // CheckBoxCheckBackgroundFillChecked is a StaticResource of
+        // AccentFillColorDefaultBrush), which app-level keys do not override.
+        // Recolour those accent-only brushes in place.
+        foreach (var merged in resources.MergedDictionaries)
         {
-            var normalized = value / 255d;
-            return normalized <= 0.04045 ? normalized / 12.92 : Math.Pow((normalized + 0.055) / 1.055, 2.4);
+            if (Theme(merged, "Default") is { } frameworkDefault) WriteFramework(frameworkDefault, dark);
+            if (Theme(merged, "Dark") is { } frameworkDark) WriteFramework(frameworkDark, dark);
+            if (Theme(merged, "Light") is { } frameworkLight) WriteFramework(frameworkLight, light);
         }
-
-        return (0.2126 * Channel(color.R)) + (0.7152 * Channel(color.G)) + (0.0722 * Channel(color.B));
     }
+
+    private static ResourceDictionary? Theme(ResourceDictionary resources, string key) =>
+        resources.ThemeDictionaries.TryGetValue(key, out var value) ? value as ResourceDictionary : null;
+
+    private static Variant Dark(AppAccent accent) => accent switch
+    {
+        AppAccent.Red => new(Hex(0xFF2B2B), Hex(0x0A0A0A), Hex(0xFF2B2B), Hex(0xFF5A5A), Hex(0x1F0B0B)),
+        AppAccent.Yellow => new(Hex(0xFFD60A), Hex(0x0A0A0A), Hex(0xFFD60A), Hex(0xFFD60A), Hex(0x1C1904)),
+        AppAccent.Navy => new(Hex(0x1C2F86), Hex(0xFFFFFF), Hex(0x4A6CF0), Hex(0x8FA6FF), Hex(0x0C1128)),
+        _ => new(Hex(0xB8FF1F), Hex(0x0A0A0A), Hex(0xB8FF1F), Hex(0xB8FF1F), Hex(0x141C05)),
+    };
+
+    private static Variant Light(AppAccent accent) => accent switch
+    {
+        AppAccent.Red => new(Hex(0xE01414), Hex(0xFFFFFF), Hex(0xE01414), Hex(0xB80F0F), Hex(0xFBE3E3)),
+        AppAccent.Yellow => new(Hex(0xFFD60A), Hex(0x0A0A0A), Hex(0x9A7B00), Hex(0x7A6100), Hex(0xFFF4C2)),
+        AppAccent.Navy => new(Hex(0x1C2F86), Hex(0xFFFFFF), Hex(0x1C2F86), Hex(0x1C2F86), Hex(0xE1E6F7)),
+        _ => new(Hex(0xB8FF1F), Hex(0x0A0A0A), Hex(0x4C8A00), Hex(0x3D6E00), Hex(0xE9F9C9)),
+    };
+
+    private static void Write(ResourceDictionary resources, Variant variant)
+    {
+        Set(resources, "RlAccentFillBrush", variant.Fill);
+        Set(resources, "RlAccentInkBrush", variant.Ink);
+        Set(resources, "RlAccentLineBrush", variant.Line);
+        Set(resources, "RlAccentTextBrush", variant.Text);
+        Set(resources, "RlAccentSoftBrush", variant.Soft);
+        WriteFramework(resources, variant);
+        Set(resources, "AccentControlElevationBorderBrush", variant.Line);
+        Set(resources, "SystemFillColorAttentionBrush", variant.Line);
+    }
+
+    /// <summary>Brushes that only ever carry the accent colour.</summary>
+    private static void WriteFramework(ResourceDictionary resources, Variant variant)
+    {
+        Set(resources, "AccentFillColorDefaultBrush", variant.Fill);
+        Set(resources, "AccentFillColorSecondaryBrush", variant.Fill, 0.88);
+        Set(resources, "AccentFillColorTertiaryBrush", variant.Fill, 0.72);
+        Set(resources, "AccentFillColorSelectedTextBackgroundBrush", variant.Fill);
+        Set(resources, "AccentAAFillColorDefaultBrush", variant.Fill);
+        Set(resources, "AccentAAFillColorSecondaryBrush", variant.Fill, 0.88);
+        Set(resources, "AccentAAFillColorTertiaryBrush", variant.Fill, 0.72);
+        Set(resources, "AccentTextFillColorPrimaryBrush", variant.Text);
+        Set(resources, "AccentTextFillColorSecondaryBrush", variant.Text);
+        Set(resources, "AccentTextFillColorTertiaryBrush", variant.Text);
+        Set(resources, "TextOnAccentFillColorPrimaryBrush", variant.Ink);
+        Set(resources, "TextOnAccentFillColorSecondaryBrush", variant.Ink, 0.8);
+        Set(resources, "TextOnAccentFillColorSelectedTextBrush", variant.Ink);
+    }
+
+    /// <summary>Recolours an existing brush in place so ThemeResource references repaint.</summary>
+    private static void Set(ResourceDictionary resources, string key, Color color, double opacity = 1)
+    {
+        if (resources.TryGetValue(key, out var value) && value is SolidColorBrush brush)
+        {
+            brush.Color = color;
+            brush.Opacity = opacity;
+        }
+    }
+
+    private static Color Hex(uint rgb) => ColorHelper.FromArgb(
+        255, (byte)((rgb >> 16) & 0xFF), (byte)((rgb >> 8) & 0xFF), (byte)(rgb & 0xFF));
 }

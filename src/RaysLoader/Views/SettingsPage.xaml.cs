@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using RaysLoader.Theming;
 using RaysLoader.Models;
 using RaysLoader.Services;
 using RaysLoader.Settings;
@@ -132,7 +133,7 @@ public sealed partial class SettingsPage : Page
             XamlRoot = XamlRoot,
         };
 
-        if (await dialog.ShowAsync() is not ContentDialogResult.Primary) return;
+        if (await dialog.ShowThemedAsync() is not ContentDialogResult.Primary) return;
 
         var targets = AppDataCleanupTargets.None;
         if (removeTools.IsChecked == true) targets |= AppDataCleanupTargets.ManagedTools;
@@ -184,7 +185,7 @@ public sealed partial class SettingsPage : Page
             CloseButtonText = "Close",
             XamlRoot = XamlRoot,
         };
-        await dialog.ShowAsync();
+        await dialog.ShowThemedAsync();
     }
 
     private static void OpenFolder(string path)

@@ -9,15 +9,31 @@ public enum AppTheme
     Dark,
 }
 
+/// <summary>
+/// Accent colours. Values start at 10 so settings saved by earlier versions,
+/// which stored 0-6 for the retired palette, can be told apart and migrated.
+/// </summary>
 public enum AppAccent
 {
-    System,
-    Ocean,
-    Mint,
-    Coral,
-    Gold,
-    Rose,
-    Violet,
+    Red = 10,
+    Yellow = 11,
+    NeonGreen = 12,
+    Navy = 13,
+}
+
+public static class AppAccents
+{
+    public const AppAccent Default = AppAccent.NeonGreen;
+
+    /// <summary>Maps a saved accent, including retired values, to a current one.</summary>
+    public static AppAccent Normalize(AppAccent accent) => (int)accent switch
+    {
+        _ when Enum.IsDefined(accent) => accent,
+        1 or 6 => AppAccent.Navy,       // Ocean, Violet
+        3 or 5 => AppAccent.Red,        // Coral, Rose
+        4 => AppAccent.Yellow,          // Gold
+        _ => Default,                   // Windows accent, Mint, unknown
+    };
 }
 
 public enum AuthenticationMode
@@ -36,7 +52,7 @@ public enum YtDlpUpdateChannel
 public sealed partial class AppSettings : ObservableObject
 {
     [ObservableProperty] private AppTheme theme = AppTheme.System;
-    [ObservableProperty] private AppAccent accentColor = AppAccent.System;
+    [ObservableProperty] private AppAccent accentColor = AppAccents.Default;
     [ObservableProperty] private bool hasCompletedOnboarding;
     [ObservableProperty] private string defaultOutputDirectory = AppPaths.DefaultOutputDirectory;
     [ObservableProperty] private int maximumSimultaneousDownloads = 2;

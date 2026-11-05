@@ -186,7 +186,7 @@ public sealed class SettingsService : ISettingsService, ISettingsChangeNotifier
     private static void Normalize(AppSettings settings)
     {
         string[] videoQualities = ["best", "2160p", "1440p", "1080p", "720p", "480p", "360p"];
-        if (!Enum.IsDefined(settings.AccentColor)) settings.AccentColor = AppAccent.System;
+        settings.AccentColor = AppAccents.Normalize(settings.AccentColor);
         if (!Enum.IsDefined(settings.AuthenticationMode)) settings.AuthenticationMode = AuthenticationMode.None;
         if (!Enum.IsDefined(settings.YtDlpUpdateChannel)) settings.YtDlpUpdateChannel = YtDlpUpdateChannel.Nightly;
         settings.BrowserCookies = AuthenticationOptions.Browsers.Any(option =>

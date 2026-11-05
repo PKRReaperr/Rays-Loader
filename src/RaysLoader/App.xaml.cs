@@ -3,6 +3,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using RaysLoader.ProcessManagement;
 using RaysLoader.Services;
+using RaysLoader.Theming;
 using RaysLoader.ViewModels;
 using RaysLoader.Views;
 
@@ -29,6 +30,8 @@ public partial class App : Application
         {
             var settings = new SettingsService(AppIdentity.DataDirectory, importLegacySettings: !AppIdentity.IsDevelopment);
             await settings.LoadAsync();
+            // Before any XAML loads, so every control resolves the accent brushes.
+            AccentPalette.Apply(settings.Current.AccentColor);
 
             var services = new ServiceCollection();
             services.AddSingleton<ISettingsService>(settings);

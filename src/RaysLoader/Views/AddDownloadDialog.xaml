@@ -87,14 +87,14 @@
                             Background="{ThemeResource AppCardBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="8">
+>
                             <Grid MinHeight="76" ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="124" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Background="{ThemeResource SettingsSectionBodyBrush}" CornerRadius="6">
+                                <Border Background="{ThemeResource SettingsSectionBodyBrush}">
                                     <Grid>
                                         <FontIcon
                                             HorizontalAlignment="Center"
@@ -188,7 +188,7 @@
                     <ToggleSwitch Header="Download only the selected range" IsOn="{Binding TrimEnabled, Mode=TwoWay}" IsEnabled="{Binding CanSelectClip}" />
                     <Border
                         Padding="14,12"
-                        CornerRadius="8"
+
                         Background="{ThemeResource AppCardBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1">
@@ -200,16 +200,16 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="START" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Text="{Binding TrimStartDisplay}" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="START" Style="{StaticResource RlLabelTextStyle}" />
+                                    <TextBlock Text="{Binding TrimStartDisplay}" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="16" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <TextBlock Text="CLIP LENGTH" HorizontalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Text="{Binding TrimLengthDisplay}" HorizontalAlignment="Center" FontSize="14" />
+                                    <TextBlock Text="CLIP LENGTH" HorizontalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" />
+                                    <TextBlock Text="{Binding TrimLengthDisplay}" HorizontalAlignment="Center" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="14" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                    <TextBlock Text="END" HorizontalAlignment="Right" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Text="{Binding TrimEndDisplay}" HorizontalAlignment="Right" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="END" HorizontalAlignment="Right" Style="{StaticResource RlLabelTextStyle}" />
+                                    <TextBlock Text="{Binding TrimEndDisplay}" HorizontalAlignment="Right" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="16" />
                                 </StackPanel>
                             </Grid>
                             <controls:TrimRangeSlider
@@ -220,8 +220,8 @@
                                 IsEnabled="{Binding CanSelectClip}"
                                 AutomationProperties.Name="Clip timeline range" />
                             <Grid>
-                                <TextBlock Text="00:00" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                <TextBlock HorizontalAlignment="Right" Text="{Binding MediaDurationDisplay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                <TextBlock Text="00:00" Style="{StaticResource RlLabelTextStyle}" />
+                                <TextBlock HorizontalAlignment="Right" Text="{Binding MediaDurationDisplay}" Style="{StaticResource RlLabelTextStyle}" />
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -258,7 +258,7 @@
 
                     <Border
                         Padding="14"
-                        CornerRadius="8"
+
                         Background="{ThemeResource AppCardBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
@@ -307,7 +307,7 @@
                                         <TextBlock Text="Open source website" />
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource AccentButtonStyle}" Click="RetryPreview_Click">
+                                <Button Style="{StaticResource RlAccentButtonStyle}" Click="RetryPreview_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="7">
                                         <FontIcon Glyph="&#xE721;" />
                                         <TextBlock Text="Retry preview with sign-in" />
@@ -324,7 +324,7 @@
 
                     <Border
                         Padding="14"
-                        CornerRadius="8"
+
                         Background="{ThemeResource AppCardBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
@@ -340,7 +340,7 @@
                                 <TextBox Header="Cookies file" Text="{Binding CookiesFile, Mode=TwoWay}" PlaceholderText="Choose cookies.txt" />
                                 <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button>
                             </Grid>
-                            <Button HorizontalAlignment="Left" Style="{StaticResource AccentButtonStyle}" Click="RetryPreview_Click">Retry preview with cookies file</Button>
+                            <Button HorizontalAlignment="Left" Style="{StaticResource RlAccentButtonStyle}" Click="RetryPreview_Click">Retry preview with cookies file</Button>
                         </StackPanel>
                     </Border>
                 </StackPanel>

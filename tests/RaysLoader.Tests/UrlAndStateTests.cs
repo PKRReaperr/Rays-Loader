@@ -52,4 +52,32 @@ public sealed class UrlAndStateTests
         Assert.True(task.LogText.Length < 300_000);
         Assert.Contains("Log truncated", task.LogText);
     }
+
+    [Theory]
+    [InlineData(DownloadMode.Video, "MP4 1080p")]
+    [InlineData(DownloadMode.VideoOnly, "MP4 1080p")]
+    [InlineData(DownloadMode.AudioOnly, "MP3 192K")]
+    public void FormatSummaryDescribesTheRequestedOutput(DownloadMode mode, string expected)
+    {
+        var task = new DownloadTask(new DownloadRequest
+        {
+            Url = "https://example.test/watch",
+            OutputDirectory = "C:\\Media",
+            Mode = mode,
+            VideoQuality = "1080p",
+        });
+
+        Assert.Equal(expected, task.FormatSummary);
+    }
+
+    [Theory]
+    [InlineData("https://www.YouTube.com/watch?v=abc", "youtube.com")]
+    [InlineData("https://vimeo.com/123", "vimeo.com")]
+    [InlineData("not a url", "")]
+    public void SiteHostShowsTheLinksHostWithoutWww(string url, string expected)
+    {
+        var task = new DownloadTask(new DownloadRequest { Url = url, OutputDirectory = "C:\\Media" });
+
+        Assert.Equal(expected, task.SiteHost);
+    }
 }

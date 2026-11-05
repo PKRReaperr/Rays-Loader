@@ -14,7 +14,7 @@ public sealed class SettingsServiceTests : IDisposable
         var settings = new AppSettings
         {
             Theme = AppTheme.Dark,
-            AccentColor = AppAccent.Coral,
+            AccentColor = AppAccent.Navy,
             MaximumSimultaneousDownloads = 99,
             DefaultContainer = "mkv",
             AuthenticationMode = AuthenticationMode.Browser,
@@ -26,12 +26,40 @@ public sealed class SettingsServiceTests : IDisposable
         var reloaded = await new SettingsService(_directory).LoadAsync();
 
         Assert.Equal(AppTheme.Dark, reloaded.Theme);
-        Assert.Equal(AppAccent.Coral, reloaded.AccentColor);
+        Assert.Equal(AppAccent.Navy, reloaded.AccentColor);
         Assert.Equal(8, reloaded.MaximumSimultaneousDownloads);
         Assert.Equal("mkv", reloaded.DefaultContainer);
         Assert.Equal(AuthenticationMode.Browser, reloaded.AuthenticationMode);
         Assert.Equal("firefox", reloaded.BrowserCookies);
         Assert.Equal(YtDlpUpdateChannel.Stable, reloaded.YtDlpUpdateChannel);
+    }
+
+    [Theory]
+    [InlineData(0, AppAccent.NeonGreen)] // Windows accent
+    [InlineData(1, AppAccent.Navy)]      // Ocean
+    [InlineData(2, AppAccent.NeonGreen)] // Mint
+    [InlineData(3, AppAccent.Red)]       // Coral
+    [InlineData(4, AppAccent.Yellow)]    // Gold
+    [InlineData(5, AppAccent.Red)]       // Rose
+    [InlineData(6, AppAccent.Navy)]      // Violet
+    [InlineData(99, AppAccent.NeonGreen)]
+    [InlineData(11, AppAccent.Yellow)]
+    public async Task RetiredAccentColoursMigrateToTheClosestCurrentOne(int saved, AppAccent expected)
+    {
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(
+            Path.Combine(_directory, "settings.json"),
+            $$"""{"HasCompletedOnboarding":true,"AccentColor":{{saved}}}""");
+
+        var settings = await new SettingsService(_directory, importLegacySettings: false).LoadAsync();
+
+        Assert.Equal(expected, settings.AccentColor);
+    }
+
+    [Fact]
+    public void NewSettingsUseTheDefaultAccent()
+    {
+        Assert.Equal(AppAccent.NeonGreen, new AppSettings().AccentColor);
     }
 
     [Fact]

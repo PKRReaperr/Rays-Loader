@@ -10,6 +10,10 @@ Ray's Loader launches yt-dlp as an independent executable. The yt-dlp source pro
 
 Ray's Loader release packages include an FFmpeg build configured with GPL and version 3 components. A copy of GPLv3 is included at `LICENSES/GPL-3.0.txt`. Distributors must retain the license and exact corresponding-source offer or instructions supplied by the chosen FFmpeg build. Project and legal information: https://ffmpeg.org/legal.html
 
+## Fonts
+
+Ray's Loader bundles the Archivo typeface (Copyright 2020 The Archivo Project Authors, https://github.com/Omnibus-Type/Archivo) and the IBM Plex Mono typeface (Copyright © 2017 IBM Corp., with Reserved Font Name "Plex"). Both are licensed under the SIL Open Font License, Version 1.1; copies are included at `LICENSES/Archivo-OFL-1.1.txt` and `LICENSES/IBM-Plex-Mono-OFL-1.1.txt`. The font files are distributed unmodified, as obtained from https://github.com/google/fonts.
+
 ## Microsoft and .NET components
 
 The application uses .NET, Windows App SDK/WinUI 3, Microsoft.Extensions.DependencyInjection, and CommunityToolkit.Mvvm under their respective Microsoft open-source licenses. Package license metadata is available through NuGet and the corresponding Microsoft repositories.

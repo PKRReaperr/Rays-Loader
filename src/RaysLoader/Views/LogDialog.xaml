@@ -14,10 +14,10 @@
     <Grid Width="900" RowSpacing="10">
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
         <StackPanel Spacing="3">
-            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Title}" />
-            <TextBlock Text="Live yt-dlp and FFmpeg output" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <TextBlock Text="{Binding Title}" Style="{StaticResource RlSectionTitleTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Title}" />
+            <TextBlock Text="Live yt-dlp and FFmpeg output" Style="{StaticResource RlLabelTextStyle}" />
         </StackPanel>
-        <TextBox x:Name="LogTextBox" Grid.Row="1" MinHeight="460" MaxHeight="620" Text="{Binding LogText, Mode=OneWay}" AcceptsReturn="True" IsReadOnly="True" FontFamily="Cascadia Mono, Consolas" FontSize="11" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+        <TextBox x:Name="LogTextBox" Grid.Row="1" MinHeight="460" MaxHeight="620" Text="{Binding LogText, Mode=OneWay}" AcceptsReturn="True" IsReadOnly="True" FontFamily="{StaticResource RlMonoFont}" FontSize="12" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" />
         <CheckBox x:Name="FollowOutputCheck" Grid.Row="2" Content="Follow output" IsChecked="True" />
     </Grid>
 </ContentDialog>

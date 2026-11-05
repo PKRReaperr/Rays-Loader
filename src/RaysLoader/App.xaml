@@ -8,27 +8,485 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+
+
+            <!--
+                Ray's Loader design system ("Grid").
+                Rl* brushes are the app's own tokens. The Fluent keys below them are
+                overridden so stock controls pick up the same flat, sharp look.
+                Accent brushes are recoloured at runtime by Theming/AccentPalette.cs.
+            -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="RlBackgroundBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="RlSurfaceBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="RlRaisedBrush" Color="#141414" />
+                    <SolidColorBrush x:Key="RlSelectedBrush" Color="#1B1B1B" />
+                    <SolidColorBrush x:Key="RlRuleBrush" Color="#262626" />
+                    <SolidColorBrush x:Key="RlRuleSoftBrush" Color="#1C1C1C" />
+                    <SolidColorBrush x:Key="RlRuleStrongBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="RlGridLineBrush" Color="#151515" />
+                    <SolidColorBrush x:Key="RlTickOffBrush" Color="#222222" />
+                    <SolidColorBrush x:Key="RlTextBrush" Color="#EDEDED" />
+                    <SolidColorBrush x:Key="RlTextSecondaryBrush" Color="#B5B5B5" />
+                    <SolidColorBrush x:Key="RlTextMutedBrush" Color="#8C8C8C" />
+                    <SolidColorBrush x:Key="RlInverseBrush" Color="#EDEDED" />
+                    <SolidColorBrush x:Key="RlOnInverseBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="RlDangerBrush" Color="#FF6B6B" />
+                    <SolidColorBrush x:Key="RlAccentFillBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="RlAccentInkBrush" Color="#0A0A0A" />
+                    <SolidColorBrush x:Key="RlAccentLineBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="RlAccentTextBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="RlAccentSoftBrush" Color="#141C05" />
+
+                    <!-- Older keys still used by some views. -->
+                    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="AppSurfaceBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="AppCardBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="SettingsPageHeaderBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="SettingsSectionLabelBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="SettingsSectionBodyBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="SettingsSectionDividerBrush" Color="#262626" />
+
+                    <!-- Fluent overrides: neutral surfaces, strokes and text. -->
+                    <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="#141414" />
+                    <SolidColorBrush x:Key="LayerFillColorDefaultBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="LayerFillColorAltBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="LayerOnMicaBaseAltFillColorDefaultBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#0E0E0E" />
+                    <SolidColorBrush x:Key="CardBackgroundFillColorSecondaryBrush" Color="#141414" />
+                    <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#262626" />
+                    <SolidColorBrush x:Key="CardStrokeColorDefaultSolidBrush" Color="#262626" />
+                    <SolidColorBrush x:Key="DividerStrokeColorDefaultBrush" Color="#262626" />
+                    <SolidColorBrush x:Key="SurfaceStrokeColorDefaultBrush" Color="#262626" />
+                    <SolidColorBrush x:Key="SurfaceStrokeColorFlyoutBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="ControlStrokeColorSecondaryBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="ControlStrongStrokeColorDefaultBrush" Color="#8C8C8C" />
+                    <SolidColorBrush x:Key="ControlElevationBorderBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="CircleElevationBorderBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="TextControlElevationBorderBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="#1B1B1B" />
+                    <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="#141414" />
+                    <SolidColorBrush x:Key="ControlFillColorInputActiveBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="ControlAltFillColorSecondaryBrush" Color="#141414" />
+                    <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#1B1B1B" />
+                    <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#141414" />
+                    <SolidColorBrush x:Key="AcrylicBackgroundFillColorDefaultBrush" Color="#111111" />
+                    <SolidColorBrush x:Key="AcrylicInAppFillColorDefaultBrush" Color="#111111" />
+                    <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#EDEDED" />
+                    <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#B5B5B5" />
+                    <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#8C8C8C" />
+                    <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#FF6B6B" />
+                    <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#FFD60A" />
+
+                    <!-- Fluent accent keys, recoloured at runtime. -->
+                    <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#B8FF1F" Opacity="0.9" />
+                    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#B8FF1F" Opacity="0.8" />
+                    <SolidColorBrush x:Key="AccentFillColorSelectedTextBackgroundBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentAAFillColorDefaultBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentAAFillColorSecondaryBrush" Color="#B8FF1F" Opacity="0.9" />
+                    <SolidColorBrush x:Key="AccentAAFillColorTertiaryBrush" Color="#B8FF1F" Opacity="0.8" />
+                    <SolidColorBrush x:Key="AccentControlElevationBorderBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="SystemFillColorAttentionBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="#0A0A0A" />
+                    <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="#0A0A0A" Opacity="0.8" />
+                    <SolidColorBrush x:Key="TextOnAccentFillColorSelectedTextBrush" Color="#0A0A0A" />
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="RlBackgroundBrush" Color="#F2F1EC" />
+                    <SolidColorBrush x:Key="RlSurfaceBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="RlRaisedBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="RlSelectedBrush" Color="#DFDED7" />
+                    <SolidColorBrush x:Key="RlRuleBrush" Color="#C9C8C1" />
+                    <SolidColorBrush x:Key="RlRuleSoftBrush" Color="#DAD9D2" />
+                    <SolidColorBrush x:Key="RlRuleStrongBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="RlGridLineBrush" Color="#E6E5DF" />
+                    <SolidColorBrush x:Key="RlTickOffBrush" Color="#D6D5CE" />
+                    <SolidColorBrush x:Key="RlTextBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="RlTextSecondaryBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="RlTextMutedBrush" Color="#5C5C5C" />
+                    <SolidColorBrush x:Key="RlInverseBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="RlOnInverseBrush" Color="#F2F1EC" />
+                    <SolidColorBrush x:Key="RlDangerBrush" Color="#B80F0F" />
+                    <SolidColorBrush x:Key="RlAccentFillBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="RlAccentInkBrush" Color="#0A0A0A" />
+                    <SolidColorBrush x:Key="RlAccentLineBrush" Color="#4C8A00" />
+                    <SolidColorBrush x:Key="RlAccentTextBrush" Color="#3D6E00" />
+                    <SolidColorBrush x:Key="RlAccentSoftBrush" Color="#E9F9C9" />
+
+                    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F2F1EC" />
+                    <SolidColorBrush x:Key="AppSurfaceBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="AppCardBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="SettingsPageHeaderBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="SettingsSectionLabelBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="SettingsSectionBodyBrush" Color="#F2F1EC" />
+                    <SolidColorBrush x:Key="SettingsSectionDividerBrush" Color="#C9C8C1" />
+
+                    <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="#F2F1EC" />
+                    <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="LayerFillColorDefaultBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="LayerFillColorAltBrush" Color="#F2F1EC" />
+                    <SolidColorBrush x:Key="LayerOnMicaBaseAltFillColorDefaultBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="CardBackgroundFillColorSecondaryBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#C9C8C1" />
+                    <SolidColorBrush x:Key="CardStrokeColorDefaultSolidBrush" Color="#C9C8C1" />
+                    <SolidColorBrush x:Key="DividerStrokeColorDefaultBrush" Color="#C9C8C1" />
+                    <SolidColorBrush x:Key="SurfaceStrokeColorDefaultBrush" Color="#C9C8C1" />
+                    <SolidColorBrush x:Key="SurfaceStrokeColorFlyoutBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="ControlStrokeColorSecondaryBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="ControlStrongStrokeColorDefaultBrush" Color="#5C5C5C" />
+                    <SolidColorBrush x:Key="ControlElevationBorderBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="CircleElevationBorderBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="TextControlElevationBorderBrush" Color="#9C9B94" />
+                    <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="#DFDED7" />
+                    <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="ControlFillColorInputActiveBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ControlAltFillColorSecondaryBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#DFDED7" />
+                    <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#EAE9E3" />
+                    <SolidColorBrush x:Key="AcrylicBackgroundFillColorDefaultBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="AcrylicInAppFillColorDefaultBrush" Color="#FBFAF7" />
+                    <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#0B0B0B" />
+                    <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#3A3A3A" />
+                    <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#5C5C5C" />
+                    <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#B80F0F" />
+                    <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#7A6100" />
+
+                    <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#B8FF1F" Opacity="0.9" />
+                    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#B8FF1F" Opacity="0.8" />
+                    <SolidColorBrush x:Key="AccentFillColorSelectedTextBackgroundBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#3D6E00" />
+                    <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#3D6E00" />
+                    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush" Color="#3D6E00" />
+                    <SolidColorBrush x:Key="AccentAAFillColorDefaultBrush" Color="#B8FF1F" />
+                    <SolidColorBrush x:Key="AccentAAFillColorSecondaryBrush" Color="#B8FF1F" Opacity="0.9" />
+                    <SolidColorBrush x:Key="AccentAAFillColorTertiaryBrush" Color="#B8FF1F" Opacity="0.8" />
+                    <SolidColorBrush x:Key="AccentControlElevationBorderBrush" Color="#4C8A00" />
+                    <SolidColorBrush x:Key="SystemFillColorAttentionBrush" Color="#4C8A00" />
+                    <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="#0A0A0A" />
+                    <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="#0A0A0A" Opacity="0.8" />
+                    <SolidColorBrush x:Key="TextOnAccentFillColorSelectedTextBrush" Color="#0A0A0A" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" Invert="True" />
             <converters:StringPresenceConverter x:Key="StringPresenceConverter" />
+            <converters:StringPresenceToVisibilityConverter x:Key="StringPresenceToVisibilityConverter" />
             <converters:NullableImageSourceConverter x:Key="NullableImageSourceConverter" />
             <converters:DownloadStateToGlyphConverter x:Key="DownloadStateToGlyphConverter" />
             <converters:DownloadStateToBrushConverter x:Key="DownloadStateToBrushConverter" />
+            <converters:DownloadStateToLabelConverter x:Key="DownloadStateToLabelConverter" />
+            <converters:DownloadStateToToneConverter x:Key="DownloadStateToToneConverter" />
+            <converters:DownloadStateToneVisibilityConverter x:Key="DownloadStateToneVisibilityConverter" />
+            <converters:UppercaseConverter x:Key="UppercaseConverter" />
+            <converters:TwoDigitConverter x:Key="TwoDigitConverter" />
             <converters:AccentColorToBrushConverter x:Key="AccentColorToBrushConverter" />
             <converters:AccentColorToLabelConverter x:Key="AccentColorToLabelConverter" />
-            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#08090B" />
-            <SolidColorBrush x:Key="AppSurfaceBrush" Color="#101216" />
-            <SolidColorBrush x:Key="AppCardBrush" Color="#17191D" />
-            <SolidColorBrush x:Key="SettingsPageHeaderBrush" Color="#1D2026" />
-            <SolidColorBrush x:Key="SettingsSectionLabelBrush" Color="#22262D" />
-            <SolidColorBrush x:Key="SettingsSectionBodyBrush" Color="#0D0F13" />
-            <SolidColorBrush x:Key="SettingsSectionDividerBrush" Color="#08090B" />
-            <Style x:Key="CardBorderStyle" TargetType="Border">
-                <Setter Property="Background" Value="{ThemeResource AppCardBrush}" />
-                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+            <!-- Sharp corners everywhere. -->
+            <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+            <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+
+            <!-- Type. Archivo carries headings and UI; IBM Plex Mono is for data and lists only. -->
+            <FontFamily x:Key="RlSansFont">ms-appx:///Assets/Fonts/Archivo.ttf#Archivo</FontFamily>
+            <FontFamily x:Key="RlMonoFont">ms-appx:///Assets/Fonts/IBMPlexMono-Regular.ttf#IBM Plex Mono</FontFamily>
+            <FontFamily x:Key="RlMonoStrongFont">ms-appx:///Assets/Fonts/IBMPlexMono-SemiBold.ttf#IBM Plex Mono</FontFamily>
+            <FontFamily x:Key="ContentControlThemeFontFamily">ms-appx:///Assets/Fonts/Archivo.ttf#Archivo</FontFamily>
+
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+            </Style>
+            <Style x:Key="RlDisplayTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="60" />
+                <Setter Property="FontWeight" Value="Black" />
+                <Setter Property="FontStretch" Value="Expanded" />
+                <Setter Property="CharacterSpacing" Value="-20" />
+                <Setter Property="LineHeight" Value="54" />
+                <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+                <Setter Property="TextWrapping" Value="NoWrap" />
+            </Style>
+            <Style x:Key="RlTitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="26" />
+                <Setter Property="FontWeight" Value="ExtraBold" />
+                <Setter Property="FontStretch" Value="Expanded" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="RlSectionTitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="FontStretch" Value="SemiExpanded" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="RlBodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="RlCaptionTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextMutedBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="RlLabelTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlMonoFont}" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="CharacterSpacing" Value="160" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextMutedBrush}" />
+                <Setter Property="TextWrapping" Value="NoWrap" />
+            </Style>
+            <Style x:Key="RlMonoTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlMonoFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextSecondaryBrush}" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="TextWrapping" Value="NoWrap" />
+            </Style>
+            <Style x:Key="RlStatNumberTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="34" />
+                <Setter Property="FontWeight" Value="ExtraBold" />
+                <Setter Property="FontStretch" Value="Expanded" />
+                <Setter Property="LineHeight" Value="34" />
+                <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+            </Style>
+
+            <!-- Panels. -->
+            <Style x:Key="RlPanelStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource RlBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Padding" Value="20" />
+            </Style>
+            <Style x:Key="CardBorderStyle" TargetType="Border" BasedOn="{StaticResource RlPanelStyle}">
                 <Setter Property="Padding" Value="16" />
+            </Style>
+
+            <!--
+                Accent buttons use their own flat template bound to Rl tokens. The stock
+                AccentButtonStyle resolves its brushes inside XamlControlsResources,
+                which app-level overrides do not reach.
+            -->
+            <ControlTemplate x:Key="RlAccentButtonTemplate" TargetType="Button">
+                <Grid
+                    x:Name="RootGrid"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border x:Name="Shade" Background="{ThemeResource RlAccentInkBrush}" Opacity="0" />
+                    <ContentPresenter
+                        x:Name="ContentPresenter"
+                        Padding="{TemplateBinding Padding}"
+                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                        AutomationProperties.AccessibilityView="Raw"
+                        Content="{TemplateBinding Content}"
+                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                        ContentTransitions="{TemplateBinding ContentTransitions}"
+                        Foreground="{TemplateBinding Foreground}" />
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Target="Shade.Opacity" Value="0.12" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Target="Shade.Opacity" Value="0.24" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </Grid>
+            </ControlTemplate>
+            <Style x:Key="RlAccentBaseButtonStyle" TargetType="Button">
+                <Setter Property="Template" Value="{StaticResource RlAccentButtonTemplate}" />
+                <Setter Property="Background" Value="{ThemeResource RlAccentFillBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource RlAccentInkBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlAccentLineBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="FocusVisualMargin" Value="-3" />
+            </Style>
+
+            <!-- Buttons. -->
+            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="Padding" Value="14,6" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+            <Style x:Key="RlAccentButtonStyle" TargetType="Button" BasedOn="{StaticResource RlAccentBaseButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="Padding" Value="16,6" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlAccentLineBrush}" />
+            </Style>
+            <Style x:Key="RlToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="Padding" Value="18,0" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+            </Style>
+            <Style x:Key="RlToolbarAccentButtonStyle" TargetType="Button" BasedOn="{StaticResource RlAccentBaseButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="Padding" Value="20,0" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="ExtraBold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlAccentLineBrush}" />
+            </Style>
+            <Style x:Key="RlIconButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Width" Value="36" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleBrush}" />
+            </Style>
+            <Style x:Key="RlIconAccentButtonStyle" TargetType="Button" BasedOn="{StaticResource RlAccentBaseButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Width" Value="36" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlAccentLineBrush}" />
+            </Style>
+            <Style x:Key="RlToolbarToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="Padding" Value="18,0" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+            </Style>
+
+            <!-- Dialogs: flat primary action. -->
+            <Style TargetType="ContentDialog" BasedOn="{StaticResource DefaultContentDialogStyle}">
+                <Setter Property="PrimaryButtonStyle" Value="{StaticResource RlAccentButtonStyle}" />
+            </Style>
+
+            <!-- Side rail item: a RadioButton that shows its count in Tag. -->
+            <Style x:Key="RlRailItemStyle" TargetType="RadioButton">
+                <Setter Property="Foreground" Value="{ThemeResource RlTextSecondaryBrush}" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="Padding" Value="20,0" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Grid x:Name="RootGrid" Background="Transparent" Padding="{TemplateBinding Padding}" MinHeight="{TemplateBinding MinHeight}" ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter
+                                    x:Name="ContentPresenter"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Foreground="{TemplateBinding Foreground}" />
+                                <Border
+                                    x:Name="CountBadge"
+                                    Grid.Column="1"
+                                    MinWidth="30"
+                                    Padding="4,2"
+                                    VerticalAlignment="Center"
+                                    Background="{ThemeResource RlSelectedBrush}"
+                                    Visibility="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringPresenceToVisibilityConverter}}">
+                                    <TextBlock
+                                        x:Name="CountText"
+                                        HorizontalAlignment="Center"
+                                        FontFamily="{StaticResource RlMonoFont}"
+                                        FontSize="12"
+                                        Foreground="{ThemeResource RlTextSecondaryBrush}"
+                                        Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </Border>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlRaisedBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlTextBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlSelectedBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlTextMutedBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="CheckStates">
+                                        <VisualState x:Name="Checked">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlSelectedBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlTextBrush}" />
+                                                <Setter Target="CountBadge.Background" Value="{ThemeResource RlAccentFillBrush}" />
+                                                <Setter Target="CountText.Foreground" Value="{ThemeResource RlAccentInkBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Unchecked" />
+                                        <VisualState x:Name="Indeterminate" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
         </ResourceDictionary>
     </Application.Resources>

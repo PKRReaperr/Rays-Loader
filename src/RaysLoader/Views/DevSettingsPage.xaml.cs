@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using RaysLoader.Theming;
 using RaysLoader.Models;
 using RaysLoader.Services;
 using RaysLoader.Settings;
@@ -189,7 +190,7 @@ public sealed partial class DevSettingsPage : Page
             XamlRoot = XamlRoot,
         };
 
-        if (await dialog.ShowAsync() is not ContentDialogResult.Primary) return;
+        if (await dialog.ShowThemedAsync() is not ContentDialogResult.Primary) return;
         if (!await AutoSave.FlushAsync())
         {
             await ShowMessageAsync("Reset unavailable", "Your current settings could not be saved. Retry saving before resetting DEV app data.");
@@ -240,7 +241,7 @@ public sealed partial class DevSettingsPage : Page
             CloseButtonText = "Close",
             XamlRoot = XamlRoot,
         };
-        await dialog.ShowAsync();
+        await dialog.ShowThemedAsync();
     }
 
     private static void OpenFolder(string path)

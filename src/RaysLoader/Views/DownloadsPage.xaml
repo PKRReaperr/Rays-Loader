@@ -3,117 +3,259 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:RaysLoader.Models"
+    xmlns:controls="using:RaysLoader.Controls"
     NavigationCacheMode="Required">
-    <Grid x:Name="Root" Padding="24,16,24,24" AllowDrop="True" DragOver="Root_DragOver" Drop="Root_Drop">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Page.Resources>
+        <Style x:Key="TagBorderStyle" TargetType="Border">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Padding" Value="7,3" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style x:Key="TagTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource RlMonoStrongFont}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="CharacterSpacing" Value="100" />
+        </Style>
+        <Style x:Key="BracketStyle" TargetType="Border">
+            <Setter Property="Width" Value="10" />
+            <Setter Property="Height" Value="10" />
+            <Setter Property="BorderBrush" Value="{ThemeResource RlAccentLineBrush}" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+    </Page.Resources>
 
-        <StackPanel x:Name="DevLibraryHeader" Visibility="Collapsed" Spacing="6" Margin="4,8,4,20">
-            <TextBlock Text="YOUR LIBRARY" FontSize="11" FontWeight="SemiBold" CharacterSpacing="140" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-            <TextBlock Text="Downloads" FontSize="32" FontWeight="SemiBold" />
-            <TextBlock Text="Add a link. Choose a format. Make it yours." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-        </StackPanel>
-        <CommandBar Grid.Row="1" Background="Transparent" DefaultLabelPosition="Right">
-            <CommandBar.Content>
-                <TextBlock x:Name="DownloadsHeading" VerticalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Downloads" />
-            </CommandBar.Content>
-            <CommandBar.PrimaryCommands>
-                <AppBarButton Icon="Add" Label="Add" Command="{Binding AddDownloadCommand}" AutomationProperties.Name="Add download" />
-                <AppBarButton Icon="Play" Label="Start queue" Command="{Binding StartQueueCommand}" AutomationProperties.Name="Start all queued downloads" />
-                <AppBarToggleButton x:Name="StopAllToggle" Icon="Stop" Label="Stop all remaining" Click="StopAllToggle_Click" AutomationProperties.Name="Stop all active and queued downloads" />
-                <AppBarButton Icon="RepeatAll" Label="Retry failed" Command="{Binding RetryAllFailedCommand}" AutomationProperties.Name="Retry all failed downloads" />
-            </CommandBar.PrimaryCommands>
-            <CommandBar.SecondaryCommands>
-                <AppBarButton Label="Clear completed" Command="{Binding ClearCompletedCommand}" />
-                <AppBarButton Label="Clear failed" Command="{Binding ClearFailedCommand}" />
-            </CommandBar.SecondaryCommands>
-        </CommandBar>
+    <Grid x:Name="Root" AllowDrop="True" DragOver="Root_DragOver" Drop="Root_Drop" Background="{ThemeResource RlBackgroundBrush}">
+        <controls:BlueprintGrid LineBrush="{ThemeResource RlGridLineBrush}" CellSize="48" />
 
-        <ListView
-            x:Name="DownloadList"
-            Grid.Row="2"
-            Margin="0,12,0,0"
-            ItemsSource="{Binding VisibleDownloads}"
-            SelectionMode="None"
-            IsItemClickEnabled="False"
-            HorizontalContentAlignment="Stretch"
-            ScrollViewer.HorizontalScrollMode="Disabled">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="Margin" Value="0,0,0,10" />
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:DownloadTask">
-                    <Border Style="{StaticResource CardBorderStyle}" ToolTipService.ToolTip="{x:Bind Title}">
-                        <Grid ColumnSpacing="16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="104" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+        <Grid Padding="36,30,36,28" RowSpacing="22">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-                            <Border Width="104" Height="72" CornerRadius="6" Background="{ThemeResource ControlFillColorSecondaryBrush}">
-                                <Grid>
-                                    <FontIcon FontSize="28" Glyph="&#xE8B1;" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <Image Source="{Binding ThumbnailUrl, Converter={StaticResource NullableImageSourceConverter}}" Stretch="UniformToFill" />
-                                </Grid>
-                            </Border>
+            <!-- Heading and counters. -->
+            <Grid ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Bottom" Spacing="10">
+                    <TextBlock Style="{StaticResource RlLabelTextStyle}" Foreground="{ThemeResource RlAccentTextBrush}">
+                        <Run Text="// " /><Run Text="{Binding SelectedFilter, Converter={StaticResource UppercaseConverter}}" />
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource RlDisplayTextStyle}" Text="DOWNLOADS" AutomationProperties.HeadingLevel="Level1" AutomationProperties.Name="Downloads" />
+                </StackPanel>
+                <Border Grid.Column="1" VerticalAlignment="Bottom" Background="{ThemeResource RlBackgroundBrush}" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="1,1,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Padding="18,10,18,12" MinWidth="96" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,1,0">
+                            <StackPanel Spacing="6">
+                                <TextBlock Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="RUNNING" />
+                                <TextBlock Style="{StaticResource RlStatNumberTextStyle}" Foreground="{ThemeResource RlAccentTextBrush}" Text="{Binding RunningCount, Converter={StaticResource TwoDigitConverter}}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Padding="18,10,18,12" MinWidth="96" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,1,0">
+                            <StackPanel Spacing="6">
+                                <TextBlock Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="QUEUED" />
+                                <TextBlock Style="{StaticResource RlStatNumberTextStyle}" Text="{Binding QueuedCount, Converter={StaticResource TwoDigitConverter}}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Padding="18,10,18,12" MinWidth="96" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,1,0">
+                            <StackPanel Spacing="6">
+                                <TextBlock Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="COMPLETED" />
+                                <TextBlock Style="{StaticResource RlStatNumberTextStyle}" Text="{Binding CompletedCount, Converter={StaticResource TwoDigitConverter}}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Padding="18,10,18,12" MinWidth="96" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,1,0">
+                            <StackPanel Spacing="6">
+                                <TextBlock Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="FAILED" />
+                                <TextBlock Style="{StaticResource RlStatNumberTextStyle}" Text="{Binding FailedCount, Converter={StaticResource TwoDigitConverter}}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
 
-                            <Grid Grid.Column="1" RowSpacing="7">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxLines="1" />
-                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="7">
-                                    <FontIcon FontSize="13" Glyph="{x:Bind State, Converter={StaticResource DownloadStateToGlyphConverter}}" Foreground="{x:Bind State, Converter={StaticResource DownloadStateToBrushConverter}}" />
-                                    <TextBlock Text="{x:Bind StatusSummary, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                                <ProgressBar Grid.Row="2" Height="4" Value="{x:Bind ProgressPercent, Mode=OneWay}" Maximum="100" />
-                                <TextBlock Grid.Row="3" Text="{x:Bind CurrentOperation, Mode=OneWay}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
-                                <Button Grid.Row="4" HorizontalAlignment="Left" Margin="0,2,0,0" Padding="10,4" Tag="{x:Bind}" Click="ViewTerminal_Click" AutomationProperties.Name="View terminal">
-                                    <StackPanel Orientation="Horizontal" Spacing="7">
-                                        <FontIcon Glyph="&#xE756;" FontSize="13" />
-                                        <TextBlock Text="View terminal" />
-                                    </StackPanel>
-                                </Button>
+            <!-- Queue commands. -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                <Button Style="{StaticResource RlToolbarAccentButtonStyle}" Command="{Binding AddDownloadCommand}" AutomationProperties.Name="Add download">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon FontSize="13" Glyph="&#xE710;" />
+                        <TextBlock Text="ADD" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource RlToolbarButtonStyle}" Command="{Binding StartQueueCommand}" AutomationProperties.Name="Start all queued downloads">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon FontSize="12" Glyph="&#xE768;" />
+                        <TextBlock Text="START QUEUE" />
+                    </StackPanel>
+                </Button>
+                <ToggleButton x:Name="StopAllToggle" Style="{StaticResource RlToolbarToggleButtonStyle}" Click="StopAllToggle_Click" AutomationProperties.Name="Stop all active and queued downloads">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon FontSize="12" Glyph="&#xE71A;" />
+                        <TextBlock Text="STOP ALL REMAINING" />
+                    </StackPanel>
+                </ToggleButton>
+                <Button Style="{StaticResource RlToolbarButtonStyle}" Command="{Binding RetryAllFailedCommand}" AutomationProperties.Name="Retry all failed downloads">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon FontSize="13" Glyph="&#xE72C;" />
+                        <TextBlock Text="RETRY FAILED" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource RlToolbarButtonStyle}" Width="44" Padding="0" AutomationProperties.Name="More queue actions" ToolTipService.ToolTip="More">
+                    <FontIcon FontSize="14" Glyph="&#xE712;" />
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                            <MenuFlyoutItem Text="Clear completed" Command="{Binding ClearCompletedCommand}" />
+                            <MenuFlyoutItem Text="Clear failed" Command="{Binding ClearFailedCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
+
+            <!-- The table. -->
+            <Grid Grid.Row="2">
+                <Border Background="{ThemeResource RlBackgroundBrush}" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="1">
+                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
+                        <Grid MinWidth="880">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="38" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="16" Padding="16,0,14,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="64" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="124" />
+                                    <ColumnDefinition Width="230" />
+                                    <ColumnDefinition Width="96" />
+                                    <ColumnDefinition Width="Auto" MinWidth="124" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="TITLE" />
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="STATUS" />
+                                <TextBlock Grid.Column="3" VerticalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="PROGRESS" />
+                                <TextBlock Grid.Column="4" VerticalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="FORMAT" />
                             </Grid>
 
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                <Button ToolTipService.ToolTip="Retry" AutomationProperties.Name="Retry download" Tag="{x:Bind}" Click="Retry_Click" Visibility="{x:Bind CanRetry, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <FontIcon Glyph="&#xE72C;" />
-                                </Button>
-                                <Button ToolTipService.ToolTip="Stop" AutomationProperties.Name="Stop download" Tag="{x:Bind}" Click="Stop_Click" Visibility="{x:Bind CanStop, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <FontIcon Glyph="&#xE71A;" />
-                                </Button>
-                                <Button ToolTipService.ToolTip="More actions" AutomationProperties.Name="More download actions" Tag="{x:Bind}" Click="More_Click">
-                                    <FontIcon Glyph="&#xE712;" />
+                            <ListView
+                                x:Name="DownloadList"
+                                Grid.Row="1"
+                                ItemsSource="{Binding VisibleDownloads}"
+                                SelectionMode="None"
+                                IsItemClickEnabled="False"
+                                HorizontalContentAlignment="Stretch"
+                                ScrollViewer.HorizontalScrollMode="Disabled"
+                                AutomationProperties.Name="Downloads">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="MinHeight" Value="0" />
+                                        <Setter Property="CornerRadius" Value="0" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:DownloadTask">
+                                        <Grid BorderBrush="{ThemeResource RlRuleSoftBrush}" BorderThickness="0,0,0,1" MinHeight="74" ToolTipService.ToolTip="{x:Bind Title, Mode=OneWay}">
+                                            <Rectangle Fill="{ThemeResource RlAccentSoftBrush}" Visibility="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToneVisibilityConverter}, ConverterParameter=Active}" />
+                                            <Grid ColumnSpacing="16" Padding="16,12,14,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="64" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="124" />
+                                                    <ColumnDefinition Width="230" />
+                                                    <ColumnDefinition Width="96" />
+                                                    <ColumnDefinition Width="Auto" MinWidth="124" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Width="64" Height="36" VerticalAlignment="Center" Background="{ThemeResource RlRaisedBrush}" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="1">
+                                                    <Image Source="{Binding ThumbnailUrl, Converter={StaticResource NullableImageSourceConverter}}" Stretch="UniformToFill" />
+                                                </Border>
+
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="5">
+                                                    <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" MaxLines="1" Foreground="{ThemeResource RlTextBrush}" />
+                                                    <TextBlock Style="{StaticResource RlMonoTextStyle}" FontSize="11" Foreground="{ThemeResource RlTextMutedBrush}">
+                                                        <Run Text="{x:Bind SiteHost}" /><Run Text="  /  " /><Run Text="{x:Bind CurrentOperation, Mode=OneWay}" />
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <Grid Grid.Column="2" VerticalAlignment="Center">
+                                                    <Border Style="{StaticResource TagBorderStyle}" Background="{ThemeResource RlAccentFillBrush}" BorderBrush="{ThemeResource RlAccentLineBrush}" Visibility="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToneVisibilityConverter}, ConverterParameter=Active}">
+                                                        <TextBlock Style="{StaticResource TagTextStyle}" Foreground="{ThemeResource RlAccentInkBrush}" Text="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToLabelConverter}}" />
+                                                    </Border>
+                                                    <Border Style="{StaticResource TagBorderStyle}" BorderBrush="{ThemeResource RlTextBrush}" Visibility="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToneVisibilityConverter}, ConverterParameter=Complete}">
+                                                        <TextBlock Style="{StaticResource TagTextStyle}" Foreground="{ThemeResource RlTextBrush}" Text="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToLabelConverter}}" />
+                                                    </Border>
+                                                    <Border Style="{StaticResource TagBorderStyle}" Background="{ThemeResource RlInverseBrush}" BorderBrush="{ThemeResource RlInverseBrush}" Visibility="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToneVisibilityConverter}, ConverterParameter=Failed}">
+                                                        <TextBlock Style="{StaticResource TagTextStyle}" Foreground="{ThemeResource RlOnInverseBrush}" Text="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToLabelConverter}}" />
+                                                    </Border>
+                                                    <Border Style="{StaticResource TagBorderStyle}" BorderBrush="{ThemeResource RlRuleStrongBrush}" Visibility="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToneVisibilityConverter}, ConverterParameter=Idle}">
+                                                        <TextBlock Style="{StaticResource TagTextStyle}" Foreground="{ThemeResource RlTextSecondaryBrush}" Text="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToLabelConverter}}" />
+                                                    </Border>
+                                                </Grid>
+
+                                                <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="7">
+                                                    <controls:TickBar
+                                                        Height="14"
+                                                        TickCount="32"
+                                                        Value="{x:Bind ProgressPercent, Mode=OneWay}"
+                                                        Tone="{x:Bind State, Mode=OneWay, Converter={StaticResource DownloadStateToToneConverter}}"
+                                                        ActiveBrush="{ThemeResource RlAccentLineBrush}"
+                                                        CompleteBrush="{ThemeResource RlTextBrush}"
+                                                        IdleBrush="{ThemeResource RlRuleStrongBrush}"
+                                                        TrackBrush="{ThemeResource RlTickOffBrush}" />
+                                                    <TextBlock Style="{StaticResource RlMonoTextStyle}" FontSize="11" Text="{x:Bind StatusSummary, Mode=OneWay}" />
+                                                </StackPanel>
+
+                                                <TextBlock Grid.Column="4" VerticalAlignment="Center" Style="{StaticResource RlMonoTextStyle}" Text="{x:Bind FormatSummary}" />
+
+                                                <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+                                                    <Button Style="{StaticResource RlIconButtonStyle}" ToolTipService.ToolTip="View terminal" AutomationProperties.Name="View terminal" Tag="{x:Bind}" Click="ViewTerminal_Click">
+                                                        <FontIcon FontSize="13" Glyph="&#xE756;" />
+                                                    </Button>
+                                                    <Button Style="{StaticResource RlIconButtonStyle}" ToolTipService.ToolTip="Stop" AutomationProperties.Name="Stop download" Tag="{x:Bind}" Click="Stop_Click" Visibility="{x:Bind CanStop, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <FontIcon FontSize="12" Glyph="&#xE71A;" />
+                                                    </Button>
+                                                    <Button Style="{StaticResource RlIconAccentButtonStyle}" ToolTipService.ToolTip="Retry" AutomationProperties.Name="Retry download" Tag="{x:Bind}" Click="Retry_Click" Visibility="{x:Bind CanRetry, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <FontIcon FontSize="13" Glyph="&#xE72C;" />
+                                                    </Button>
+                                                    <Button Style="{StaticResource RlIconButtonStyle}" ToolTipService.ToolTip="More actions" AutomationProperties.Name="More download actions" Tag="{x:Bind}" Click="More_Click">
+                                                        <FontIcon FontSize="13" Glyph="&#xE712;" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <StackPanel
+                                Grid.Row="1"
+                                Margin="24,64"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12"
+                                Visibility="{Binding HasVisibleDownloads, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                <TextBlock HorizontalAlignment="Center" Style="{StaticResource RlTitleTextStyle}" FontWeight="Black" Text="{Binding EmptyTitle, Converter={StaticResource UppercaseConverter}}" />
+                                <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource RlMonoTextStyle}" Foreground="{ThemeResource RlTextMutedBrush}" Text="{Binding EmptyDescription}" />
+                                <Button HorizontalAlignment="Center" Margin="0,8,0,0" Style="{StaticResource RlToolbarAccentButtonStyle}" Command="{Binding AddDownloadCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon FontSize="13" Glyph="&#xE710;" />
+                                        <TextBlock Text="ADD DOWNLOAD" />
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
                         </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
-        <Grid Grid.Row="2" Visibility="{Binding HasVisibleDownloads, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="360">
-                <FontIcon Glyph="&#xE896;" FontSize="38" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
-                <TextBlock HorizontalAlignment="Center" FontSize="22" FontWeight="SemiBold" Text="{Binding EmptyTitle}" />
-                <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding EmptyDescription}" />
-                <Button HorizontalAlignment="Center" Margin="0,8,0,0" Style="{StaticResource AccentButtonStyle}" Command="{Binding AddDownloadCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" /><TextBlock Text="Add Download" /></StackPanel>
-                </Button>
-            </StackPanel>
+                    </ScrollViewer>
+                </Border>
+                <Border Style="{StaticResource BracketStyle}" Margin="-5,-5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="2,2,0,0" />
+                <Border Style="{StaticResource BracketStyle}" Margin="0,-5,-5,0" HorizontalAlignment="Right" VerticalAlignment="Top" BorderThickness="0,2,2,0" />
+                <Border Style="{StaticResource BracketStyle}" Margin="-5,0,0,-5" HorizontalAlignment="Left" VerticalAlignment="Bottom" BorderThickness="2,0,0,2" />
+                <Border Style="{StaticResource BracketStyle}" Margin="0,0,-5,-5" HorizontalAlignment="Right" VerticalAlignment="Bottom" BorderThickness="0,0,2,2" />
+            </Grid>
         </Grid>
     </Grid>
 </Page>

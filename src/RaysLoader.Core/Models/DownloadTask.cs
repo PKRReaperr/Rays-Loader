@@ -34,6 +34,16 @@ public sealed class DownloadTask : ObservableObject
     public Guid Id { get; }
     public DownloadRequest Request { get; }
     public string Url => Request.Url;
+
+    /// <summary>Short format label for lists, such as "MP4 1080p" or "MP3 192K".</summary>
+    public string FormatSummary => Request.Mode is DownloadMode.AudioOnly
+        ? $"{Request.AudioFormat.ToUpperInvariant()} {Request.AudioBitrate}".Trim()
+        : $"{Request.Container.ToUpperInvariant()} {Request.VideoQuality}".Trim();
+
+    /// <summary>The link's host without "www.", or an empty string when the URL is not absolute.</summary>
+    public string SiteHost => Uri.TryCreate(Request.Url, UriKind.Absolute, out var uri)
+        ? (uri.Host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? uri.Host[4..] : uri.Host).ToLowerInvariant()
+        : string.Empty;
     public string OutputDirectory => Request.OutputDirectory;
     public DateTimeOffset CreatedAt { get; }
 
