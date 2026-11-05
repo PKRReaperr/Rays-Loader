@@ -60,6 +60,13 @@ public static class AccentPalette
             ? Blend(FromHex(0xD3, 0xD6, 0xDC), color, 0.04)
             : Blend(FromHex(0x08, 0x09, 0x0B), color, 0.04);
 
+#if RAYSLOADER_DEV
+        // Quiet neutral surfaces give the accent and content more room in DEV.
+        background = isLight ? FromHex(0xF4, 0xF5, 0xF8) : FromHex(0x14, 0x16, 0x1C);
+        surface = isLight ? FromHex(0xEA, 0xED, 0xF3) : FromHex(0x1B, 0x1E, 0x26);
+        card = isLight ? Colors.White : FromHex(0x23, 0x27, 0x31);
+#endif
+
         SetBrush("AppBackgroundBrush", background, 1);
         SetBrush("AppSurfaceBrush", surface, 1);
         SetBrush("AppCardBrush", card, 1);

@@ -22,6 +22,21 @@ dotnet test tests\RaysLoader.Tests\RaysLoader.Tests.csproj -c Release -p:Platfor
 
 ## Publish self-contained x64
 
+### DEV preview (separate from the installed app)
+
+```powershell
+.\scripts\publish-dev.ps1 -ToolsDirectory 'C:\path\to\verified-tools'
+& '.\artifacts\dev\win-x64\RaysLoader.exe'
+```
+
+DEV builds use `%LOCALAPPDATA%\RaysLoaderDev` for settings, managed tools, updater files, and crash logs. They do not import live or legacy settings. The existing **Ray's Loader DEV** shortcut continues to target `artifacts\dev\win-x64\RaysLoader.exe`. Close DEV before republishing it.
+
+The DEV settings preview saves changes automatically, previews appearance immediately, and groups settings into categories. **Check and update yt-dlp** checks the selected channel and installs only when needed; **Refresh tool details** reads installed versions. Custom yt-dlp paths remain externally managed. DEV cannot install public Ray's Loader updates; update it with the DEV publish script.
+
+`-ToolsDirectory` is optional and copies existing tools into the DEV output without changing the source. The public release settings page remains available only in `PublicRelease=true` builds. DEV UI work does not require an installer or a public release publish.
+
+### Public release
+
 ```powershell
 .\scripts\publish-windows.ps1
 ```

@@ -123,6 +123,51 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Single(Directory.GetFiles(_directory, "settings.corrupt-*.json"));
     }
 
+    [Fact]
+    public async Task SeparateProfilesCanOptOutOfLegacySettingsImport()
+    {
+        var service = new SettingsService(_directory, importLegacySettings: false);
+
+        var settings = await service.LoadAsync();
+
+        Assert.False(settings.HasCompletedOnboarding);
+        Assert.Equal(AppPaths.DefaultOutputDirectory, settings.DefaultOutputDirectory);
+        Assert.True(File.Exists(Path.Combine(_directory, "settings.json")));
+    }
+
+    [Fact]
+    public async Task ConcurrentSavesUseOneAtomicWriterAndKeepTheLatestSettings()
+    {
+        var service = new SettingsService(_directory, importLegacySettings: false);
+        var settings = Enumerable.Range(0, 12)
+            .Select(index => new AppSettings { FilenameTemplate = $"template-{index}" })
+            .ToArray();
+
+        await Task.WhenAll(settings.Select(value => service.SaveAsync(value)));
+
+        Assert.Same(settings[^1], service.Current);
+        var reloaded = await new SettingsService(_directory, importLegacySettings: false).LoadAsync();
+        Assert.Equal(settings[^1].FilenameTemplate, reloaded.FilenameTemplate);
+        Assert.False(File.Exists(Path.Combine(_directory, "settings.json.tmp")));
+    }
+
+    [Fact]
+    public async Task ResetNotifiesSubscribersOfTheNewCurrentSettings()
+    {
+        var service = new SettingsService(_directory, importLegacySettings: false);
+        await service.SaveAsync(new AppSettings { HasCompletedOnboarding = true, DefaultContainer = "mkv" });
+        var original = service.Current;
+        var changes = new List<AppSettings>();
+        service.CurrentChanged += (_, _) => changes.Add(service.Current);
+
+        await service.ResetAsync();
+
+        Assert.NotSame(original, service.Current);
+        Assert.Same(service.Current, Assert.Single(changes));
+        Assert.True(service.Current.HasCompletedOnboarding);
+        Assert.Equal("mp4", service.Current.DefaultContainer);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);

@@ -27,7 +27,7 @@ public partial class App : Application
     {
         try
         {
-            var settings = new SettingsService();
+            var settings = new SettingsService(AppIdentity.DataDirectory, importLegacySettings: !AppIdentity.IsDevelopment);
             await settings.LoadAsync();
 
             var services = new ServiceCollection();
@@ -36,7 +36,9 @@ public partial class App : Application
             services.AddSingleton<IProcessRunnerService, ProcessRunnerService>();
             services.AddSingleton<IYtDlpArgumentBuilder, YtDlpArgumentBuilder>();
             services.AddSingleton<IProgressParserService, ProgressParserService>();
-            services.AddSingleton<IToolLocatorService, ToolLocatorService>();
+            services.AddSingleton<IToolLocatorService>(AppIdentity.IsDevelopment
+                ? new ToolLocatorService(settings.SettingsDirectory)
+                : new ToolLocatorService());
             services.AddSingleton<IToolMaintenanceService, ToolMaintenanceService>();
             services.AddSingleton<IYtDlpService, YtDlpService>();
             services.AddSingleton<ISupportedSitesService, SupportedSitesService>();
@@ -48,10 +50,17 @@ public partial class App : Application
             services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
             services.AddSingleton<MainViewModel>();
             services.AddTransient<AddDownloadViewModel>();
-            services.AddTransient<SettingsViewModel>();
+            services.AddTransient(provider => new SettingsViewModel(
+                settings, provider.GetRequiredService<IUpdateService>(),
+                provider.GetRequiredService<IToolMaintenanceService>(), developmentMode: AppIdentity.IsDevelopment));
+            if (AppIdentity.IsDevelopment)
+                services.AddSingleton(new SettingsAutoSaveService(settings));
             services.AddTransient<SupportedSitesViewModel>();
             services.AddTransient<DownloadsPage>();
             services.AddTransient<SettingsPage>();
+#if RAYSLOADER_DEV
+            services.AddTransient<DevSettingsPage>();
+#endif
             services.AddTransient<AboutPage>();
             services.AddTransient<SupportedSitesPage>();
             services.AddSingleton<MainWindow>();
@@ -71,7 +80,7 @@ public partial class App : Application
     {
         try
         {
-            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RaysLoader");
+            var directory = AppIdentity.DataDirectory;
             Directory.CreateDirectory(directory);
             File.WriteAllText(Path.Combine(directory, "crash.log"), $"{DateTimeOffset.Now:O}{Environment.NewLine}{exception}");
         }

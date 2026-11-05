@@ -20,6 +20,12 @@ public sealed partial class DownloadsPage : Page
         _queue = queue;
         _settings = settings;
         DataContext = viewModel;
+        if (AppIdentity.IsDevelopment)
+        {
+            DevLibraryHeader.Visibility = Visibility.Visible;
+            DownloadsHeading.Visibility = Visibility.Collapsed;
+            Root.Padding = new Thickness(28, 20, 28, 28);
+        }
         viewModel.AddDownloadRequested += AddDownloadRequested;
         viewModel.LogRequested += LogRequested;
         Unloaded += DownloadsPage_Unloaded;

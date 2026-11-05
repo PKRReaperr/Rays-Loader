@@ -7,12 +7,18 @@
     <Grid x:Name="Root" Padding="24,16,24,24" AllowDrop="True" DragOver="Root_DragOver" Drop="Root_Drop">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <CommandBar Grid.Row="0" Background="Transparent" DefaultLabelPosition="Right">
+        <StackPanel x:Name="DevLibraryHeader" Visibility="Collapsed" Spacing="6" Margin="4,8,4,20">
+            <TextBlock Text="YOUR LIBRARY" FontSize="11" FontWeight="SemiBold" CharacterSpacing="140" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+            <TextBlock Text="Downloads" FontSize="32" FontWeight="SemiBold" />
+            <TextBlock Text="Add a link. Choose a format. Make it yours." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <CommandBar Grid.Row="1" Background="Transparent" DefaultLabelPosition="Right">
             <CommandBar.Content>
-                <TextBlock VerticalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Downloads" />
+                <TextBlock x:Name="DownloadsHeading" VerticalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Downloads" />
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
                 <AppBarButton Icon="Add" Label="Add" Command="{Binding AddDownloadCommand}" AutomationProperties.Name="Add download" />
@@ -28,7 +34,7 @@
 
         <ListView
             x:Name="DownloadList"
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="0,12,0,0"
             ItemsSource="{Binding VisibleDownloads}"
             SelectionMode="None"
@@ -99,7 +105,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid Grid.Row="1" Visibility="{Binding HasVisibleDownloads, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+        <Grid Grid.Row="2" Visibility="{Binding HasVisibleDownloads, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="360">
                 <FontIcon Glyph="&#xE896;" FontSize="38" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
                 <TextBlock HorizontalAlignment="Center" FontSize="22" FontWeight="SemiBold" Text="{Binding EmptyTitle}" />

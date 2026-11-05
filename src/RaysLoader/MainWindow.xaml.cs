@@ -13,6 +13,11 @@ using RaysLoader.Theming;
 using RaysLoader.ViewModels;
 using RaysLoader.Views;
 using Windows.Graphics;
+#if RAYSLOADER_DEV
+using SettingsView = RaysLoader.Views.DevSettingsPage;
+#else
+using SettingsView = RaysLoader.Views.SettingsPage;
+#endif
 
 namespace RaysLoader;
 
@@ -23,6 +28,8 @@ public sealed partial class MainWindow : Window
     private readonly IToolMaintenanceService _toolMaintenanceService;
     private readonly CancellationTokenSource _lifetimeCancellation = new();
     private bool _startupFlowStarted;
+    private bool _closeAfterSave;
+    private bool _closeInProgress;
 
     public MainWindow(
         MainViewModel viewModel,
@@ -44,6 +51,16 @@ public sealed partial class MainWindow : Window
         TrySetBackdrop();
         ApplyTheme(settingsService.Current.Theme);
         AccentPalette.Apply(settingsService.Current.AccentColor, settingsService.Current.Theme);
+        if (AppIdentity.IsDevelopment)
+        {
+            DevelopmentBadge.Visibility = Visibility.Visible;
+            AppUpdatesMenuItem.Text = "Download engine updates";
+            Navigation.PaneDisplayMode = NavigationViewPaneDisplayMode.Auto;
+            Navigation.OpenPaneLength = 212;
+            Navigation.ExpandedModeThresholdWidth = 1100;
+            Navigation.CompactModeThresholdWidth = 700;
+            AllItem.Content = "All downloads";
+        }
 
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", AppIdentity.IconFileName));
         AppWindow.Resize(new SizeInt32(settingsService.Current.WindowWidth, settingsService.Current.WindowHeight));
@@ -87,7 +104,7 @@ public sealed partial class MainWindow : Window
             ViewModel.SelectedFilter = filter;
             ShowDownloads();
         }
-        else if (tag == "Settings") ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
+        else if (tag == "Settings") ShowSettings();
         else if (tag == "About") ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
         else if (tag == "SupportedSites") ShowSupportedSites();
     }
@@ -96,7 +113,7 @@ public sealed partial class MainWindow : Window
     private async void PasteAndAdd_Click(object sender, RoutedEventArgs e) => await ShowAddDownloadAsync(await ClipboardTextAsync());
     private void Exit_Click(object sender, RoutedEventArgs e) => Close();
     private void ShowDownloads_Click(object sender, RoutedEventArgs e) { Navigation.SelectedItem = AllItem; ShowDownloads(); }
-    private void ShowSettings_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<SettingsPage>();
+    private void ShowSettings_Click(object sender, RoutedEventArgs e) => ShowSettings();
     private void ShowAbout_Click(object sender, RoutedEventArgs e) => ContentFrame.Content = App.Services.GetRequiredService<AboutPage>();
     private void ShowSupportedSites_Click(object sender, RoutedEventArgs e) => ShowSupportedSites();
     private async void GettingStarted_Click(object sender, RoutedEventArgs e) => await ShowOnboardingAsync();
@@ -106,7 +123,13 @@ public sealed partial class MainWindow : Window
     private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
     {
         var page = ShowSettings();
-        await page.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
+        if (AppIdentity.IsDevelopment)
+        {
+#if RAYSLOADER_DEV
+            page.ShowDownloadEngine();
+#endif
+        }
+        else await page.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
     }
     private void OpenUpdates_Click(object sender, RoutedEventArgs e)
     {
@@ -143,7 +166,7 @@ public sealed partial class MainWindow : Window
                 UpdateInfoBar.IsOpen = true;
             }
         }
-        if (!_settingsService.Current.AutomaticallyCheckForUpdates) return;
+        if (AppIdentity.IsDevelopment || !_settingsService.Current.AutomaticallyCheckForUpdates) return;
         try
         {
             var update = await _updateService.CheckForUpdateAsync(_lifetimeCancellation.Token);
@@ -175,9 +198,72 @@ public sealed partial class MainWindow : Window
 
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        if (AppIdentity.IsDevelopment)
+        {
+            if (_closeAfterSave) return;
+            // WinUI does not await async Closing handlers. Keep the window alive
+            // until the final edits reach disk, including edits made just before X.
+            args.Cancel = true;
+            if (_closeInProgress) return;
+            _closeInProgress = true;
+            // Commit NumberBox text before disabling the editor. Keep settings
+            // stable while cancelled tool processes finish restoring their files.
+            SettingsNavigationItem.Focus(FocusState.Programmatic);
+            Navigation.IsEnabled = false;
+            RootGrid.IsHitTestVisible = false;
+            var autoSave = App.Services.GetRequiredService<SettingsAutoSaveService>();
+            _settingsService.Current.WindowWidth = sender.Size.Width;
+            _settingsService.Current.WindowHeight = sender.Size.Height;
+            var saved = await autoSave.FlushAsync();
+            if (!saved)
+            {
+                Navigation.IsEnabled = true;
+                RootGrid.IsHitTestVisible = true;
+                var dialog = new ContentDialog
+                {
+                    Title = "Settings could not be saved",
+                    Content = new TextBlock { Text = autoSave.StatusMessage, TextWrapping = TextWrapping.Wrap },
+                    PrimaryButtonText = "Keep editing",
+                    SecondaryButtonText = "Exit without saving",
+                    DefaultButton = ContentDialogButton.Primary,
+                    XamlRoot = RootGrid.XamlRoot,
+                };
+                ContentDialogResult choice;
+                try { choice = await dialog.ShowAsync(); }
+                catch (Exception exception) when (exception is InvalidOperationException or COMException)
+                {
+                    // Another dialog can already be open when the title-bar X
+                    // is clicked. Keep the editor usable and the edits in memory.
+                    _closeInProgress = false;
+                    UpdateInfoBar.Title = "Settings could not be saved";
+                    UpdateInfoBar.Message = "Close the open dialog and correct the settings error before exiting.";
+                    UpdateInfoBar.Severity = InfoBarSeverity.Error;
+                    UpdateInfoBar.IsOpen = true;
+                    return;
+                }
+                if (choice != ContentDialogResult.Secondary)
+                {
+                    _closeInProgress = false;
+                    return;
+                }
+                Navigation.IsEnabled = false;
+                RootGrid.IsHitTestVisible = false;
+            }
+            _lifetimeCancellation.Cancel();
+            if (ContentFrame.Content is SettingsView devSettingsPage)
+            {
+                devSettingsPage.ViewModel.CancelActiveToolOperation();
+                devSettingsPage.ViewModel.CancelActiveUpdate();
+            }
+            await _toolMaintenanceService.WaitForIdleAsync();
+            autoSave.Dispose();
+            _closeAfterSave = true;
+            Close();
+            return;
+        }
         _lifetimeCancellation.Cancel();
         _updateService.CancelActiveOperations();
-        if (ContentFrame.Content is SettingsPage settingsPage)
+        if (ContentFrame.Content is SettingsView settingsPage)
         {
             settingsPage.ViewModel.CancelActiveUpdate();
             settingsPage.ViewModel.CancelActiveToolOperation();
@@ -196,10 +282,12 @@ public sealed partial class MainWindow : Window
         _ => ElementTheme.Default,
     };
 
-    private SettingsPage ShowSettings()
+    private SettingsView ShowSettings()
     {
-        var page = App.Services.GetRequiredService<SettingsPage>();
+        if (ContentFrame.Content is SettingsView existing) return existing;
+        var page = App.Services.GetRequiredService<SettingsView>();
         ContentFrame.Content = page;
+        Navigation.SelectedItem = SettingsNavigationItem;
         return page;
     }
 

@@ -47,13 +47,17 @@
                             <MenuFlyoutItem Text="View feedback" Click="ViewFeedback_Click" />
                         </MenuFlyoutSubItem>
                         <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Check for updates" Click="CheckForUpdates_Click" />
+                        <MenuFlyoutItem x:Name="AppUpdatesMenuItem" Text="Check for updates" Click="CheckForUpdates_Click" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="About Ray's Loader" Click="ShowAbout_Click" />
                     </MenuBarItem>
                 </MenuBar>
             </Grid>
-            <Grid x:Name="TitleBarDragRegion" Grid.Column="3" Background="Transparent" />
+            <Grid x:Name="TitleBarDragRegion" Grid.Column="3" Background="Transparent">
+                <Border x:Name="DevelopmentBadge" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0" Padding="8,3" CornerRadius="6" Background="{ThemeResource ControlFillColorSecondaryBrush}">
+                    <TextBlock Text="DEV PREVIEW" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                </Border>
+            </Grid>
         </Grid>
 
         <InfoBar
@@ -103,7 +107,7 @@
                 <NavigationViewItem x:Name="SupportedSitesItem" Content="Supported sites" Tag="SupportedSites" AutomationProperties.Name="Supported sites">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE909;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Settings" Tag="Settings" AutomationProperties.Name="Settings">
+                <NavigationViewItem x:Name="SettingsNavigationItem" Content="Settings" Tag="Settings" AutomationProperties.Name="Settings">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="About" Tag="About" AutomationProperties.Name="About Ray's Loader">

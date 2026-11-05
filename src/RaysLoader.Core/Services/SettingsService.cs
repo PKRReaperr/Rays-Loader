@@ -13,27 +13,46 @@ public interface ISettingsService
     Task ResetAsync(CancellationToken cancellationToken = default);
 }
 
-public sealed class SettingsService : ISettingsService
+/// <summary>Optional notifications for consumers that track replacement settings objects.</summary>
+public interface ISettingsChangeNotifier
+{
+    event EventHandler? CurrentChanged;
+}
+
+public sealed class SettingsService : ISettingsService, ISettingsChangeNotifier
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
     private readonly string _settingsPath;
+    private readonly bool _importLegacySettings;
+    private readonly SemaphoreSlim _writeGate = new(1, 1);
+    private readonly object _currentLock = new();
+    private AppSettings _current = new();
+    private long _replacementRevision;
 
-    public SettingsService(string? settingsDirectory = null)
+    public SettingsService(string? settingsDirectory = null, bool importLegacySettings = true)
     {
         SettingsDirectory = settingsDirectory ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "RaysLoader");
         _settingsPath = Path.Combine(SettingsDirectory, "settings.json");
+        _importLegacySettings = importLegacySettings;
     }
 
-    public AppSettings Current { get; private set; } = new();
+    public AppSettings Current
+    {
+        get { lock (_currentLock) return _current; }
+        private set => SetCurrent(value);
+    }
     public string SettingsDirectory { get; }
+    public event EventHandler? CurrentChanged;
 
     public async Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default)
     {
         if (!File.Exists(_settingsPath))
         {
-            var imported = await TryImportLegacySettingsAsync(cancellationToken).ConfigureAwait(false);
+            var imported = _importLegacySettings
+                ? await TryImportLegacySettingsAsync(cancellationToken).ConfigureAwait(false)
+                : null;
             if (imported is not null) imported.HasCompletedOnboarding = true;
             Current = imported ?? new AppSettings();
             await SaveAsync(Current, cancellationToken).ConfigureAwait(false);
@@ -62,23 +81,46 @@ public sealed class SettingsService : ISettingsService
     public async Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(settings);
+        long replacementRevision;
+        lock (_currentLock) replacementRevision = _replacementRevision;
         Normalize(settings);
-        Directory.CreateDirectory(SettingsDirectory);
-        var temporaryPath = _settingsPath + ".tmp";
-        await using (var stream = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, useAsync: true))
+        await _writeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            await JsonSerializer.SerializeAsync(stream, settings, JsonOptions, cancellationToken).ConfigureAwait(false);
-            await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-        }
+            Directory.CreateDirectory(SettingsDirectory);
+            var temporaryPath = _settingsPath + ".tmp";
+            await using (var stream = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, useAsync: true))
+            {
+                await JsonSerializer.SerializeAsync(stream, settings, JsonOptions, cancellationToken).ConfigureAwait(false);
+                await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
 
-        File.Move(temporaryPath, _settingsPath, overwrite: true);
-        Current = settings;
+            File.Move(temporaryPath, _settingsPath, overwrite: true);
+            // A reset or load may replace Current while this write is in flight.
+            SetCurrent(settings, replacementRevision);
+        }
+        finally
+        {
+            _writeGate.Release();
+        }
     }
 
     public Task ResetAsync(CancellationToken cancellationToken = default)
     {
         Current = new AppSettings { HasCompletedOnboarding = Current.HasCompletedOnboarding };
         return SaveAsync(Current, cancellationToken);
+    }
+
+    private void SetCurrent(AppSettings settings, long? expectedReplacementRevision = null)
+    {
+        lock (_currentLock)
+        {
+            if (ReferenceEquals(_current, settings) ||
+                (expectedReplacementRevision is not null && _replacementRevision != expectedReplacementRevision)) return;
+            if (expectedReplacementRevision is null) _replacementRevision++;
+            _current = settings;
+        }
+        CurrentChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task<AppSettings?> TryImportLegacySettingsAsync(CancellationToken cancellationToken)

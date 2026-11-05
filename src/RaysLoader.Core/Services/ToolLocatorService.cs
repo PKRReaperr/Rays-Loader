@@ -20,6 +20,12 @@ public sealed class ToolLocatorService : IToolLocatorService
 
     public ToolLocatorService() : this(null, () => Environment.GetEnvironmentVariable("PATH")) { }
 
+    // Explicit data roots let DEV use its own managed engine without consulting
+    // the installed application's managed or legacy tools directories.
+    public ToolLocatorService(string settingsDirectory)
+        : this([Path.Combine(settingsDirectory, "tools"), Path.Combine(AppContext.BaseDirectory, "tools")],
+            () => Environment.GetEnvironmentVariable("PATH")) { }
+
     internal ToolLocatorService(string[]? searchDirectories, Func<string?> pathProvider)
     {
         this.searchDirectories = searchDirectories;

@@ -4,11 +4,11 @@ Ray's Loader is an independent application by Rayware Inc.
 
 ## yt-dlp
 
-Ray's Loader can launch yt-dlp, an independent project licensed under The Unlicense. A copy is included at `LICENSES/yt-dlp-UNLICENSE.txt`. Project information: https://github.com/yt-dlp/yt-dlp
+Ray's Loader launches yt-dlp as an independent executable. The yt-dlp source project is released under The Unlicense; a copy is included at `LICENSES/yt-dlp-UNLICENSE.txt`. Official PyInstaller-built executables include GPLv3+ components, so those combined executables are distributed under GPLv3+. A copy of GPLv3 is included at `LICENSES/GPL-3.0.txt`. The corresponding source and third-party license information for each yt-dlp release are available from https://github.com/yt-dlp/yt-dlp/releases and https://github.com/yt-dlp/yt-dlp/blob/master/THIRD_PARTY_LICENSES.txt.
 
 ## FFmpeg
 
-Ray's Loader release packages include an FFmpeg build configured with GPL and version 3 components. A copy of GPLv3 is included at `LICENSES/FFmpeg-GPL-3.0.txt`. Distributors must retain the license and source-code offer/instructions supplied by the chosen FFmpeg build. Project and legal information: https://ffmpeg.org/legal.html
+Ray's Loader release packages include an FFmpeg build configured with GPL and version 3 components. A copy of GPLv3 is included at `LICENSES/GPL-3.0.txt`. Distributors must retain the license and exact corresponding-source offer or instructions supplied by the chosen FFmpeg build. Project and legal information: https://ffmpeg.org/legal.html
 
 ## Microsoft and .NET components
 

@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace RaysLoader.Settings;
 
 public enum AppTheme
@@ -31,42 +33,42 @@ public enum YtDlpUpdateChannel
     Nightly,
 }
 
-public sealed class AppSettings
+public sealed partial class AppSettings : ObservableObject
 {
-    public AppTheme Theme { get; set; } = AppTheme.System;
-    public AppAccent AccentColor { get; set; } = AppAccent.System;
-    public bool HasCompletedOnboarding { get; set; }
-    public string DefaultOutputDirectory { get; set; } = AppPaths.DefaultOutputDirectory;
-    public int MaximumSimultaneousDownloads { get; set; } = 2;
-    public bool ConfirmBeforeStoppingAll { get; set; } = true;
-    public bool RememberWindowPlacement { get; set; } = true;
-    public bool StartMinimized { get; set; }
-    public bool ShowCompletionNotifications { get; set; } = true;
-    public bool AutomaticallyCheckForUpdates { get; set; } = true;
-    public bool AutomaticallyUpdateYtDlp { get; set; } = true;
-    public YtDlpUpdateChannel YtDlpUpdateChannel { get; set; } = YtDlpUpdateChannel.Nightly;
-    public string DefaultVideoQuality { get; set; } = "best";
-    public string DefaultContainer { get; set; } = "mp4";
-    public string DefaultAudioFormat { get; set; } = "mp3";
-    public string DefaultAudioBitrate { get; set; } = "192K";
-    public string FilenameTemplate { get; set; } = "%(title).200B [%(id)s].%(ext)s";
-    public bool DownloadPlaylists { get; set; } = true;
-    public bool WriteSubtitles { get; set; }
-    public bool EmbedMetadata { get; set; }
-    public bool WriteThumbnail { get; set; }
-    public string YtDlpPath { get; set; } = string.Empty;
-    public string FfmpegPath { get; set; } = string.Empty;
-    public AuthenticationMode AuthenticationMode { get; set; }
-    public string BrowserCookies { get; set; } = string.Empty;
-    public string CookiesFile { get; set; } = string.Empty;
-    public string AdditionalArguments { get; set; } = string.Empty;
-    public string Proxy { get; set; } = string.Empty;
-    public string RateLimit { get; set; } = string.Empty;
-    public int ConcurrentFragments { get; set; } = 1;
-    public bool PreserveTemporaryFiles { get; set; }
-    public bool VerboseLogging { get; set; }
-    public int WindowWidth { get; set; } = 1280;
-    public int WindowHeight { get; set; } = 760;
-    public int? WindowX { get; set; }
-    public int? WindowY { get; set; }
+    [ObservableProperty] private AppTheme theme = AppTheme.System;
+    [ObservableProperty] private AppAccent accentColor = AppAccent.System;
+    [ObservableProperty] private bool hasCompletedOnboarding;
+    [ObservableProperty] private string defaultOutputDirectory = AppPaths.DefaultOutputDirectory;
+    [ObservableProperty] private int maximumSimultaneousDownloads = 2;
+    [ObservableProperty] private bool confirmBeforeStoppingAll = true;
+    [ObservableProperty] private bool rememberWindowPlacement = true;
+    [ObservableProperty] private bool startMinimized;
+    [ObservableProperty] private bool showCompletionNotifications = true;
+    [ObservableProperty] private bool automaticallyCheckForUpdates = true;
+    [ObservableProperty] private bool automaticallyUpdateYtDlp = true;
+    [ObservableProperty] private YtDlpUpdateChannel ytDlpUpdateChannel = YtDlpUpdateChannel.Nightly;
+    [ObservableProperty] private string defaultVideoQuality = "best";
+    [ObservableProperty] private string defaultContainer = "mp4";
+    [ObservableProperty] private string defaultAudioFormat = "mp3";
+    [ObservableProperty] private string defaultAudioBitrate = "192K";
+    [ObservableProperty] private string filenameTemplate = "%(title).200B [%(id)s].%(ext)s";
+    [ObservableProperty] private bool downloadPlaylists = true;
+    [ObservableProperty] private bool writeSubtitles;
+    [ObservableProperty] private bool embedMetadata;
+    [ObservableProperty] private bool writeThumbnail;
+    [ObservableProperty] private string ytDlpPath = string.Empty;
+    [ObservableProperty] private string ffmpegPath = string.Empty;
+    [ObservableProperty] private AuthenticationMode authenticationMode;
+    [ObservableProperty] private string browserCookies = string.Empty;
+    [ObservableProperty] private string cookiesFile = string.Empty;
+    [ObservableProperty] private string additionalArguments = string.Empty;
+    [ObservableProperty] private string proxy = string.Empty;
+    [ObservableProperty] private string rateLimit = string.Empty;
+    [ObservableProperty] private int concurrentFragments = 1;
+    [ObservableProperty] private bool preserveTemporaryFiles;
+    [ObservableProperty] private bool verboseLogging;
+    [ObservableProperty] private int windowWidth = 1280;
+    [ObservableProperty] private int windowHeight = 760;
+    [ObservableProperty] private int? windowX;
+    [ObservableProperty] private int? windowY;
 }

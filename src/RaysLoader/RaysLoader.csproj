@@ -30,6 +30,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
   </ItemGroup>
+  <ItemGroup Condition="'$(PublicRelease)' == 'true'">
+    <Page Remove="Views\DevSettingsPage.xaml" />
+    <Compile Remove="Views\DevSettingsPage.xaml.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\RaysLoader.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Assets\RaysLoader.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

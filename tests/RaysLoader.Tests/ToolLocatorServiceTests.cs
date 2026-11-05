@@ -10,6 +10,22 @@ public sealed class ToolLocatorServiceTests : IDisposable
     private readonly List<string> junctions = [];
 
     [Fact]
+    public void ExplicitDataRootUsesItsOwnManagedTools()
+    {
+        var devSettings = Path.Combine(root, "RaysLoaderDev");
+        var toolsDirectory = Path.Combine(devSettings, "tools");
+        var ytDlp = CreateExecutable(toolsDirectory, "yt-dlp.exe");
+        var ffmpeg = CreateExecutable(toolsDirectory, "ffmpeg.exe");
+        var ffprobe = CreateExecutable(toolsDirectory, "ffprobe.exe");
+
+        var tools = new ToolLocatorService(devSettings).Locate(new AppSettings());
+
+        Assert.Equal(ytDlp, tools.YtDlp, ignoreCase: true);
+        Assert.Equal(ffmpeg, tools.Ffmpeg, ignoreCase: true);
+        Assert.Equal(ffprobe, tools.Ffprobe, ignoreCase: true);
+    }
+
+    [Fact]
     public void AcceptsExplicitTrustedExecutable()
     {
         var configured = CreateExecutable(Path.Combine(root, "configured"), "renamed.exe");
