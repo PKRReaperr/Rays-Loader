@@ -29,11 +29,11 @@ if (Test-Path -LiteralPath $publishDirectory) {
     Remove-Item -LiteralPath $publishDirectory -Recurse -Force
 }
 
-dotnet publish (Join-Path $repoRoot 'src\RaysLoader\RaysLoader.csproj') `
-    -c $Configuration -p:Platform=x64 --self-contained true `
-    -p:PublicRelease=false -p:PublishSingleFile=false -o $publishDirectory
-
-if ($LASTEXITCODE -ne 0) { throw "DEV publish failed (exit code $LASTEXITCODE)." }
+. (Join-Path $PSScriptRoot 'publish-common.ps1')
+Invoke-StagedPublish -ProjectPath (Join-Path $repoRoot 'src\RaysLoader\RaysLoader.csproj') `
+    -Destination $publishDirectory -PublishArguments @(
+        '-c', $Configuration, '-p:Platform=x64', '--self-contained', 'true',
+        '-p:PublicRelease=false', '-p:PublishSingleFile=false')
 
 if ($ToolsDirectory) {
     $toolDestination = Join-Path $publishDirectory 'tools'

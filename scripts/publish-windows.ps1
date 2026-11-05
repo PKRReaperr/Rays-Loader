@@ -13,9 +13,11 @@ if (Test-Path -LiteralPath $publishDirectory) {
     Remove-Item -LiteralPath $publishDirectory -Recurse -Force
 }
 
-dotnet publish (Join-Path $repoRoot 'src\RaysLoader\RaysLoader.csproj') `
-    -c $Configuration -p:Platform=x64 --self-contained true `
-    -p:PublicRelease=true -p:PublishSingleFile=false -o $publishDirectory
+. (Join-Path $PSScriptRoot 'publish-common.ps1')
+Invoke-StagedPublish -ProjectPath (Join-Path $repoRoot 'src\RaysLoader\RaysLoader.csproj') `
+    -Destination $publishDirectory -PublishArguments @(
+        '-c', $Configuration, '-p:Platform=x64', '--self-contained', 'true',
+        '-p:PublicRelease=true', '-p:PublishSingleFile=false')
 
 if (-not $SkipTools) {
     if ([string]::IsNullOrWhiteSpace($ToolsDirectory)) {
