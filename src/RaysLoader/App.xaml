@@ -404,6 +404,416 @@
                 <Setter Property="CharacterSpacing" Value="60" />
             </Style>
 
+            <!--
+                Segmented choice: RadioButtons drawn as joined flat cells. The selected
+                cell uses the inverse fill so the accent stays reserved for the primary action.
+            -->
+            <Style x:Key="RlSegmentStyle" TargetType="RadioButton">
+                <Setter Property="Foreground" Value="{ThemeResource RlTextSecondaryBrush}" />
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Grid
+                                x:Name="RootGrid"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                MinHeight="{TemplateBinding MinHeight}">
+                                <!-- Hover and press shade an overlay, so they never fight the checked fill. -->
+                                <Border x:Name="Shade" Background="{ThemeResource RlTextBrush}" Opacity="0" />
+                                <ContentPresenter
+                                    x:Name="ContentPresenter"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Foreground="{TemplateBinding Foreground}" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.06" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.12" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="CheckStates">
+                                        <VisualState x:Name="Checked">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.BorderBrush" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="ContentPresenter.FontWeight" Value="ExtraBold" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Unchecked" />
+                                        <VisualState x:Name="Indeterminate" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--
+                Box system: flat cells with a strong 1px rule, bold tracked caps, and the
+                inverse fill for "on". Used by the Add download dialog.
+            -->
+            <ControlTemplate x:Key="RlBoxButtonTemplate" TargetType="Button">
+                <Grid
+                    x:Name="RootGrid"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border x:Name="Shade" Background="{ThemeResource RlTextBrush}" Opacity="0" />
+                    <ContentPresenter
+                        x:Name="ContentPresenter"
+                        Padding="{TemplateBinding Padding}"
+                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                        AutomationProperties.AccessibilityView="Raw"
+                        Content="{TemplateBinding Content}"
+                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                        Foreground="{TemplateBinding Foreground}" />
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Target="Shade.Opacity" Value="0.06" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Target="Shade.Opacity" Value="0.12" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </Grid>
+            </ControlTemplate>
+            <Style x:Key="RlBoxButtonStyle" TargetType="Button">
+                <Setter Property="Template" Value="{StaticResource RlBoxButtonTemplate}" />
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+            </Style>
+            <Style x:Key="RlBoxAccentButtonStyle" TargetType="Button" BasedOn="{StaticResource RlAccentBaseButtonStyle}">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="ExtraBold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="Padding" Value="16,0" />
+            </Style>
+            <Style x:Key="RlBoxDialogButtonStyle" TargetType="Button" BasedOn="{StaticResource RlBoxButtonStyle}">
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+            </Style>
+            <Style x:Key="RlBoxDialogAccentButtonStyle" TargetType="Button" BasedOn="{StaticResource RlBoxAccentButtonStyle}">
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+            </Style>
+
+            <!-- A multi-select cell: a small square fills when the option is on. -->
+            <Style x:Key="RlBoxToggleStyle" TargetType="ToggleButton">
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextSecondaryBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="Padding" Value="12,0,14,0" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid
+                                x:Name="RootGrid"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                MinHeight="{TemplateBinding MinHeight}">
+                                <Border x:Name="Shade" Background="{ThemeResource RlTextBrush}" Opacity="0" />
+                                <Grid Margin="{TemplateBinding Padding}" ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border
+                                        x:Name="Indicator"
+                                        Width="10"
+                                        Height="10"
+                                        VerticalAlignment="Center"
+                                        BorderBrush="{ThemeResource RlTextMutedBrush}"
+                                        BorderThickness="1" />
+                                    <ContentPresenter
+                                        x:Name="ContentPresenter"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="Center"
+                                        Content="{TemplateBinding Content}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        Foreground="{TemplateBinding Foreground}" />
+                                </Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.06" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlTextBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.12" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Checked">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.BorderBrush" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.Background" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.BorderBrush" Value="{ThemeResource RlOnInverseBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="CheckedPointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.BorderBrush" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.Opacity" Value="0.92" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.Background" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.BorderBrush" Value="{ThemeResource RlOnInverseBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="CheckedPressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.BorderBrush" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.Opacity" Value="0.84" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.Background" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.BorderBrush" Value="{ThemeResource RlOnInverseBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="CheckedDisabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Background" Value="{ThemeResource RlInverseBrush}" />
+                                                <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlOnInverseBrush}" />
+                                                <Setter Target="Indicator.Background" Value="{ThemeResource RlOnInverseBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Indeterminate" />
+                                        <VisualState x:Name="IndeterminatePointerOver" />
+                                        <VisualState x:Name="IndeterminatePressed" />
+                                        <VisualState x:Name="IndeterminateDisabled" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- A disclosure header: a full-width cell whose chevron flips when open. -->
+            <Style x:Key="RlBoxDisclosureStyle" TargetType="ToggleButton">
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid
+                                x:Name="RootGrid"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                MinHeight="{TemplateBinding MinHeight}">
+                                <Border x:Name="Shade" Background="{ThemeResource RlTextBrush}" Opacity="0" />
+                                <Grid Margin="{TemplateBinding Padding}" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter
+                                        x:Name="ContentPresenter"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="Center"
+                                        Content="{TemplateBinding Content}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        Foreground="{TemplateBinding Foreground}" />
+                                    <FontIcon
+                                        x:Name="Chevron"
+                                        Grid.Column="1"
+                                        FontSize="12"
+                                        Glyph="&#xE70D;"
+                                        Foreground="{ThemeResource RlTextMutedBrush}" />
+                                </Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.06" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.12" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Checked">
+                                            <VisualState.Setters>
+                                                <Setter Target="Chevron.Glyph" Value="&#xE70E;" />
+                                                <Setter Target="Chevron.Foreground" Value="{ThemeResource RlTextBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="CheckedPointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.06" />
+                                                <Setter Target="Chevron.Glyph" Value="&#xE70E;" />
+                                                <Setter Target="Chevron.Foreground" Value="{ThemeResource RlTextBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="CheckedPressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="Shade.Opacity" Value="0.12" />
+                                                <Setter Target="Chevron.Glyph" Value="&#xE70E;" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="CheckedDisabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="RootGrid.Opacity" Value="0.38" />
+                                                <Setter Target="Chevron.Glyph" Value="&#xE70E;" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Indeterminate" />
+                                        <VisualState x:Name="IndeterminatePointerOver" />
+                                        <VisualState x:Name="IndeterminatePressed" />
+                                        <VisualState x:Name="IndeterminateDisabled" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!-- The open body under a disclosure header; its top rule is the header's bottom rule. -->
+            <Style x:Key="RlBoxDisclosureBodyStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1,0,1,1" />
+                <Setter Property="Padding" Value="16" />
+            </Style>
+            <Style x:Key="RlBoxPanelStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource RlBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="14" />
+            </Style>
+
+            <!-- Dropdowns and fields in the same flat cell language. -->
+            <DataTemplate x:Key="RlUppercaseItemTemplate">
+                <TextBlock Text="{Binding Converter={StaticResource UppercaseConverter}}" />
+            </DataTemplate>
+            <Style x:Key="RlBoxComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="60" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="ItemTemplate" Value="{StaticResource RlUppercaseItemTemplate}" />
+                <Setter Property="HeaderTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontSize="14" FontWeight="Normal" CharacterSpacing="0" Foreground="{ThemeResource RlTextBrush}" />
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="RlBoxTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Background" Value="{ThemeResource RlSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource RlRuleStrongBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontFamily" Value="{StaticResource RlMonoFont}" />
+                <Setter Property="MinHeight" Value="36" />
+            </Style>
+
             <!-- Dialogs: flat primary action. -->
             <Style TargetType="ContentDialog" BasedOn="{StaticResource DefaultContentDialogStyle}">
                 <Setter Property="PrimaryButtonStyle" Value="{StaticResource RlAccentButtonStyle}" />

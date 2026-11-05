@@ -55,6 +55,7 @@ public sealed partial class AppSettings : ObservableObject
     [ObservableProperty] private AppAccent accentColor = AppAccents.Default;
     [ObservableProperty] private bool hasCompletedOnboarding;
     [ObservableProperty] private string defaultOutputDirectory = AppPaths.DefaultOutputDirectory;
+    [ObservableProperty] private bool rememberOutputDirectory;
     [ObservableProperty] private int maximumSimultaneousDownloads = 2;
     [ObservableProperty] private bool confirmBeforeStoppingAll = true;
     [ObservableProperty] private bool rememberWindowPlacement = true;

@@ -21,6 +21,124 @@ public sealed class AddDownloadViewModelTests
         Assert.Contains(viewModel.VideoQuality, viewModel.VideoQualities);
     }
 
+    [Theory]
+    [InlineData(DownloadMode.Video, true, true, false)]
+    [InlineData(DownloadMode.VideoOnly, true, false, false)]
+    [InlineData(DownloadMode.AudioOnly, false, false, true)]
+    public void ModeSelectionShowsOnlyRelevantOptions(DownloadMode mode, bool videoQuality, bool container, bool audio)
+    {
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            new StubSettingsService());
+        var changed = new List<string?>();
+        viewModel.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        switch (mode)
+        {
+            case DownloadMode.Video: viewModel.IsAudioOnlyMode = true; viewModel.IsVideoMode = true; break;
+            case DownloadMode.VideoOnly: viewModel.IsVideoOnlyMode = true; break;
+            case DownloadMode.AudioOnly: viewModel.IsAudioOnlyMode = true; break;
+        }
+
+        Assert.Equal(mode, viewModel.Mode);
+        Assert.Equal(mode is DownloadMode.Video, viewModel.IsVideoMode);
+        Assert.Equal(mode is DownloadMode.VideoOnly, viewModel.IsVideoOnlyMode);
+        Assert.Equal(mode is DownloadMode.AudioOnly, viewModel.IsAudioOnlyMode);
+        Assert.Equal(videoQuality, viewModel.ShowsVideoQuality);
+        Assert.Equal(container, viewModel.ShowsContainer);
+        Assert.Equal(audio, viewModel.ShowsAudioOptions);
+        Assert.Contains(nameof(AddDownloadViewModel.ShowsAudioOptions), changed);
+    }
+
+    [Fact]
+    public async Task RememberedFolderBecomesTheDefault()
+    {
+        var settings = new StubSettingsService();
+        var folder = Path.Combine(Path.GetTempPath(), "RaysLoaderRememberTest");
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            settings)
+        {
+            OutputDirectory = folder,
+            RememberOutputDirectory = true,
+        };
+
+        await viewModel.SaveOutputPreferenceAsync();
+
+        Assert.True(settings.Current.RememberOutputDirectory);
+        Assert.Equal(AppPaths.ResolveOutputDirectory(folder), settings.Current.DefaultOutputDirectory);
+        Assert.Equal(1, settings.SaveCount);
+
+        var next = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            settings);
+        Assert.True(next.RememberOutputDirectory);
+        Assert.Equal(settings.Current.DefaultOutputDirectory, next.OutputDirectory);
+    }
+
+    [Fact]
+    public async Task FolderIsNotSavedWhenRememberIsOff()
+    {
+        var settings = new StubSettingsService();
+        var original = settings.Current.DefaultOutputDirectory;
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            settings)
+        {
+            OutputDirectory = Path.Combine(Path.GetTempPath(), "RaysLoaderOneOff"),
+        };
+
+        await viewModel.SaveOutputPreferenceAsync();
+
+        Assert.Equal(original, settings.Current.DefaultOutputDirectory);
+        Assert.False(settings.Current.RememberOutputDirectory);
+        Assert.Equal(0, settings.SaveCount);
+    }
+
+    [Fact]
+    public async Task TurningRememberOffKeepsTheLastDefault()
+    {
+        var settings = new StubSettingsService();
+        settings.Current.RememberOutputDirectory = true;
+        var saved = settings.Current.DefaultOutputDirectory;
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            settings)
+        {
+            OutputDirectory = Path.Combine(Path.GetTempPath(), "RaysLoaderOneOff"),
+            RememberOutputDirectory = false,
+        };
+
+        await viewModel.SaveOutputPreferenceAsync();
+
+        Assert.False(settings.Current.RememberOutputDirectory);
+        Assert.Equal(saved, settings.Current.DefaultOutputDirectory);
+        Assert.Equal(1, settings.SaveCount);
+    }
+
+    [Fact]
+    public void DefaultClipMethodIsAnItemOfTheList()
+    {
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            new StubSettingsService());
+
+        Assert.Same(viewModel.ClipMethods[0], viewModel.SelectedClipMethod);
+        Assert.Equal(ClipDownloadMethod.DownloadThenTrim, viewModel.SelectedClipMethod.Method);
+    }
+
+    [Fact]
+    public void ClearingAModeFlagKeepsTheCurrentMode()
+    {
+        var viewModel = new AddDownloadViewModel(
+            new StubYtDlpService(new MediaMetadata(string.Empty, string.Empty, string.Empty, null, false, false, [])),
+            new StubSettingsService());
+
+        viewModel.IsVideoMode = false;
+
+        Assert.Equal(DownloadMode.Video, viewModel.Mode);
+    }
+
     [Fact]
     public async Task UrlSummaryCountsValidUniqueLines()
     {
@@ -354,7 +472,12 @@ public sealed class AddDownloadViewModelTests
         public AppSettings Current { get; } = new() { DefaultOutputDirectory = AppPaths.UserDownloadsDirectory };
         public string SettingsDirectory => Path.GetTempPath();
         public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
-        public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public int SaveCount { get; private set; }
+        public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
+        {
+            SaveCount++;
+            return Task.CompletedTask;
+        }
         public Task ResetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

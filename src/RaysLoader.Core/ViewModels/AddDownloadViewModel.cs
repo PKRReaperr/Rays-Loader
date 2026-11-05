@@ -11,6 +11,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
 {
     [ObservableProperty] private string urls = string.Empty;
     [ObservableProperty] private string outputDirectory = settingsService.Current.DefaultOutputDirectory;
+    [ObservableProperty] private bool rememberOutputDirectory = settingsService.Current.RememberOutputDirectory;
     [ObservableProperty] private DownloadMode mode = DownloadMode.Video;
     [ObservableProperty] private string videoQuality = NormalizeVideoQuality(settingsService.Current.DefaultVideoQuality);
     [ObservableProperty] private string container = settingsService.Current.DefaultContainer;
@@ -31,7 +32,7 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     [ObservableProperty] private double mediaDurationSeconds;
     [ObservableProperty] private bool canSelectClip;
     [ObservableProperty] private bool exactBoundaries;
-    [ObservableProperty] private ClipDownloadMethodOption selectedClipMethod = new("Full quality, then trim (reliable)", ClipDownloadMethod.DownloadThenTrim);
+    [ObservableProperty] private ClipDownloadMethodOption selectedClipMethod = ClipMethodOptions[0];
     [ObservableProperty] private string errorMessage = string.Empty;
     [ObservableProperty] private string authenticationMessage = string.Empty;
     [ObservableProperty] private bool isAuthenticationExpanded;
@@ -50,12 +51,14 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     public IReadOnlyList<string> AudioBitrates { get; } = ["320K", "256K", "192K", "128K", "96K"];
     public IReadOnlyList<AuthenticationMethodOption> AuthenticationMethods { get; } = AuthenticationOptions.Methods;
     public IReadOnlyList<BrowserCookieOption> Browsers { get; } = AuthenticationOptions.Browsers;
-    public IReadOnlyList<ClipDownloadMethodOption> ClipMethods { get; } =
+    // The selection must be one of these instances: a value-equal copy shows as blank in the dropdown.
+    private static readonly ClipDownloadMethodOption[] ClipMethodOptions =
     [
         new("Full quality, then trim (reliable)", ClipDownloadMethod.DownloadThenTrim),
         new("Partial download (source-dependent)", ClipDownloadMethod.PartialDownload),
         new("Fast partial download (may lower quality)", ClipDownloadMethod.FastPartialDownload),
     ];
+    public IReadOnlyList<ClipDownloadMethodOption> ClipMethods => ClipMethodOptions;
     public string TrimStartDisplay => FormatTimelineTime(TrimStartSeconds);
     public string TrimEndDisplay => FormatTimelineTime(TrimEndSeconds);
     public string TrimLengthDisplay => FormatTimelineTime(Math.Max(0, TrimEndSeconds - TrimStartSeconds));
@@ -92,6 +95,40 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
     {
         OnPropertyChanged(nameof(UrlInputSummary));
         ScheduleAutomaticAnalysis();
+    }
+
+    // Mode is shown as a segmented choice, one bindable flag per option.
+    public bool IsVideoMode
+    {
+        get => Mode is DownloadMode.Video;
+        set { if (value) Mode = DownloadMode.Video; }
+    }
+
+    public bool IsVideoOnlyMode
+    {
+        get => Mode is DownloadMode.VideoOnly;
+        set { if (value) Mode = DownloadMode.VideoOnly; }
+    }
+
+    public bool IsAudioOnlyMode
+    {
+        get => Mode is DownloadMode.AudioOnly;
+        set { if (value) Mode = DownloadMode.AudioOnly; }
+    }
+
+    // Only the options yt-dlp uses for the selected mode are shown.
+    public bool ShowsVideoQuality => Mode is not DownloadMode.AudioOnly;
+    public bool ShowsContainer => Mode is DownloadMode.Video;
+    public bool ShowsAudioOptions => Mode is DownloadMode.AudioOnly;
+
+    partial void OnModeChanged(DownloadMode value)
+    {
+        OnPropertyChanged(nameof(IsVideoMode));
+        OnPropertyChanged(nameof(IsVideoOnlyMode));
+        OnPropertyChanged(nameof(IsAudioOnlyMode));
+        OnPropertyChanged(nameof(ShowsVideoQuality));
+        OnPropertyChanged(nameof(ShowsContainer));
+        OnPropertyChanged(nameof(ShowsAudioOptions));
     }
 
     partial void OnIsBusyChanged(bool value)
@@ -287,6 +324,25 @@ public sealed partial class AddDownloadViewModel(IYtDlpService ytDlpService, ISe
         var cancellation = Interlocked.Exchange(ref analysisCancellation, null);
         cancellation?.Cancel();
         cancellation?.Dispose();
+    }
+
+    /// <summary>
+    /// Saves the remember-folder choice. When it is on, the folder used for this
+    /// download becomes the default for the next one. Call after the requests are queued.
+    /// </summary>
+    public async Task SaveOutputPreferenceAsync(CancellationToken cancellationToken = default)
+    {
+        var settings = settingsService.Current;
+        var folder = RememberOutputDirectory ? AppPaths.ResolveOutputDirectory(OutputDirectory) : settings.DefaultOutputDirectory;
+        if (settings.RememberOutputDirectory == RememberOutputDirectory &&
+            string.Equals(settings.DefaultOutputDirectory, folder, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        settings.RememberOutputDirectory = RememberOutputDirectory;
+        settings.DefaultOutputDirectory = folder;
+        await settingsService.SaveAsync(settings, cancellationToken);
     }
 
     private DownloadRequest BuildRequest(string url) => new()

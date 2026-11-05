@@ -59,13 +59,29 @@ public sealed partial class AddDownloadDialog : ContentDialog
         await ViewModel.AnalyzeCommand.ExecuteAsync(null);
     }
 
+    // Primary (accent, Enter) adds and starts; secondary only queues.
     private void PrimaryButton_Click(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        => AddRequests(args, startQueue: false);
-
-    private void SecondaryButton_Click(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         => AddRequests(args, startQueue: true);
 
+    private void SecondaryButton_Click(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        => AddRequests(args, startQueue: false);
+
+    // DefaultButton is None because a default button swaps in the stock accent style,
+    // so Enter is handled here: it adds and starts, like the primary button.
+    private void Dialog_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key is not Windows.System.VirtualKey.Enter || !ViewModel.CanQueue) return;
+        if (e.OriginalSource is TextBox { AcceptsReturn: true } or ComboBox or Microsoft.UI.Xaml.Controls.Primitives.ButtonBase) return;
+        e.Handled = true;
+        if (TryAddRequests(startQueue: true)) Hide();
+    }
+
     private void AddRequests(ContentDialogButtonClickEventArgs args, bool startQueue)
+    {
+        if (!TryAddRequests(startQueue)) args.Cancel = true;
+    }
+
+    private bool TryAddRequests(bool startQueue)
     {
         try
         {
@@ -77,11 +93,26 @@ public sealed partial class AddDownloadDialog : ContentDialog
                 if (preview is not null) task.ThumbnailUrl = preview.ThumbnailUrl;
             }
             if (startQueue) _queue.StartQueued();
+            _ = SaveOutputPreferenceAsync();
+            return true;
         }
         catch (Exception exception) when (exception is FormatException or ArgumentException or InvalidOperationException or IOException or UnauthorizedAccessException)
         {
             ViewModel.ErrorMessage = exception.Message;
-            args.Cancel = true;
+            return false;
+        }
+    }
+
+    // The downloads are already queued, so a failed preference save must not undo them.
+    private async Task SaveOutputPreferenceAsync()
+    {
+        try
+        {
+            await ViewModel.SaveOutputPreferenceAsync();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Debug.WriteLine($"Couldn't save the output folder preference: {exception.Message}");
         }
     }
 

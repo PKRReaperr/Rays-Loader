@@ -4,18 +4,50 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:RaysLoader.Controls"
     xmlns:models="using:RaysLoader.Models"
-    Title="Add download"
-    PrimaryButtonText="Add to queue"
-    SecondaryButtonText="Add &amp; start queue"
-    CloseButtonText="Cancel"
-    DefaultButton="Primary"
+    xmlns:viewmodels="using:RaysLoader.ViewModels"
+    PrimaryButtonText="ADD &amp; START QUEUE"
+    SecondaryButtonText="ADD TO QUEUE"
+    CloseButtonText="CANCEL"
+    DefaultButton="None"
+    KeyDown="Dialog_KeyDown"
+    PrimaryButtonStyle="{StaticResource RlBoxDialogAccentButtonStyle}"
+    SecondaryButtonStyle="{StaticResource RlBoxDialogButtonStyle}"
+    CloseButtonStyle="{StaticResource RlBoxDialogButtonStyle}"
     IsPrimaryButtonEnabled="{Binding CanQueue}"
     IsSecondaryButtonEnabled="{Binding CanQueue}"
     PrimaryButtonClick="PrimaryButton_Click"
     SecondaryButtonClick="SecondaryButton_Click">
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">960</x:Double>
+        <Style x:Key="SectionNumberStyle" TargetType="TextBlock" BasedOn="{StaticResource RlLabelTextStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource RlAccentTextBrush}" />
+        </Style>
+        <Style x:Key="SectionNameStyle" TargetType="TextBlock" BasedOn="{StaticResource RlLabelTextStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource RlTextBrush}" />
+        </Style>
+        <Style x:Key="SectionRuleStyle" TargetType="Border">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{ThemeResource RlRuleBrush}" />
+        </Style>
+        <Style x:Key="OptionComboStyle" TargetType="ComboBox" BasedOn="{StaticResource RlBoxComboBoxStyle}">
+            <Setter Property="Width" Value="200" />
+        </Style>
+        <DataTemplate x:Key="FormatItemTemplate" x:DataType="models:MediaFormat">
+            <TextBlock Text="{x:Bind Id, Converter={StaticResource UppercaseConverter}}" />
+        </DataTemplate>
+        <DataTemplate x:Key="ClipMethodItemTemplate" x:DataType="viewmodels:ClipDownloadMethodOption">
+            <TextBlock Text="{x:Bind Label, Converter={StaticResource UppercaseConverter}}" />
+        </DataTemplate>
     </ContentDialog.Resources>
+
+    <ContentDialog.Title>
+        <StackPanel Spacing="6">
+            <TextBlock Style="{StaticResource SectionNumberStyle}" Text="// NEW DOWNLOAD" />
+            <TextBlock Style="{StaticResource RlTitleTextStyle}" Text="Add download" />
+        </StackPanel>
+    </ContentDialog.Title>
+
     <ScrollViewer
         x:Name="OptionsScrollViewer"
         MaxHeight="620"
@@ -24,8 +56,8 @@
         <StackPanel
             x:Name="ContentPanel"
             Width="840"
-            Spacing="10"
-            Padding="0,0,8,0"
+            Spacing="14"
+            Padding="0,0,12,4"
             Loaded="ContentPanel_Loaded"
             Unloaded="ContentPanel_Unloaded">
             <InfoBar
@@ -34,323 +66,432 @@
                 Severity="Error"
                 Message="{Binding ErrorMessage}" />
 
-            <TextBox
-                Header="Media URL"
-                Text="{Binding Urls, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                PlaceholderText="Paste one or more URLs, one per line"
-                AcceptsReturn="True"
-                MinHeight="64"
-                AutomationProperties.Name="Media URLs" />
-            <TextBlock
-                Margin="2,-8,0,0"
-                Text="{Binding UrlInputSummary}"
-                FontSize="12"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <!-- 01 Source -->
             <Grid ColumnSpacing="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button Click="Paste_Click" AutomationProperties.Name="Paste from clipboard"><StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE77F;" /><TextBlock Text="Paste" /></StackPanel></Button>
-                <ProgressRing Grid.Column="1" Width="20" Height="20" IsActive="{Binding IsBusy}" />
-                <TextBlock
-                    Grid.Column="2"
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding PreviewStatus}"
-                    TextTrimming="CharacterEllipsis" />
-                <HyperlinkButton
-                    Grid.Column="3"
-                    Padding="0"
-                    Content="Browse supported sites"
-                    NavigateUri="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" />
+                <TextBlock Style="{StaticResource SectionNumberStyle}" Text="01" />
+                <TextBlock Grid.Column="1" Style="{StaticResource SectionNameStyle}" Text="SOURCE" />
+                <Border Grid.Column="2" Style="{StaticResource SectionRuleStyle}" />
             </Grid>
 
-            <ListView
-                MaxHeight="210"
-                ItemsSource="{Binding Previews}"
-                SelectionMode="None"
-                IsItemClickEnabled="False">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0,0,0,6" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:MediaPreviewItem">
-                        <Border
-                            Padding="10"
-                            Background="{ThemeResource AppCardBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
->
-                            <Grid MinHeight="76" ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="124" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Border Background="{ThemeResource SettingsSectionBodyBrush}">
+            <StackPanel Spacing="8">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        Style="{StaticResource RlBoxTextBoxStyle}"
+                        Text="{Binding Urls, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        PlaceholderText="Paste one or more URLs, one per line"
+                        AcceptsReturn="True"
+                        MinHeight="64"
+                        AutomationProperties.Name="Media URLs">
+                        <TextBox.Header><TextBlock Text="Media URL" /></TextBox.Header>
+                    </TextBox>
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource RlBoxButtonStyle}"
+                        VerticalAlignment="Bottom"
+                        MinHeight="64"
+                        Click="Paste_Click"
+                        AutomationProperties.Name="Paste from clipboard">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE77F;" />
+                            <TextBlock Text="PASTE" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressRing Width="14" Height="14" IsActive="{Binding IsBusy}" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource RlMonoTextStyle}"
+                        Foreground="{ThemeResource RlTextBrush}"
+                        Text="{Binding PreviewStatus}" />
+                    <TextBlock
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource RlMonoTextStyle}"
+                        Foreground="{ThemeResource RlTextMutedBrush}"
+                        Text="{Binding UrlInputSummary}" />
+                    <HyperlinkButton
+                        Grid.Column="3"
+                        Padding="0"
+                        FontSize="12"
+                        Foreground="{ThemeResource RlTextSecondaryBrush}"
+                        Content="Browse supported sites"
+                        NavigateUri="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" />
+                </Grid>
+
+                <ListView
+                    MaxHeight="210"
+                    ItemsSource="{Binding Previews}"
+                    SelectionMode="None"
+                    IsItemClickEnabled="False">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,0,6" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:MediaPreviewItem">
+                            <Border
+                                Padding="10"
+                                Background="{ThemeResource RlSurfaceBrush}"
+                                BorderBrush="{ThemeResource RlRuleStrongBrush}"
+                                BorderThickness="1">
+                                <Grid MinHeight="70" ColumnSpacing="14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="124" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Height="70" Background="{ThemeResource RlBackgroundBrush}">
+                                        <Grid>
+                                            <FontIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                FontSize="22"
+                                                Foreground="{ThemeResource RlTextMutedBrush}"
+                                                Glyph="&#xE8B9;" />
+                                            <Image
+                                                Source="{x:Bind ThumbnailUrl, Mode=OneWay, Converter={StaticResource NullableImageSourceConverter}}"
+                                                Stretch="UniformToFill" />
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="5">
+                                        <TextBlock
+                                            Style="{StaticResource RlSectionTitleTextStyle}"
+                                            MaxLines="2"
+                                            Text="{x:Bind Title, Mode=OneWay}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <TextBlock Style="{StaticResource RlLabelTextStyle}" Text="{x:Bind Source, Mode=OneWay}" />
+                                            <TextBlock
+                                                Style="{StaticResource RlMonoTextStyle}"
+                                                MaxLines="2"
+                                                Text="{x:Bind Message, Mode=OneWay}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <ProgressRing
+                                        Grid.Column="2"
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        IsActive="{x:Bind IsLoading, Mode=OneWay}"
+                                        Visibility="{x:Bind IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <FontIcon
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource RlDangerBrush}"
+                                        Glyph="&#xEA39;"
+                                        Visibility="{x:Bind HasFailed, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+
+            <!-- 02 Format -->
+            <Grid ColumnSpacing="10" Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource SectionNumberStyle}" Text="02" />
+                <TextBlock Grid.Column="1" Style="{StaticResource SectionNameStyle}" Text="FORMAT" />
+                <Border Grid.Column="2" Style="{StaticResource SectionRuleStyle}" />
+            </Grid>
+
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Mode" />
+                    <Grid HorizontalAlignment="Left" Width="456" AutomationProperties.Name="Mode">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <RadioButton GroupName="DownloadMode" Style="{StaticResource RlSegmentStyle}" Content="VIDEO" IsChecked="{Binding IsVideoMode, Mode=TwoWay}" AutomationProperties.Name="Video with audio" />
+                        <RadioButton Grid.Column="1" Margin="-1,0,0,0" GroupName="DownloadMode" Style="{StaticResource RlSegmentStyle}" Content="VIDEO ONLY" IsChecked="{Binding IsVideoOnlyMode, Mode=TwoWay}" AutomationProperties.Name="Video only" />
+                        <RadioButton Grid.Column="2" Margin="-1,0,0,0" GroupName="DownloadMode" Style="{StaticResource RlSegmentStyle}" Content="AUDIO ONLY" IsChecked="{Binding IsAudioOnlyMode, Mode=TwoWay}" AutomationProperties.Name="Audio only" />
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <ComboBox Style="{StaticResource OptionComboStyle}" Header="Video quality" ItemsSource="{Binding VideoQualities}" SelectedItem="{Binding VideoQuality, Mode=TwoWay}" Visibility="{Binding ShowsVideoQuality, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ComboBox Style="{StaticResource OptionComboStyle}" Header="Container" ItemsSource="{Binding Containers}" SelectedItem="{Binding Container, Mode=TwoWay}" Visibility="{Binding ShowsContainer, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ComboBox Style="{StaticResource OptionComboStyle}" Header="Audio format" ItemsSource="{Binding AudioFormats}" SelectedItem="{Binding AudioFormat, Mode=TwoWay}" Visibility="{Binding ShowsAudioOptions, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ComboBox Style="{StaticResource OptionComboStyle}" Header="Audio bitrate" ItemsSource="{Binding AudioBitrates}" SelectedItem="{Binding AudioBitrate, Mode=TwoWay}" Visibility="{Binding ShowsAudioOptions, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ComboBox Style="{StaticResource OptionComboStyle}" Header="Exact format (optional)" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" ItemTemplate="{StaticResource FormatItemTemplate}" PlaceholderText="AUTOMATIC" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 03 Output -->
+            <Grid ColumnSpacing="10" Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource SectionNumberStyle}" Text="03" />
+                <TextBlock Grid.Column="1" Style="{StaticResource SectionNameStyle}" Text="OUTPUT" />
+                <Border Grid.Column="2" Style="{StaticResource SectionRuleStyle}" />
+            </Grid>
+
+            <StackPanel Spacing="12">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource RlBoxTextBoxStyle}" Text="{Binding OutputDirectory, Mode=TwoWay}" PlaceholderText="Choose a folder" AutomationProperties.Name="Output folder">
+                        <TextBox.Header><TextBlock Text="Output folder" /></TextBox.Header>
+                    </TextBox>
+                    <Button Grid.Column="1" Style="{StaticResource RlBoxButtonStyle}" VerticalAlignment="Bottom" Click="BrowseOutput_Click" AutomationProperties.Name="Browse output folder">
+                        <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon FontSize="14" Glyph="&#xE8B7;" /><TextBlock Text="BROWSE" /></StackPanel>
+                    </Button>
+                    <ToggleButton
+                        Grid.Column="2"
+                        Style="{StaticResource RlBoxToggleStyle}"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Left"
+                        Content="REMEMBER FOLDER"
+                        IsChecked="{Binding RememberOutputDirectory, Mode=TwoWay}"
+                        ToolTipService.ToolTip="Use this folder as the default for future downloads"
+                        AutomationProperties.Name="Remember this folder for future downloads" />
+                </Grid>
+
+                <Grid AutomationProperties.Name="Include">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Style="{StaticResource RlBoxToggleStyle}" Content="SUBTITLES" IsChecked="{Binding WriteSubtitles, Mode=TwoWay}" AutomationProperties.Name="Subtitles" />
+                    <ToggleButton Grid.Column="1" Margin="-1,0,0,0" Style="{StaticResource RlBoxToggleStyle}" Content="EMBED METADATA" IsChecked="{Binding EmbedMetadata, Mode=TwoWay}" AutomationProperties.Name="Embed metadata" />
+                    <ToggleButton Grid.Column="2" Margin="-1,0,0,0" Style="{StaticResource RlBoxToggleStyle}" Content="THUMBNAIL" IsChecked="{Binding WriteThumbnail, Mode=TwoWay}" AutomationProperties.Name="Thumbnail" />
+                    <ToggleButton Grid.Column="3" Margin="-1,0,0,0" Style="{StaticResource RlBoxToggleStyle}" Content="ALLOW PLAYLIST" IsChecked="{Binding DownloadPlaylist, Mode=TwoWay}" AutomationProperties.Name="Allow playlist" />
+                </Grid>
+            </StackPanel>
+
+            <!-- 04 More -->
+            <Grid ColumnSpacing="10" Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource SectionNumberStyle}" Text="04" />
+                <TextBlock Grid.Column="1" Style="{StaticResource SectionNameStyle}" Text="MORE OPTIONS" />
+                <Border Grid.Column="2" Style="{StaticResource SectionRuleStyle}" />
+            </Grid>
+
+            <StackPanel Spacing="8">
+                <!-- Clip selection -->
+                <StackPanel>
+                    <ToggleButton x:Name="ClipToggle" Style="{StaticResource RlBoxDisclosureStyle}" Content="CLIP SELECTION" AutomationProperties.Name="Clip selection" />
+                    <Border Style="{StaticResource RlBoxDisclosureBodyStyle}" Visibility="{Binding IsChecked, ElementName=ClipToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Spacing="12">
+                            <ToggleButton
+                                Style="{StaticResource RlBoxToggleStyle}"
+                                HorizontalAlignment="Left"
+                                Content="DOWNLOAD ONLY THE SELECTED RANGE"
+                                IsChecked="{Binding TrimEnabled, Mode=TwoWay}"
+                                IsEnabled="{Binding CanSelectClip}"
+                                AutomationProperties.Name="Download only the selected range" />
+                            <Border Style="{StaticResource RlBoxPanelStyle}">
+                                <StackPanel Spacing="8">
                                     <Grid>
-                                        <FontIcon
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            FontSize="22"
-                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                            Glyph="&#xE8B9;" />
-                                        <Image
-                                            Source="{x:Bind ThumbnailUrl, Mode=OneWay, Converter={StaticResource NullableImageSourceConverter}}"
-                                            Stretch="UniformToFill" />
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="START" Style="{StaticResource RlLabelTextStyle}" />
+                                            <TextBlock Text="{Binding TrimStartDisplay}" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="16" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                            <TextBlock Text="CLIP LENGTH" HorizontalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" />
+                                            <TextBlock Text="{Binding TrimLengthDisplay}" HorizontalAlignment="Center" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="14" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                            <TextBlock Text="END" HorizontalAlignment="Right" Style="{StaticResource RlLabelTextStyle}" />
+                                            <TextBlock Text="{Binding TrimEndDisplay}" HorizontalAlignment="Right" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="16" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <controls:TrimRangeSlider
+                                        Minimum="0"
+                                        Maximum="{Binding MediaDurationSeconds}"
+                                        StartValue="{Binding TrimStartSeconds, Mode=TwoWay}"
+                                        EndValue="{Binding TrimEndSeconds, Mode=TwoWay}"
+                                        IsEnabled="{Binding CanSelectClip}"
+                                        AutomationProperties.Name="Clip timeline range" />
+                                    <Grid>
+                                        <TextBlock Text="00:00" Style="{StaticResource RlLabelTextStyle}" />
+                                        <TextBlock HorizontalAlignment="Right" Text="{Binding MediaDurationDisplay}" Style="{StaticResource RlLabelTextStyle}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel>
+                                <ToggleButton x:Name="FineTuneToggle" Style="{StaticResource RlBoxDisclosureStyle}" MinHeight="36" Content="FINE-TUNE TIMES" AutomationProperties.Name="Fine-tune times" />
+                                <Border Style="{StaticResource RlBoxDisclosureBodyStyle}" Background="{ThemeResource RlBackgroundBrush}" Visibility="{Binding IsChecked, ElementName=FineTuneToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <NumberBox Header="Start (seconds)" Value="{Binding TrimStartSeconds, Mode=TwoWay}" Minimum="0" Maximum="{Binding MediaDurationSeconds}" SpinButtonPlacementMode="Compact" CornerRadius="0" />
+                                        <NumberBox Grid.Column="1" Header="End (seconds)" Value="{Binding TrimEndSeconds, Mode=TwoWay}" Minimum="0" Maximum="{Binding MediaDurationSeconds}" SpinButtonPlacementMode="Compact" CornerRadius="0" />
                                     </Grid>
                                 </Border>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                                    <TextBlock
-                                        FontWeight="SemiBold"
-                                        MaxLines="2"
-                                        Text="{x:Bind Title, Mode=OneWay}"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="Wrap" />
-                                    <TextBlock
-                                        FontSize="12"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind Source, Mode=OneWay}"
-                                        TextTrimming="CharacterEllipsis" />
-                                    <TextBlock
-                                        FontSize="12"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        MaxLines="2"
-                                        Text="{x:Bind Message, Mode=OneWay}"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ProgressRing
-                                    Grid.Column="2"
-                                    Width="20"
-                                    Height="20"
-                                    VerticalAlignment="Center"
-                                    IsActive="{x:Bind IsLoading, Mode=OneWay}"
-                                    Visibility="{x:Bind IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <FontIcon
-                                    Grid.Column="2"
-                                    VerticalAlignment="Center"
-                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Glyph="&#xEA39;"
-                                    Visibility="{x:Bind HasFailed, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-
-            <Grid ColumnSpacing="8">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <TextBox Header="Output folder" Text="{Binding OutputDirectory, Mode=TwoWay}" PlaceholderText="Choose a folder" AutomationProperties.Name="Output folder" />
-                <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseOutput_Click" AutomationProperties.Name="Browse output folder"><StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE8B7;" /><TextBlock Text="Browse" /></StackPanel></Button>
-            </Grid>
-
-            <Grid ColumnSpacing="12" RowSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <ComboBox Header="Mode" ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode, Mode=TwoWay}" />
-                <ComboBox Grid.Column="1" Header="Video quality" ItemsSource="{Binding VideoQualities}" SelectedItem="{Binding VideoQuality, Mode=TwoWay}" />
-                <ComboBox Grid.Column="2" Header="Container" ItemsSource="{Binding Containers}" SelectedItem="{Binding Container, Mode=TwoWay}" />
-                <ComboBox Grid.Row="1" Header="Audio format" ItemsSource="{Binding AudioFormats}" SelectedItem="{Binding AudioFormat, Mode=TwoWay}" />
-                <ComboBox Grid.Row="1" Grid.Column="1" Header="Audio bitrate" ItemsSource="{Binding AudioBitrates}" SelectedItem="{Binding AudioBitrate, Mode=TwoWay}" />
-                <ComboBox Grid.Row="1" Grid.Column="2" Header="Exact format (optional)" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" DisplayMemberPath="Id" PlaceholderText="Automatic" />
-            </Grid>
-
-            <Grid ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <CheckBox Content="Subtitles" IsChecked="{Binding WriteSubtitles, Mode=TwoWay}" />
-                <CheckBox Grid.Column="1" Content="Embed metadata" IsChecked="{Binding EmbedMetadata, Mode=TwoWay}" />
-                <CheckBox Grid.Column="2" Content="Thumbnail" IsChecked="{Binding WriteThumbnail, Mode=TwoWay}" />
-                <CheckBox Grid.Column="3" Content="Allow playlist" IsChecked="{Binding DownloadPlaylist, Mode=TwoWay}" />
-            </Grid>
-
-            <Expander Header="Clip selection">
-                <StackPanel Spacing="12" Padding="0,10,0,4">
-                    <ToggleSwitch Header="Download only the selected range" IsOn="{Binding TrimEnabled, Mode=TwoWay}" IsEnabled="{Binding CanSelectClip}" />
-                    <Border
-                        Padding="14,12"
-
-                        Background="{ThemeResource AppCardBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock Text="START" Style="{StaticResource RlLabelTextStyle}" />
-                                    <TextBlock Text="{Binding TrimStartDisplay}" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="16" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <TextBlock Text="CLIP LENGTH" HorizontalAlignment="Center" Style="{StaticResource RlLabelTextStyle}" />
-                                    <TextBlock Text="{Binding TrimLengthDisplay}" HorizontalAlignment="Center" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="14" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                    <TextBlock Text="END" HorizontalAlignment="Right" Style="{StaticResource RlLabelTextStyle}" />
-                                    <TextBlock Text="{Binding TrimEndDisplay}" HorizontalAlignment="Right" FontFamily="{StaticResource RlMonoStrongFont}" FontSize="16" />
-                                </StackPanel>
-                            </Grid>
-                            <controls:TrimRangeSlider
-                                Minimum="0"
-                                Maximum="{Binding MediaDurationSeconds}"
-                                StartValue="{Binding TrimStartSeconds, Mode=TwoWay}"
-                                EndValue="{Binding TrimEndSeconds, Mode=TwoWay}"
-                                IsEnabled="{Binding CanSelectClip}"
-                                AutomationProperties.Name="Clip timeline range" />
-                            <Grid>
-                                <TextBlock Text="00:00" Style="{StaticResource RlLabelTextStyle}" />
-                                <TextBlock HorizontalAlignment="Right" Text="{Binding MediaDurationDisplay}" Style="{StaticResource RlLabelTextStyle}" />
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                    <Expander Header="Fine-tune times">
-                        <Grid ColumnSpacing="12" Padding="0,8,0,0">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                            <NumberBox Header="Start (seconds)" Value="{Binding TrimStartSeconds, Mode=TwoWay}" Minimum="0" Maximum="{Binding MediaDurationSeconds}" SpinButtonPlacementMode="Compact" />
-                            <NumberBox Grid.Column="1" Header="End (seconds)" Value="{Binding TrimEndSeconds, Mode=TwoWay}" Minimum="0" Maximum="{Binding MediaDurationSeconds}" SpinButtonPlacementMode="Compact" />
-                        </Grid>
-                    </Expander>
-                    <ComboBox Header="Clip method" ItemsSource="{Binding ClipMethods}" SelectedItem="{Binding SelectedClipMethod, Mode=TwoWay}" DisplayMemberPath="Label" />
-                    <TextBlock Text="Full quality downloads the selected source streams before FFmpeg trims them. Partial methods transfer less data when the source supports efficient seeking." TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <CheckBox Content="Precise cuts (partial methods only; slower)" IsChecked="{Binding ExactBoundaries, Mode=TwoWay}" />
-                </StackPanel>
-            </Expander>
-
-            <Expander Header="Authentication (optional)" IsExpanded="{Binding IsAuthenticationExpanded, Mode=TwoWay}">
-                <StackPanel Spacing="12" Padding="0,10,0,4">
-                    <InfoBar
-                        IsOpen="{Binding AuthenticationMessage, Converter={StaticResource StringPresenceConverter}}"
-                        IsClosable="False"
-                        Message="{Binding AuthenticationMessage}"
-                        Severity="Warning" />
-                    <ComboBox
-                        Width="300"
-                        HorizontalAlignment="Left"
-                        Header="Authentication method"
-                        ItemsSource="{Binding AuthenticationMethods}"
-                        SelectedItem="{Binding SelectedAuthenticationMethod, Mode=TwoWay}" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="Authentication unlocks supported account-restricted media; it cannot add media types that yt-dlp does not support. For example, yt-dlp downloads Flickr videos but not still Flickr photos."
-                        TextWrapping="Wrap" />
-
-                    <Border
-                        Padding="14"
-
-                        Background="{ThemeResource AppCardBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        Visibility="{Binding UsesBrowserAuthentication, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel Spacing="10">
-                            <TextBlock FontSize="15" FontWeight="SemiBold" Text="Use an existing browser sign-in" />
-                            <ComboBox
-                                Width="310"
-                                HorizontalAlignment="Left"
-                                Header="Browser where you are signed in"
-                                ItemsSource="{Binding Browsers}"
-                                SelectedItem="{Binding SelectedBrowser, Mode=TwoWay}" />
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="28" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="1" />
-                                <TextBlock Grid.Column="1" Text="Open the source website in the selected browser." TextWrapping="Wrap" />
-                            </Grid>
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="28" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="2" />
-                                <TextBlock Grid.Column="1" Text="Sign in normally and confirm that you can view the media. Ray's Loader never asks for your password." TextWrapping="Wrap" />
-                            </Grid>
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="28" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="3" />
-                                <TextBlock Grid.Column="1" Text="Return here and select Retry preview with sign-in. yt-dlp will read the selected browser's local cookies for this operation." TextWrapping="Wrap" />
-                            </Grid>
-                            <InfoBar
-                                IsOpen="True"
-                                IsClosable="False"
-                                Severity="Informational"
-                                Message="Firefox is the most reliable option on Windows. If a Chromium browser fails, close it completely before retrying; recent Chrome versions may block cookie decryption." />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Click="OpenSourceWebsite_Click">
-                                    <StackPanel Orientation="Horizontal" Spacing="7">
-                                        <FontIcon Glyph="&#xE774;" />
-                                        <TextBlock Text="Open source website" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Style="{StaticResource RlAccentButtonStyle}" Click="RetryPreview_Click">
-                                    <StackPanel Orientation="Horizontal" Spacing="7">
-                                        <FontIcon Glyph="&#xE721;" />
-                                        <TextBlock Text="Retry preview with sign-in" />
-                                    </StackPanel>
-                                </Button>
                             </StackPanel>
-                            <HyperlinkButton
-                                Padding="0"
+                            <ComboBox Style="{StaticResource RlBoxComboBoxStyle}" HorizontalAlignment="Left" MinWidth="360" Header="Clip method" ItemsSource="{Binding ClipMethods}" SelectedItem="{Binding SelectedClipMethod, Mode=TwoWay}" ItemTemplate="{StaticResource ClipMethodItemTemplate}" />
+                            <TextBlock Style="{StaticResource RlCaptionTextStyle}" Text="Full quality downloads the selected source streams before FFmpeg trims them. Partial methods transfer less data when the source supports efficient seeking." />
+                            <ToggleButton
+                                Style="{StaticResource RlBoxToggleStyle}"
                                 HorizontalAlignment="Left"
-                                Content="Read yt-dlp's official cookie guide"
-                                NavigateUri="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" />
+                                Content="PRECISE CUTS (PARTIAL METHODS ONLY; SLOWER)"
+                                IsChecked="{Binding ExactBoundaries, Mode=TwoWay}"
+                                AutomationProperties.Name="Precise cuts (partial methods only; slower)" />
                         </StackPanel>
                     </Border>
+                </StackPanel>
 
-                    <Border
-                        Padding="14"
-
-                        Background="{ThemeResource AppCardBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        Visibility="{Binding UsesCookiesFile, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel Spacing="10">
-                            <TextBlock FontWeight="SemiBold" Text="Use a manually exported cookies.txt file" />
+                <!-- Authentication -->
+                <StackPanel>
+                    <ToggleButton x:Name="AuthenticationToggle" Style="{StaticResource RlBoxDisclosureStyle}" Content="AUTHENTICATION (OPTIONAL)" IsChecked="{Binding IsAuthenticationExpanded, Mode=TwoWay}" AutomationProperties.Name="Authentication (optional)" />
+                    <Border Style="{StaticResource RlBoxDisclosureBodyStyle}" Visibility="{Binding IsChecked, ElementName=AuthenticationToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Spacing="12">
+                            <InfoBar
+                                IsOpen="{Binding AuthenticationMessage, Converter={StaticResource StringPresenceConverter}}"
+                                IsClosable="False"
+                                Message="{Binding AuthenticationMessage}"
+                                Severity="Warning" />
+                            <ComboBox
+                                Style="{StaticResource RlBoxComboBoxStyle}"
+                                Width="300"
+                                HorizontalAlignment="Left"
+                                Header="Authentication method"
+                                ItemsSource="{Binding AuthenticationMethods}"
+                                SelectedItem="{Binding SelectedAuthenticationMethod, Mode=TwoWay}" />
                             <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="The file must use Netscape/Mozilla cookie format. Cookie files can grant account access, so keep them private and never attach them to bug reports."
-                                TextWrapping="Wrap" />
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBox Header="Cookies file" Text="{Binding CookiesFile, Mode=TwoWay}" PlaceholderText="Choose cookies.txt" />
-                                <Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseCookies_Click">Browse</Button>
-                            </Grid>
-                            <Button HorizontalAlignment="Left" Style="{StaticResource RlAccentButtonStyle}" Click="RetryPreview_Click">Retry preview with cookies file</Button>
+                                Style="{StaticResource RlBodyTextStyle}"
+                                Text="Authentication unlocks supported account-restricted media; it cannot add media types that yt-dlp does not support. For example, yt-dlp downloads Flickr videos but not still Flickr photos." />
+
+                            <Border
+                                Style="{StaticResource RlBoxPanelStyle}"
+                                Visibility="{Binding UsesBrowserAuthentication, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Style="{StaticResource RlSectionTitleTextStyle}" Text="Use an existing browser sign-in" />
+                                    <ComboBox
+                                        Style="{StaticResource RlBoxComboBoxStyle}"
+                                        Width="310"
+                                        HorizontalAlignment="Left"
+                                        Header="Browser where you are signed in"
+                                        ItemsSource="{Binding Browsers}"
+                                        SelectedItem="{Binding SelectedBrowser, Mode=TwoWay}" />
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="28" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource SectionNumberStyle}" Text="01" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="Open the source website in the selected browser." TextWrapping="Wrap" />
+                                    </Grid>
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="28" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource SectionNumberStyle}" Text="02" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="Sign in normally and confirm that you can view the media. Ray's Loader never asks for your password." TextWrapping="Wrap" />
+                                    </Grid>
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="28" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource SectionNumberStyle}" Text="03" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="Return here and select Retry preview with sign-in. yt-dlp will read the selected browser's local cookies for this operation." TextWrapping="Wrap" />
+                                    </Grid>
+                                    <InfoBar
+                                        IsOpen="True"
+                                        IsClosable="False"
+                                        Severity="Informational"
+                                        Message="Firefox is the most reliable option on Windows. If a Chromium browser fails, close it completely before retrying; recent Chrome versions may block cookie decryption." />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Style="{StaticResource RlBoxButtonStyle}" Click="OpenSourceWebsite_Click" AutomationProperties.Name="Open source website">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon FontSize="14" Glyph="&#xE774;" />
+                                                <TextBlock Text="OPEN SOURCE WEBSITE" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource RlBoxButtonStyle}" Click="RetryPreview_Click" AutomationProperties.Name="Retry preview with sign-in">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                                                <TextBlock Text="RETRY PREVIEW WITH SIGN-IN" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                    <HyperlinkButton
+                                        Padding="0"
+                                        HorizontalAlignment="Left"
+                                        Content="Read yt-dlp's official cookie guide"
+                                        NavigateUri="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border
+                                Style="{StaticResource RlBoxPanelStyle}"
+                                Visibility="{Binding UsesCookiesFile, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Style="{StaticResource RlSectionTitleTextStyle}" Text="Use a manually exported cookies.txt file" />
+                                    <TextBlock
+                                        Style="{StaticResource RlBodyTextStyle}"
+                                        Text="The file must use Netscape/Mozilla cookie format. Cookie files can grant account access, so keep them private and never attach them to bug reports." />
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <TextBox Style="{StaticResource RlBoxTextBoxStyle}" Text="{Binding CookiesFile, Mode=TwoWay}" PlaceholderText="Choose cookies.txt" AutomationProperties.Name="Cookies file">
+                                            <TextBox.Header><TextBlock Text="Cookies file" /></TextBox.Header>
+                                        </TextBox>
+                                        <Button Grid.Column="1" Style="{StaticResource RlBoxButtonStyle}" VerticalAlignment="Bottom" Click="BrowseCookies_Click" AutomationProperties.Name="Browse for cookies file">BROWSE</Button>
+                                    </Grid>
+                                    <Button Style="{StaticResource RlBoxButtonStyle}" Click="RetryPreview_Click" AutomationProperties.Name="Retry preview with cookies file">RETRY PREVIEW WITH COOKIES FILE</Button>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </Expander>
 
-            <Expander Header="Advanced options">
-                <StackPanel Spacing="10" Padding="0,10,0,4">
-                    <TextBox Header="Additional yt-dlp arguments" Text="{Binding AdditionalArguments, Mode=TwoWay}" PlaceholderText="Optional advanced arguments" />
+                <!-- Advanced -->
+                <StackPanel>
+                    <ToggleButton x:Name="AdvancedToggle" Style="{StaticResource RlBoxDisclosureStyle}" Content="ADVANCED OPTIONS" AutomationProperties.Name="Advanced options" />
+                    <Border Style="{StaticResource RlBoxDisclosureBodyStyle}" Visibility="{Binding IsChecked, ElementName=AdvancedToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBox Style="{StaticResource RlBoxTextBoxStyle}" Text="{Binding AdditionalArguments, Mode=TwoWay}" PlaceholderText="Optional advanced arguments" AutomationProperties.Name="Additional yt-dlp arguments">
+                            <TextBox.Header><TextBlock Text="Additional yt-dlp arguments" /></TextBox.Header>
+                        </TextBox>
+                    </Border>
                 </StackPanel>
-            </Expander>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>
