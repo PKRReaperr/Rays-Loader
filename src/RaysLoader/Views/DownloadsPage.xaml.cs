@@ -42,6 +42,9 @@ public sealed partial class DownloadsPage : Page
     private void Retry_Click(object sender, RoutedEventArgs e) { if ((sender as FrameworkElement)?.Tag is DownloadTask task) ViewModel.RetryCommand.Execute(task); }
     private void ViewTerminal_Click(object sender, RoutedEventArgs e) { if ((sender as FrameworkElement)?.Tag is DownloadTask task) ViewModel.ShowLogCommand.Execute(task); }
 
+    // Keeps the table as wide as the viewport so star columns fill it and long titles trim.
+    private void TableScroller_SizeChanged(object sender, SizeChangedEventArgs e) => TableGrid.Width = Math.Max(TableGrid.MinWidth, e.NewSize.Width);
+
     private async void StopAllToggle_Click(object sender, RoutedEventArgs e)
     {
         if (StopAllToggle.IsChecked != true)

@@ -118,8 +118,10 @@
             <!-- The table. -->
             <Grid Grid.Row="2">
                 <Border Background="{ThemeResource RlBackgroundBrush}" BorderBrush="{ThemeResource RlRuleBrush}" BorderThickness="1">
-                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
-                        <Grid MinWidth="880">
+                    <!-- A horizontal ScrollViewer measures content with infinite width, so the
+                         table is sized to the viewport in code; it only scrolls below MinWidth. -->
+                    <ScrollViewer x:Name="TableScroller" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled" SizeChanged="TableScroller_SizeChanged">
+                        <Grid x:Name="TableGrid" MinWidth="880">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="38" />
                                 <RowDefinition Height="*" />
@@ -177,9 +179,7 @@
 
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="5">
                                                     <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" MaxLines="1" Foreground="{ThemeResource RlTextBrush}" />
-                                                    <TextBlock Style="{StaticResource RlMonoTextStyle}" FontSize="11" Foreground="{ThemeResource RlTextMutedBrush}">
-                                                        <Run Text="{x:Bind SiteHost}" /><Run Text="  /  " /><Run Text="{x:Bind CurrentOperation, Mode=OneWay}" />
-                                                    </TextBlock>
+                                                    <TextBlock Style="{StaticResource RlMonoTextStyle}" FontSize="11" Foreground="{ThemeResource RlTextMutedBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" Text="{x:Bind SourceLine, Mode=OneWay}" />
                                                 </StackPanel>
 
                                                 <Grid Grid.Column="2" VerticalAlignment="Center">

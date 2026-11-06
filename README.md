@@ -40,6 +40,8 @@ Choose your theme, accent color, output folder, and download preferences.
   <img src="assets/screenshots/customize-settings.png" alt="Customize Ray's Loader settings" width="760">
 </p>
 
+<sub>Screenshots show Blender Foundation open movies (<a href="https://studio.blender.org/films/">studio.blender.org</a>), licensed CC BY.</sub>
+
 ## Quick start
 
 ```powershell

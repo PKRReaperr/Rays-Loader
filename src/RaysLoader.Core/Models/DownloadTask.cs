@@ -55,7 +55,10 @@ public sealed class DownloadTask : ObservableObject
     public string DownloadSpeed { get => _downloadSpeed; set { if (SetProperty(ref _downloadSpeed, value)) OnPropertyChanged(nameof(StatusSummary)); } }
     public string Eta { get => _eta; set { if (SetProperty(ref _eta, value)) OnPropertyChanged(nameof(StatusSummary)); } }
     public string StatusText { get => _statusText; set => SetProperty(ref _statusText, value); }
-    public string CurrentOperation { get => _currentOperation; set => SetProperty(ref _currentOperation, value); }
+    public string CurrentOperation { get => _currentOperation; set { if (SetProperty(ref _currentOperation, value)) OnPropertyChanged(nameof(SourceLine)); } }
+
+    /// <summary>The site host, followed by the current operation when there is one.</summary>
+    public string SourceLine => string.Join("  /  ", new[] { SiteHost, CurrentOperation.Trim() }.Where(part => part.Length > 0));
     public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
     public string LogText { get => _logText; private set => SetProperty(ref _logText, value); }
     public int? ProcessId { get => _processId; set => SetProperty(ref _processId, value); }

@@ -80,4 +80,16 @@ public sealed class UrlAndStateTests
 
         Assert.Equal(expected, task.SiteHost);
     }
+
+    [Theory]
+    [InlineData("https://www.youtube.com/watch?v=abc", "Merging formats", "youtube.com  /  Merging formats")]
+    [InlineData("https://www.youtube.com/watch?v=abc", "", "youtube.com")]
+    [InlineData("not a url", "Merging formats", "Merging formats")]
+    [InlineData("not a url", "  ", "")]
+    public void SourceLineOmitsTheSeparatorWhenAPartIsEmpty(string url, string operation, string expected)
+    {
+        var task = new DownloadTask(new DownloadRequest { Url = url, OutputDirectory = "C:\\Media" }) { CurrentOperation = operation };
+
+        Assert.Equal(expected, task.SourceLine);
+    }
 }
