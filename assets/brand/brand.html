@@ -73,6 +73,18 @@
   #social h1 span { color: var(--accent); }
   #social .lede { font-size: 23px; line-height: 1.4; color: #CFCFCF; font-weight: 500; }
   #social .foot { position: absolute; left: 72px; bottom: 64px; display: flex; gap: 10px; }
+
+  /* ---------- Installer wizard images (Inno Setup modern style, 100% DPI sizes) ---------- */
+  #wizard { width: 164px; height: 314px; }
+  #wizard.grid::before { background-size: 16px 16px; }
+  #wizard .logo { position: absolute; left: 20px; top: 26px; }
+  #wizard .label { position: absolute; left: 20px; top: 108px; font-size: 7.5px; letter-spacing: .2em; }
+  #wizard h1 { position: absolute; left: 19px; top: 124px; font-size: 22.5px; }
+  #wizard h1 span { color: var(--accent); }
+  #wizard .bar { position: absolute; left: 20px; bottom: 44px; width: 28px; height: 4px; background: var(--accent); }
+  #wizard .foot { position: absolute; left: 20px; bottom: 24px; font-family: "Plex"; font-weight: 600; font-size: 7px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
+  #wizard-small { width: 58px; height: 58px; background: transparent; }
+  #wizard-small .logo { width: 58px; height: 58px; }
 </style>
 </head>
 <body>
@@ -138,6 +150,19 @@
   <div class="shot" style="left:640px; top:88px; width:760px; height:476px;">
     <img src="shot-queue.png" alt=""><span class="brk tl"></span><span class="brk bl"></span>
   </div>
+</section>
+
+<!-- INSTALLER -->
+<section class="view grid" id="wizard">
+  <img class="logo" src="../../src/RaysLoader/Assets/RaysLoader.png" width="64" height="64" alt="">
+  <div class="label">// Setup</div>
+  <h1 class="display">Ray&rsquo;s<br><span>Loader</span></h1>
+  <div class="bar"></div>
+  <div class="foot">Rayware / Windows</div>
+</section>
+
+<section class="view" id="wizard-small">
+  <img class="logo" src="../../src/RaysLoader/Assets/RaysLoader.png" alt="">
 </section>
 
 <script>

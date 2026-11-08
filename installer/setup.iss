@@ -1,5 +1,5 @@
 #define MyAppName "Ray's Loader"
-#define MyAppVersion "1.3.6"
+#define MyAppVersion "1.4.0"
 #define MyAppPublisher "Rayware Inc."
 #define MyAppExeName "RaysLoader.exe"
 
@@ -20,7 +20,10 @@ SetupIconFile=..\src\RaysLoader\Assets\RaysLoader.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
 SolidCompression=yes
-WizardStyle=modern
+WizardStyle=modern dynamic
+; Rendered by assets\brand\render.ps1; Setup picks the size that best fits the display DPI.
+WizardImageFile=images\WizardImage-100.png,images\WizardImage-150.png,images\WizardImage-200.png
+WizardSmallImageFile=images\WizardSmallImage-100.png,images\WizardSmallImage-150.png,images\WizardSmallImage-200.png
 PrivilegesRequired=admin
 LicenseFile=..\LICENSE
 CloseApplications=yes
