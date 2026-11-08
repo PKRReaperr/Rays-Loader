@@ -195,6 +195,7 @@
             <converters:DownloadStateToneVisibilityConverter x:Key="DownloadStateToneVisibilityConverter" />
             <converters:UppercaseConverter x:Key="UppercaseConverter" />
             <converters:TwoDigitConverter x:Key="TwoDigitConverter" />
+            <converters:ZeroCountToOpacityConverter x:Key="ZeroCountToOpacityConverter" />
             <converters:AccentColorToBrushConverter x:Key="AccentColorToBrushConverter" />
             <converters:AccentColorToLabelConverter x:Key="AccentColorToLabelConverter" />
 
@@ -819,7 +820,11 @@
                 <Setter Property="PrimaryButtonStyle" Value="{StaticResource RlAccentButtonStyle}" />
             </Style>
 
-            <!-- Side rail item: a RadioButton that shows its count in Tag. -->
+            <!--
+                Side rail item: a RadioButton with an optional count in Tag (an int).
+                Items with a count get a square marker that fills with the accent when selected.
+                The selected item also gets an accent bar on its left edge; zero counts fade.
+            -->
             <Style x:Key="RlRailItemStyle" TargetType="RadioButton">
                 <Setter Property="Foreground" Value="{ThemeResource RlTextSecondaryBrush}" />
                 <Setter Property="FontFamily" Value="{StaticResource RlSansFont}" />
@@ -827,39 +832,48 @@
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="HorizontalAlignment" Value="Stretch" />
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
-                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="MinHeight" Value="40" />
                 <Setter Property="Padding" Value="20,0" />
                 <Setter Property="UseSystemFocusVisuals" Value="True" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="RadioButton">
-                            <Grid x:Name="RootGrid" Background="Transparent" Padding="{TemplateBinding Padding}" MinHeight="{TemplateBinding MinHeight}" ColumnSpacing="10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter
-                                    x:Name="ContentPresenter"
-                                    VerticalAlignment="Center"
-                                    Content="{TemplateBinding Content}"
-                                    ContentTemplate="{TemplateBinding ContentTemplate}"
-                                    Foreground="{TemplateBinding Foreground}" />
-                                <Border
-                                    x:Name="CountBadge"
-                                    Grid.Column="1"
-                                    MinWidth="30"
-                                    Padding="4,2"
-                                    VerticalAlignment="Center"
-                                    Background="{ThemeResource RlSelectedBrush}"
-                                    Visibility="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringPresenceToVisibilityConverter}}">
+                            <Grid x:Name="RootGrid" Background="Transparent" MinHeight="{TemplateBinding MinHeight}">
+                                <Rectangle x:Name="SelectionBar" Width="3" HorizontalAlignment="Left" Fill="{ThemeResource RlAccentLineBrush}" Opacity="0" />
+                                <Grid Padding="{TemplateBinding Padding}" ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Rectangle
+                                        x:Name="Marker"
+                                        Width="10"
+                                        Height="10"
+                                        Margin="0,0,2,0"
+                                        VerticalAlignment="Center"
+                                        Fill="Transparent"
+                                        Stroke="{ThemeResource RlRuleStrongBrush}"
+                                        StrokeThickness="1.5"
+                                        Visibility="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringPresenceToVisibilityConverter}}" />
+                                    <ContentPresenter
+                                        x:Name="ContentPresenter"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Content="{TemplateBinding Content}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        Foreground="{TemplateBinding Foreground}" />
                                     <TextBlock
                                         x:Name="CountText"
-                                        HorizontalAlignment="Center"
-                                        FontFamily="{StaticResource RlMonoFont}"
-                                        FontSize="12"
-                                        Foreground="{ThemeResource RlTextSecondaryBrush}"
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource RlTextMutedBrush}"
+                                        Opacity="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ZeroCountToOpacityConverter}}"
+                                        Visibility="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringPresenceToVisibilityConverter}}"
                                         Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
-                                </Border>
+                                </Grid>
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup x:Name="CommonStates">
                                         <VisualState x:Name="Normal" />
@@ -867,6 +881,7 @@
                                             <VisualState.Setters>
                                                 <Setter Target="RootGrid.Background" Value="{ThemeResource RlRaisedBrush}" />
                                                 <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlTextBrush}" />
+                                                <Setter Target="Marker.Stroke" Value="{ThemeResource RlTextMutedBrush}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Pressed">
@@ -885,8 +900,10 @@
                                             <VisualState.Setters>
                                                 <Setter Target="RootGrid.Background" Value="{ThemeResource RlSelectedBrush}" />
                                                 <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource RlTextBrush}" />
-                                                <Setter Target="CountBadge.Background" Value="{ThemeResource RlAccentFillBrush}" />
-                                                <Setter Target="CountText.Foreground" Value="{ThemeResource RlAccentInkBrush}" />
+                                                <Setter Target="SelectionBar.Opacity" Value="1" />
+                                                <Setter Target="Marker.Fill" Value="{ThemeResource RlAccentFillBrush}" />
+                                                <Setter Target="Marker.Stroke" Value="{ThemeResource RlAccentFillBrush}" />
+                                                <Setter Target="CountText.Foreground" Value="{ThemeResource RlTextBrush}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Unchecked" />

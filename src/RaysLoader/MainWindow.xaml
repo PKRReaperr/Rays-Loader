@@ -114,13 +114,17 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
+                    <!-- Download filters: everything, then one row per status. -->
                     <StackPanel AutomationProperties.Name="Download filters">
-                        <TextBlock Margin="20,0,20,10" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="FILTER" />
-                        <RadioButton x:Name="AllItem" Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="All" Content="All" Tag="{Binding AllCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="All downloads" />
-                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Running" Content="Running" Tag="{Binding RunningCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Running downloads" />
-                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Queued" Content="Queued" Tag="{Binding QueuedCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Queued downloads" />
-                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Completed" Content="Completed" Tag="{Binding CompletedCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Completed downloads" />
-                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Failed" Content="Failed" Tag="{Binding FailedCount, Converter={StaticResource TwoDigitConverter}}" Checked="Rail_Checked" AutomationProperties.Name="Failed downloads" />
+                        <TextBlock Margin="20,0,20,8" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="DOWNLOADS" />
+                        <RadioButton x:Name="AllItem" Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="All" Content="All" Tag="{Binding AllCount}" Checked="Rail_Checked" AutomationProperties.Name="All downloads" />
+
+                        <Rectangle Height="1" Margin="20,12,20,14" Fill="{ThemeResource RlRuleBrush}" />
+                        <TextBlock Margin="20,0,20,6" Style="{StaticResource RlLabelTextStyle}" FontSize="10" Text="BY STATUS" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Running" Content="Running" Tag="{Binding RunningCount}" Checked="Rail_Checked" AutomationProperties.Name="Running downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Queued" Content="Queued" Tag="{Binding QueuedCount}" Checked="Rail_Checked" AutomationProperties.Name="Queued downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Completed" Content="Completed" Tag="{Binding CompletedCount}" Checked="Rail_Checked" AutomationProperties.Name="Completed downloads" />
+                        <RadioButton Style="{StaticResource RlRailItemStyle}" GroupName="Navigation" CommandParameter="Failed" Content="Failed" Tag="{Binding FailedCount}" Checked="Rail_Checked" AutomationProperties.Name="Failed downloads" />
                     </StackPanel>
                     <StackPanel Grid.Row="2">
                         <RadioButton x:Name="SupportedSitesItem" Style="{StaticResource RlRailItemStyle}" MinHeight="40" FontSize="13" GroupName="Navigation" CommandParameter="SupportedSites" Content="Supported sites" Checked="Rail_Checked" />

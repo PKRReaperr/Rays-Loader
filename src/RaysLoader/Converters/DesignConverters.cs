@@ -32,6 +32,14 @@ public sealed class TwoDigitConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotSupportedException();
 }
 
+/// <summary>Fades a zero count so the counts that matter stand out.</summary>
+public sealed class ZeroCountToOpacityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language) => value is 0 ? 0.4 : 1.0;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotSupportedException();
+}
+
 /// <summary>The uppercase status tag shown in the downloads table.</summary>
 public sealed class DownloadStateToLabelConverter : IValueConverter
 {
